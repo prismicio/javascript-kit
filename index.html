@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Prismic JavaScript API</title>
+</head>
+<body>
+	<script src="api.js"></script>
+	<script>
+
+		var apiUrl = "http://www.prismic.io/api",
+			apiMaster = "012345",
+			api = prismic(apiUrl);
+
+		var products = api
+			.forms("products")
+			.refs(apiMaster)
+			.submit();
+
+		console.log("PRODUCTS:", products);
+
+		var doc = prismic.getDocument(api, apiMaster, "documentthing");
+
+		console.log("DOC:", doc);
+
+	</script>
+</body>
+</html>
