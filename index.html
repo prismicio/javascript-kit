@@ -4,23 +4,32 @@
 	<title>Prismic JavaScript API</title>
 </head>
 <body>
-	<script src="api.js"></script>
+	<script src="vendor/jquery.js"></script>
+	<script src="src/api.js"></script>
 	<script>
 
-		var apiUrl = "http://www.prismic.io/api",
-			apiMaster = "012345",
+		var apiUrl = "data/mock.js",
+			apiMaster = "UfuJ2d_mqXoNBZDt",
 			api = prismic(apiUrl);
 
-		var products = api
-			.forms("products")
-			.refs(apiMaster)
-			.submit();
+		api.get(function () {
 
-		console.log("PRODUCTS:", products);
+			// Fetch "Products"
+			api
+				.forms("products")
+				.ref(api.data.master)
+				.submit(function (products) {
 
-		var doc = prismic.getDocument(api, apiMaster, "documentthing");
+					console.log(products);
 
-		console.log("DOC:", doc);
+				});
+
+			// Fetch a document
+			prismic.getDocument(api, api.data.master, "documentthing", function (doc) {
+				console.log("DOC:", doc);
+			});
+
+		});
 
 	</script>
 </body>

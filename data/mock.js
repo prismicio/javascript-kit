@@ -1,0 +1,192 @@
+{
+   "refs":[
+      {
+         "ref":"UfuJ2d_mqXoNBZDt",
+         "label":"Master",
+         "isMasterRef":true
+      },
+      {
+         "ref":"foo",
+         "label":"bar",
+         "isMasterRef":false
+      }
+   ],
+   "bookmarks":{
+      "about":"Ue0EDd_mqb8Dhk3j",
+      "jobs":"Ue0EHN_mqbwDhk3l",
+      "stores":"Ue0EVt_mqd8Dhk3n"
+   },
+   "types":{
+      "blog-post":"Blog post",
+      "store":"Store",
+      "article":"Site-level article",
+      "selection":"Products selection",
+      "job-offer":"Job offer",
+      "product":"Product"
+   },
+   "tags":[
+      "Cupcake",
+      "Featured",
+      "Pie",
+      "Macaron"
+   ],
+   "forms":{
+      "featured":{
+         "name":"Featured on homepage",
+         "method":"GET",
+         "rel":"collection",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "default":"[[at(document.tags, [\"Featured\"])][any(document.type, [\"product\",\"selection\",\"blog-post\"])]]",
+               "type":"String"
+            }
+         }
+      },
+      "products":{
+         "name":"All Products",
+         "method":"GET",
+         "rel":"collection",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "default":"[[any(document.type, [\"product\"])]]",
+               "type":"String"
+            }
+         }
+      },
+      "macarons":{
+         "name":"Macarons",
+         "method":"GET",
+         "rel":"collection",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "default":"[[at(document.tags, [\"Macaron\"])][any(document.type, [\"product\"])]]",
+               "type":"String"
+            }
+         }
+      },
+      "cupcakes":{
+         "name":"Cupcakes",
+         "method":"GET",
+         "rel":"collection",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "default":"[[at(document.tags, [\"Cupcake\"])][any(document.type, [\"product\"])]]",
+               "type":"String"
+            }
+         }
+      },
+      "pies":{
+         "name":"Little Pies",
+         "method":"GET",
+         "rel":"collection",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "default":"[[at(document.tags, [\"Pie\"])][any(document.type, [\"product\"])]]",
+               "type":"String"
+            }
+         }
+      },
+      "selections":{
+         "name":"Product selections",
+         "method":"GET",
+         "rel":"collection",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "default":"[[any(document.type, [\"selection\"])]]",
+               "type":"String"
+            }
+         }
+      },
+      "blog":{
+         "name":"The Blog",
+         "method":"GET",
+         "rel":"collection",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "default":"[[any(document.type, [\"blog-post\"])]]",
+               "type":"String"
+            }
+         }
+      },
+      "stores":{
+         "name":"Stores",
+         "method":"GET",
+         "rel":"collection",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "default":"[[any(document.type, [\"store\"])]]",
+               "type":"String"
+            }
+         }
+      },
+      "jobs":{
+         "name":"Jobs",
+         "method":"GET",
+         "rel":"collection",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "default":"[[any(document.type, [\"job-offer\"])]]",
+               "type":"String"
+            }
+         }
+      },
+      "everything":{
+         "method":"GET",
+         "enctype":"application/x-www-form-urlencoded",
+         "action":"http://lesbonneschoses.wroom.io/api/documents/search",
+         "fields":{
+            "ref":{
+               "type":"String"
+            },
+            "q":{
+               "type":"String"
+            }
+         }
+      }
+   }
+}
