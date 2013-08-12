@@ -10,22 +10,45 @@
 
 		var apiUrl = "data/mock.js",
 			apiMaster = "UfuJ2d_mqXoNBZDt",
-			api = prismic(apiUrl);
+			api = prismic(apiUrl),
+			test;
 
+		test = {
+
+			getDocument: function (api, ref, id, cb) {
+
+				var docs = [],
+					productForm = api.forms("products");
+
+				if (productForm) {
+					docs = productForm
+						.query("[[at(document.id, " + id + ")]]")
+						.ref(ref)
+						.submit(cb);
+				}
+
+				return docs;
+
+			}
+
+		}
+
+		// Run some testa
 		api.get(function () {
 
 			// Fetch "Products"
-			api
-				.forms("products")
-				.ref(api.data.master)
-				.submit(function (products) {
+			var productForm = api.forms("products");
 
-					console.log(products);
-
-				});
+			if (productForm) {
+				productForm
+					.ref(api.data.master)
+					.submit(function (products) {
+						console.log("Loaded products:", products);
+					});
+			}
 
 			// Fetch a document
-			prismic.getDocument(api, api.data.master, "documentthing", function (doc) {
+			test.getDocument(api, api.data.master, "everything", function (doc) {
 				console.log("DOC:", doc);
 			});
 

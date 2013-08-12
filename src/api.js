@@ -1,258 +1,224 @@
-(function( window, undefined ) {
+(function (window, undefined) {
 
-"use strict";
+    "use strict";
 
-var prismic = function(url) {
+    var prismic = function(url) {
 
-	return new prismic.fn.init(url);
+            return new prismic.fn.init(url);
 
-};
+        };
 
-prismic.fn = prismic.prototype = {
+    prismic.fn = prismic.prototype = {
 
-	constructor: prismic,
+        constructor: prismic,
+        data: null,
 
-	data: null,
+        get: function (cb) {
 
-	get: function (cb) {
+            var self = this;
 
-		var self = this;
+            // Note: jQuery only used for testing
+            $.getJSON(this.url, function (data) {
 
-		$.getJSON(this.url, function (data) {
-			self.data = self.parse(data);
-			cb && cb(this);
-		});
+                self.data = self.parse(data);
+                if (cb) {
+                    cb(this);
+                }
 
-	},
+            });
+        },
 
-	parse: function (data) {
+        parse: function (data) {
 
-		var refs,
-			master,
-			forms = {},
-			form,
-			f,
-			i;
+            var refs,
+                master,
+                forms = {},
+                form,
+                f,
+                i;
 
-		// Parse the forms
-		for(i in data.forms) {
-			if (data.forms.hasOwnProperty(i)){
-				f = data.forms[i];
-				var form = new Form(
-					f.name,
-					f.fields,
-					f.form_method,
-					f.rel,
-					f.enctype,
-					f.action
-				);
+            // Parse the forms
+            for (i in data.forms) {
+                if (data.forms.hasOwnProperty(i)) {
+                    f = data.forms[i];
+                    form = new Form(
+                        f.name,
+                        f.fields,
+                        f.form_method,
+                        f.rel,
+                        f.enctype,
+                        f.action
+                    );
 
-				// Init the search form
-				forms[i] = new SearchForm(this, form, {})
-			}
-		}
+                    // Init the search form
+                    forms[i] = new SearchForm(this, form, {});
+                }
+            }
 
-		refs = data.refs.map(function (r) {
-			return new Ref(
-				r.ref,
-				r.label,
-				r.isMasterRef
-			);
-		}) || [];
+            refs = data.refs.map(function (r) {
 
-		master = refs.filter(function (r) {
+                return new Ref(
+                    r.ref,
+                    r.label,
+                    r.isMasterRef
+                );
 
-			return r.isMaster === true;
+            }) || [];
 
-		});
+            master = refs.filter(function (r) {
 
-		if (master.length === 0) {
-			throw("No master ref.");
-		}
+                return r.isMaster === true;
 
-		return {
-			bookmarks: data.bookmarks || [],
-			refs: refs,
-			forms: forms,
-			master: master[0]
-		}
+            });
 
-	},
+            if (master.length === 0) {
+                throw ("No master ref.");
+            }
 
-	init: function(url) {
+            return {
+                bookmarks: data.bookmarks || [],
+                refs: refs,
+                forms: forms,
+                master: master[0]
+            };
 
-		this.url = url;
+        },
 
-		return this;
+        init: function (url) {
 
-	},
+            this.url = url;
 
-	forms: function (formId) {
+            return this;
 
-		return this.data.forms[formId];
+        },
 
-	},
+        forms: function (formId) {
 
-	bookmarks: function () {
+            return this.data.forms[formId];
 
-		return this.data.bookmarks;
+        },
 
-	}
+        bookmarks: function () {
 
-};
+            return this.data.bookmarks;
 
-prismic.fn.init.prototype = prismic.fn;
+        }
 
-prismic.extend = prismic.fn.extend = function() {
-	var options, name, src, copy,
-		target = arguments[0] || {},
-		i = 1,
-		length = arguments.length;
+    };
+    prismic.fn.init.prototype = prismic.fn;
 
-	// extend jQuery itself if only one argument is passed
-	if ( length === i ) {
-		target = this;
-		--i;
-	}
 
-	for ( ; i < length; i++ ) {
-		// Only deal with non-null/undefined values
-		if ( (options = arguments[ i ]) != null ) {
-			// Extend the base object
-			for ( name in options ) {
-				src = target[ name ];
-				copy = options[ name ];
-			}
+    function Form(name, fields, form_method, rel, enctype, action) {
 
-			// Prevent never-ending loop
-			if ( target === copy ) {
-				continue;
-			}
+        this.name = name;
+        this.fields = fields;
+        this.form_method = form_method;
+        this.rel = rel;
+        this.enctype = enctype;
+        this.action = action;
 
-			if ( copy !== undefined ) {
-				target[ name ] = copy;
-			}
-		}
-	}
+    }
+    Form.prototype = {};
 
-	// Return the modified object
-	return target;
-};
 
-// TODO: this shouldn't be in the API - but in the website itself
-prismic.extend({
+    function SearchForm(api, form, data) {
 
-	getDocument: function (api, ref, id, cb) {
+        this.api = api;
+        this.form = form;
+        this.data = data;
 
-		var docs = api
-			.forms("everything")
-			.query("[[at(document.id, " + id + ")]]")
-			.ref(ref)
-			.submit(cb);
+    }
+    SearchForm.prototype = {
 
-		return docs;
+        ref: function (ref) {
 
-	}
-});
+            this.data.ref = ref;
+            return this;
 
-function Form(name, fields, form_method, rel, enctype, action) {
-	this.name = name;
-	this.fields = fields;
-	this.form_method = form_method;
-	this.rel = rel;
-	this.enctype = enctype;
-	this.action = action;
-};
-Form.prototype = {};
+        },
 
+        query: function (query) {
 
-function SearchForm(api, form, data) {
+            this.data.q = "[${" + (this.form.fields.q || "") + "}${" + query + "}]";
+            return this;
 
-	this.api = api;
-	this.form = form;
-	this.data = data;
+        },
 
-}
-SearchForm.prototype = {
+        submit: function (cb) {
 
-	ref: function (ref) {
-		this.data.ref = ref;
-		return this;
-	},
+            var self = this;
 
-	query: function (q) {
+            // Simulate queryin' async
+            setTimeout(function () {
 
-		this.data.query = q;
-		return this;
+                console.log("LOADING [ref/form]:", self.data.ref, self.form);
+                if (cb) {
+                    cb([new Doc(), new Doc()]);
+                }
 
-	},
+            }, 200);
 
-	submit: function (cb) {
+        }
 
-		var self = this;
+    };
 
-		// Simulate queryin' async
-		setTimeout(function () {
-			console.log("LOADING:", self.data.ref, self.data.query);
-			cb && cb([new Doc(), new Doc()]);
-		}, 200);
+    function Doc(id, type, href, tags, slugs, fragments) {
 
-	}
+        this.id = id;
+        this.type = type;
+        this.href = href;
+        this.tags = tags;
+        this.slugs = slugs;
+        this.fragments = fragments;
 
-};
+    }
+    Doc.prototype = {
 
-function Doc(id, type, href, tags, slugs, fragments) {
-	this.id = id;
-	this.type = type;
-	this.href = href;
-	this.tags = tags;
-	this.slugs = slugs;
-	this.fragments = fragments;
-};
-Doc.prototype = {
+        slug: function () {
 
-	slug: function () {
+            return this.slugs ? this.slugs[0] : "-";
 
-		return this.slugs ? this.slugs[0] : "-";
+        },
 
-	},
+        get: function (field) {
 
-	get: function (field) {
+            return this.fragments.filter(function (f) {
 
-		return this.fragments.filter(function (f) {
+                return f === field;
 
-			return f === field;
+            });
 
-		});
+        },
 
-	},
+        getAll: function (field) {
 
-	getAll: function (field) {
+            return this.fragments.length ? this.fragments[0] : [];
 
-		return this.fragments.length ? this.fragments[0] : []
+        }
 
-	}
+    };
 
-};
+    function Field(type, def) {
 
-function Field(type, def) {
-	this.type = type;
-	this.def = def;
-};
-Field.prototype = {};
+        this.type = type;
+        this.def = def;
 
+    }
+    Field.prototype = {};
 
-function Ref(ref, label, isMaster) {
-	this.ref = ref;
-	this.label = label;
-	this.isMaster = isMaster;
-};
-Ref.prototype = {};
 
+    function Ref(ref, label, isMaster) {
 
+        this.ref = ref;
+        this.label = label;
+        this.isMaster = isMaster;
 
-if ( typeof window === "object" && typeof window.document === "object" ) {
-	window.prismic = prismic;
-}
+    }
+    Ref.prototype = {};
 
-})(window);
+
+    if (typeof window === "object" && typeof window.document === "object") {
+        window.prismic = prismic;
+    }
+
+}(window));
