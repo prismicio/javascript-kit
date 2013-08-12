@@ -235,9 +235,9 @@ Doc.prototype = {
 
 };
 
-function Field(type, default) {
+function Field(type, def) {
 	this.type = type;
-	this.default = default;
+	this.def = def;
 };
 Field.prototype = {};
 
