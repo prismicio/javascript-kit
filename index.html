@@ -6,54 +6,6 @@
 <body>
 	<script src="vendor/jquery.js"></script>
 	<script src="src/api.js"></script>
-	<script>
-
-		var apiUrl = "data/mock.js",
-			apiMaster = "UfuJ2d_mqXoNBZDt",
-			api = prismic(apiUrl),
-			test;
-
-		test = {
-
-			getDocument: function (api, ref, id, cb) {
-
-				var docs = [],
-					productForm = api.forms("products");
-
-				if (productForm) {
-					docs = productForm
-						.query("[[at(document.id, " + id + ")]]")
-						.ref(ref)
-						.submit(cb);
-				}
-
-				return docs;
-
-			}
-
-		}
-
-		// Run some testa
-		api.get(function () {
-
-			// Fetch "Products"
-			var productForm = api.forms("products");
-
-			if (productForm) {
-				productForm
-					.ref(api.data.master)
-					.submit(function (products) {
-						console.log("Loaded products:", products);
-					});
-			}
-
-			// Fetch a document
-			test.getDocument(api, api.data.master, "everything", function (doc) {
-				console.log("DOC:", doc);
-			});
-
-		});
-
-	</script>
+	<script src="src/main.js"></script>
 </body>
 </html>
