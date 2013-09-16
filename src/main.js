@@ -23,8 +23,21 @@
 
 		products.forEach(function (product) {
 
+			var imgs = product.getAllImageViews("image", "main").map(function (img) {
+				return img.asHtml()
+			}).join();
+
+			console.log(imgs)
+
+			var col = product.get("color"),
+				flavours = product.getAll("flavour").map(function (fl) {
+					return fl.value;
+				}),
+				fontCol = col ? col.value : "#000";
+
 			$("<div />")
-				.text(product.slugs[0])
+				.css("color", fontCol)
+				.text(product.slugs[0] + " - " + flavours)
 				.appendTo("body");
 
 		});
