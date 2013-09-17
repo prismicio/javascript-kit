@@ -74,7 +74,9 @@
                 bookmarks: data.bookmarks || [],
                 refs: refs,
                 forms: forms,
-                master: master[0]
+                master: master[0],
+                oauthInitiate: data['oauth_initiate'],
+                oauthToken: data['oauth_token']
             };
 
         },
@@ -200,15 +202,11 @@
             this.type = type;
             this.href = href;
             this.tags = tags;
-            this.slugs = slugs;
+            this.slug = slugs ? slugs[0] : "-";
             this.fragments = fragments;
         }
 
         Doc.prototype = {
-
-            slug: function () {
-                return this.slugs ? this.slugs[0] : "-";
-            },
 
             get: function (field) {
                 var frags = getFragments.call(this, field);

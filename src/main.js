@@ -39,7 +39,7 @@
 
             $("<div />")
                 .css("color", fontCol)
-                .text(product.slugs[0] + " - " + flavours)
+                .text(product.slugs + " - " + flavours)
                 .appendTo("body");
 
         });
