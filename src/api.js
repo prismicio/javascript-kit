@@ -149,6 +149,8 @@
             }
             this.data.q = this.data.q || [];
             this.data.q.push(strip(query));
+
+            console.log(this.data.q)
             return this;
         },
 
@@ -156,10 +158,10 @@
             var self = this;
 
             var q = "[" + this.data.q.join("") + "]",
-                ref = this.data.ref.ref;
+                ref = this.data.ref;
 
             $.getJSON(
-                this.form.action + "#format=json",
+                this.form.action,
                 { ref: ref, q: q },
                 function (d) {
                     var docs = d.map(function (doc) {
@@ -198,6 +200,7 @@
         };
 
         function Doc(id, type, href, tags, slugs, fragments) {
+
             this.id = id;
             this.type = type;
             this.href = href;

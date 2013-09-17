@@ -10,12 +10,12 @@
 
     function fetchProducts(api) {
 
-        var ref = apiRef || api.data.master,
+        var ref = apiRef || api.data.master.ref,
             productForm = api.forms("products");
 
         if (productForm) {
             productForm
-                .query("[[:d = any(document.type, [\"product\"])]]")
+                //.query("[[:d = any(document.type, [\"product\"])]]")
                 .ref(ref)
                 .submit(displayProducts);
         }
@@ -39,7 +39,7 @@
 
             $("<div />")
                 .css("color", fontCol)
-                .text(product.slugs + " - " + flavours)
+                .text(product.slug + " - " + flavours)
                 .appendTo("body");
 
         });
