@@ -2,13 +2,12 @@
 
     "use strict";
 
-    var apiUrl = "https://lesbonneschoses.prismic.io/api",
-        api = prismic(apiUrl);
+    var apiUrl = "https://lesbonneschoses.prismic.io/api";
 
     // Run some tests
-    api.get(fetchProducts);
+    prismic(apiUrl, fetchProducts);
 
-    function fetchProducts() {
+    function fetchProducts(api) {
 
         var productForm = api.forms("products");
 

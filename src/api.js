@@ -2,8 +2,10 @@
 
     "use strict";
 
-    var prismic = function(url) {
-        return new prismic.fn.init(url);
+    var prismic = function(url, onReady) {
+        var api = new prismic.fn.init(url);
+        onReady && api.get(onReady);
+        return api;
     };
 
     prismic.fn = prismic.prototype = {
@@ -20,7 +22,7 @@
                 success: function (data) {
                     self.data = self.parse(data);
                     if (cb) {
-                        cb(this);
+                        cb(self, this);
                     }
                 }
             });
@@ -119,6 +121,7 @@
         },
 
         query: function (query) {
+            console.log("quererere", query)
             this.data.q = "[${" + (this.form.fields.q || "") + "}${" + query + "}]";
             return this;
         },
