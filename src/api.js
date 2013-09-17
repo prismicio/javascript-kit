@@ -150,7 +150,6 @@
             this.data.q = this.data.q || [];
             this.data.q.push(strip(query));
 
-            console.log(this.data.q)
             return this;
         },
 
@@ -168,7 +167,6 @@
                 params.q = q;
             }
 
-            console.log(params)
             $.getJSON(
                 this.form.action,
                 params,
