@@ -172,13 +172,19 @@
                 params,
                 function (d) {
                     var docs = d.map(function (doc) {
+                        var fragments = {}
+
+                        for(var field in doc.data[doc.type]) {
+                            fragments[doc.type + '.' + field] = doc.data[doc.type][field]
+                        }
+
                         return new Doc(
                             doc.id,
                             doc.type,
                             doc.href,
                             doc.tags,
                             doc.slugs,
-                            doc.data[doc.type]
+                            fragments
                         )
                     });
 
@@ -271,6 +277,33 @@
                     return image.getView(view);
                 });
 
+            },
+
+            getText: function(field) {
+                var fragment = this.get(field);
+
+                if (fragment instanceof Fragments.StructuredText) {
+                    return fragment.blocks.map(function(block) {
+                        return block.text;
+                    }).join('\n')
+                }
+            },
+
+            getNumber: function(field) {
+                var fragment = this.get(field);
+                
+                if (fragment instanceof Fragments.Number) {
+                    return fragment.value
+                }
+            },
+
+            asHtml: function(linkResolver) {
+                var htmls = [];
+                for(var field in this.fragments) {
+                    var fragment = this.get(field)
+                    htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(linkResolver) + '</section>' : '')
+                }
+                return htmls.join('')
             }
 
         };

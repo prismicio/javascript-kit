@@ -75,7 +75,7 @@
             }
         },
         asHtml: function () {
-            return main.asHtml()
+            return this.main.asHtml()
         }
     };
 
@@ -211,10 +211,24 @@
             });
 
         } else {
-            html.push(blocks.text);
+            if(blocks.type == "heading1") {
+                html.push('<h1>' + blocks.text + '</h1>');
+            }
+            if(blocks.type == "heading2") {
+                html.push('<h2>' + blocks.text + '</h2>');
+            }
+            if(blocks.type == "heading3") {
+                html.push('<h3>' + blocks.text + '</h3>');
+            }
+            if(blocks.type == "paragraph") {
+                html.push('<p>' + blocks.text + '</p>');
+            }
+            if(blocks.type == "image") {
+                html.push('<p><img src="' + blocks.url + '"></p>');
+            }
         }
 
-        return html.join();
+        return html.join('');
 
     }
 
@@ -230,7 +244,7 @@
                 break;
 
             case "Number":
-                output = new Number(field.value);
+                output = new Num(field.value);
                 break;
 
             case "Date":
