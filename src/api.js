@@ -163,8 +163,12 @@
                     ref: ref
                 };
             if (this.data.q.length === 1 && this.data.q[0] === "") {
+
+            } else {
                 params.q = q;
             }
+
+            console.log(params)
             $.getJSON(
                 this.form.action,
                 params,
