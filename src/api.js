@@ -130,6 +130,7 @@
                 this.form.action,
                 { ref: self.data.ref.ref },
                 function (d) {
+
                     var docs = d.map(function (doc) {
                         return new Doc(
                             doc.id,
@@ -137,9 +138,7 @@
                             doc.href,
                             doc.tags,
                             doc.slugs,
-
-                            // Fixme: could be anything.
-                            doc.data.product
+                            doc.data[doc.type]
                         )
                     });
 

@@ -28,7 +28,6 @@
             }).join();
 
             var desc = product.get("description");
-            console.log(desc && desc.asHtml());
 
             var col = product.get("color"),
                 flavours = product.getAll("flavour").map(function (fl) {

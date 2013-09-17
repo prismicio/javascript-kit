@@ -136,7 +136,6 @@
             html = [];
 
         if (Array.isArray(blocks)) {
-
             blocks.forEach(function (block) {
                 if (groups.length > 0) {
                     var lastGroup = groups[groups.length - 1];
