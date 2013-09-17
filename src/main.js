@@ -15,6 +15,7 @@
 
         if (productForm) {
             productForm
+                .query("[[:d = any(document.type, [\"product\"])]]")
                 .ref(ref)
                 .submit(displayProducts);
         }

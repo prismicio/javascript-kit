@@ -36,8 +36,6 @@
                 f,
                 i;
 
-            console.log(data)
-
             // Parse the forms
             for (i in data.forms) {
                 if (data.forms.hasOwnProperty(i)) {
@@ -159,10 +157,9 @@
                 ref = this.data.ref.ref;
 
             $.getJSON(
-                this.form.action,
+                this.form.action + "#format=json",
                 { ref: ref, q: q },
                 function (d) {
-
                     var docs = d.map(function (doc) {
                         return new Doc(
                             doc.id,
