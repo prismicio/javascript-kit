@@ -121,7 +121,7 @@
         },
 
         query: function (query) {
-            console.log("quererere", query)
+            // FIXME: query should append to a list, and create a single query
             this.data.q = "[${" + (this.form.fields.q || "") + "}${" + query + "}]";
             return this;
         },

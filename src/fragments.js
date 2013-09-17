@@ -128,6 +128,52 @@
 
     };
 
+    function Block() {};
+
+    function BlockText() {};
+    Text.prototype = new Block();
+
+    function Heading(text, spans, level) {
+        this.text = text;
+        this.spans = spans;
+        this.level = level;
+    };
+    Heading.prototype = new BlockText();
+
+    function Paragraph(text, spans) {};
+    Paragraph.prototype = new BlockText();
+
+    function ListItem(text, spans, ordered) {
+        this.text = text;
+        this.spans = spans;
+        this.ordered = ordered;
+    };
+    Paragraph.prototype = new BlockText();
+
+    function BlockImage(view) {
+        this.view = view;
+    }
+    BlockImage.prototype = new Block();
+
+    function Span() {};
+    function Em(start, end) {
+        this.start = start;
+        this.end = end;
+    }
+    Em.prototype = new Span();
+    function Strong(start, end) {
+        this.start = start;
+        this.end = end;
+    };
+    Strong.prototype = new Span();
+
+    function Hyperlink(start, end, link) {
+        this.start = start;
+        this.end = end;
+        this.link = link;
+    }
+    Hyperlink.prototype = new Span();
+
     function StructuredTextAsHtml (blocks, linkResolver) {
 
         var groups = [],
