@@ -150,6 +150,7 @@
             this.data.q = this.data.q || [];
             this.data.q.push(strip(query));
 
+            console.log(this.data.q)
             return this;
         },
 
@@ -157,11 +158,16 @@
             var self = this;
 
             var q = "[" + this.data.q.join("") + "]",
-                ref = this.data.ref;
-
+                ref = this.data.ref,
+                params = {
+                    ref: ref
+                };
+            if (this.data.q.length === 1 && this.data.q[0] === "") {
+                params.q = q;
+            }
             $.getJSON(
                 this.form.action,
-                { ref: ref, q: q },
+                params,
                 function (d) {
                     var docs = d.map(function (doc) {
                         return new Doc(
