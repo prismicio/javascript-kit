@@ -36,6 +36,8 @@
                 f,
                 i;
 
+            console.log(data)
+
             // Parse the forms
             for (i in data.forms) {
                 if (data.forms.hasOwnProperty(i)) {
@@ -111,8 +113,24 @@
     function SearchForm(api, form, data) {
         this.api = api;
         this.form = form;
-        this.data = data;
-    }
+        this.data = data || {};
+
+        if (form.fields && form.fields.q) {
+            for (var f in form.fields) {
+                var val = this.data[f];
+                if (!val) {
+                    this.data[f] = [];
+                }
+                // FIXME: only handle value "default"?
+                if (f === "q") {
+                    this.query(form.fields[f].default);
+                } else {
+                    this.data[f].push(form.fields[f].default);
+                }
+            }
+        }
+
+    };
     SearchForm.prototype = {
 
         ref: function (ref) {
@@ -121,17 +139,28 @@
         },
 
         query: function (query) {
-            // FIXME: query should append to a list, and create a single query
-            this.data.q = "[${" + (this.form.fields.q || "") + "}${" + query + "}]";
+
+            function strip(q) {
+                if(q == null) return "";
+                if(q.indexOf("[") === 0 && q.lastIndexOf("]") === q.length - 1) {
+                    return q.substring(1, q.length - 1);
+                }
+                return q;
+            }
+            this.data.q = this.data.q || [];
+            this.data.q.push(strip(query));
             return this;
         },
 
         submit: function (cb) {
             var self = this;
 
+            var q = "[" + this.data.q.join("") + "]",
+                ref = this.data.ref.ref;
+
             $.getJSON(
                 this.form.action,
-                { ref: self.data.ref.ref },
+                { ref: ref, q: q },
                 function (d) {
 
                     var docs = d.map(function (doc) {

@@ -2,18 +2,20 @@
 
     "use strict";
 
-    var apiUrl = "https://lesbonneschoses.prismic.io/api";
+    var apiUrl = "https://lesbonneschoses.prismic.io/api",
+        apiRef = null;
 
     // Run some tests
     prismic(apiUrl, fetchProducts);
 
     function fetchProducts(api) {
 
-        var productForm = api.forms("products");
+        var ref = apiRef || api.data.master,
+            productForm = api.forms("products");
 
         if (productForm) {
             productForm
-                .ref(api.data.master)
+                .ref(ref)
                 .submit(displayProducts);
         }
     }
