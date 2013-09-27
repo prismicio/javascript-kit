@@ -1,6 +1,6 @@
 ## JavaScript development kit for prismic.io
 
-### Minified ready to use version
+### Minified, ready to use, version
 
 You can find the latest version of the library at:
 
