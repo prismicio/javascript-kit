@@ -91,6 +91,10 @@
             return this.data.forms[formId];
         },
 
+        master: function () {
+            return this.data.master.ref;
+        },
+
         bookmarks: function () {
             return this.data.bookmarks;
         }
@@ -226,21 +230,21 @@
 
             get: function (field) {
                 var frags = getFragments.call(this, field);
-                return frags.length ? Fragments.initField(frags[0]) : null;
+                return frags.length ? Prismic.Fragments.initField(frags[0]) : null;
             },
 
             getAll: function (field) {
                 return getFragments.call(this, field).map(function (fragment) {
-                    return Fragments.initField(fragment);
+                    return Prismic.Fragments.initField(fragment);
                 }, this);
             },
 
             getImage: function (field) {
                 var img = this.get(field);
-                if (img instanceof Fragments.Image) {
+                if (img instanceof Prismic.Fragments.Image) {
                     return img;
                 }
-                if (img instanceof Fragments.StructuredText) {
+                if (img instanceof Prismic.Fragments.StructuredText) {
                     // find first image in st.
                     return img
                 }
@@ -251,10 +255,10 @@
                 var images = this.getAll(field);
 
                 return images.map(function (image) {
-                    if (image instanceof Fragments.Image) {
+                    if (image instanceof Prismic.Fragments.Image) {
                         return image;
                     }
-                    if (image instanceof Fragments.StructuredText) {
+                    if (image instanceof Prismic.Fragments.StructuredText) {
                         throw new Error("Not done.");
                     }
                     return null;
@@ -263,10 +267,10 @@
 
             getImageView: function (field, view) {
                 var img = this.get(field);
-                if (img instanceof Fragments.Image) {
+                if (img instanceof Prismic.Fragments.Image) {
                     return img.getView(view);
                 }
-                if (img instanceof Fragments.StructuredText) {
+                if (img instanceof Prismic.Fragments.StructuredText) {
                     throw new Error("Not done.");
                 }
                 return null;
@@ -282,7 +286,7 @@
             getText: function(field) {
                 var fragment = this.get(field);
 
-                if (fragment instanceof Fragments.StructuredText) {
+                if (fragment instanceof Prismic.Fragments.StructuredText) {
                     return fragment.blocks.map(function(block) {
                         return block.text;
                     }).join('\n')
@@ -292,7 +296,7 @@
             getNumber: function(field) {
                 var fragment = this.get(field);
                 
-                if (fragment instanceof Fragments.Number) {
+                if (fragment instanceof Prismic.Fragments.Number) {
                     return fragment.value
                 }
             },
@@ -320,7 +324,9 @@
     Ref.prototype = {};
 
     if (typeof window === "object" && typeof window.document === "object") {
-        window.prismic = prismic;
+        window.Prismic = {
+            Api: prismic
+        }
     }
 
 }(window));

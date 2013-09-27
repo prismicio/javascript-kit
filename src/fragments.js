@@ -1,4 +1,4 @@
-(function (window) {
+(function (Prismic) {
 
     "use strict";
 
@@ -296,8 +296,7 @@
 
     }
 
-
-    window.Fragments = {
+    Prismic.Fragments = {
         Image: ImageEl,
         ImageView: ImageView,
         Text: Text,
@@ -309,4 +308,4 @@
         initField: initField
     }
 
-}(window));
+}(window.Prismic));
