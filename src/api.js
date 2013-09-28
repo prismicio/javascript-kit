@@ -49,8 +49,7 @@
                         f.action
                     );
 
-                    // Init the search form
-                    forms[i] = new SearchForm(this, form, {});
+                    forms[i] = form;
                 }
             }
 
@@ -88,7 +87,10 @@
         },
 
         forms: function (formId) {
-            return this.data.forms[formId];
+            var form = this.data.forms[formId];
+            if(form) {
+                return new SearchForm(this, form, {});
+            }
         },
 
         master: function () {
@@ -172,7 +174,7 @@
             }
 
             $.getJSON(
-                this.form.action,
+                this.form.action + '#json',
                 params,
                 function (d) {
                     var docs = d.map(function (doc) {
@@ -289,7 +291,19 @@
                 if (fragment instanceof Prismic.Fragments.StructuredText) {
                     return fragment.blocks.map(function(block) {
                         return block.text;
-                    }).join('\n')
+                    }).join('\n');
+                }
+
+                if (fragment instanceof Prismic.Fragments.Number) {
+                    return fragment.value + '';
+                }
+            },
+
+            getStructuredText: function(field) {
+                var fragment = this.get(field);
+
+                if (fragment instanceof Prismic.Fragments.StructuredText) {
+                    return fragment;
                 }
             },
 
@@ -298,6 +312,14 @@
                 
                 if (fragment instanceof Prismic.Fragments.Number) {
                     return fragment.value
+                }
+            },
+
+            getHtml: function(field, linkResolver) {
+                var fragment = this.get(field);
+
+                if(fragment && fragment.asHtml) {
+                    return fragment.asHtml(linkResolver);
                 }
             },
 

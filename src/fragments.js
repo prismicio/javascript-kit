@@ -11,6 +11,17 @@
         }
     };
 
+    function DocumentLink(data) {
+        this.value = data;
+        this.document = data.document;
+        this.isBroken = data.isBroken;
+    }
+    DocumentLink.prototype = {
+        asHtml: function () {
+            return "BOUH";
+        }
+    };
+
     function Select(data) {
         this.value = data;
     }
@@ -109,12 +120,21 @@
     StructuredText.prototype = {
 
         getTitle: function () {
-
+            for(var i=0; i<this.blocks.length; i++) {
+                var block = this.blocks[i];
+                if(block.type.indexOf('heading') == 0) {
+                    return block;
+                }
+            }
         },
 
         getFirstParagraph: function() {
-
-
+            for(var i=0; i<this.blocks.length; i++) {
+                var block = this.blocks[i];
+                if(block.type == 'paragraph') {
+                    return block;
+                }
+            }
         },
 
         getFirstImage: function() {
@@ -127,52 +147,6 @@
         }
 
     };
-
-    function Block() {};
-
-    function BlockText() {};
-    Text.prototype = new Block();
-
-    function Heading(text, spans, level) {
-        this.text = text;
-        this.spans = spans;
-        this.level = level;
-    };
-    Heading.prototype = new BlockText();
-
-    function Paragraph(text, spans) {};
-    Paragraph.prototype = new BlockText();
-
-    function ListItem(text, spans, ordered) {
-        this.text = text;
-        this.spans = spans;
-        this.ordered = ordered;
-    };
-    Paragraph.prototype = new BlockText();
-
-    function BlockImage(view) {
-        this.view = view;
-    }
-    BlockImage.prototype = new Block();
-
-    function Span() {};
-    function Em(start, end) {
-        this.start = start;
-        this.end = end;
-    }
-    Em.prototype = new Span();
-    function Strong(start, end) {
-        this.start = start;
-        this.end = end;
-    };
-    Strong.prototype = new Span();
-
-    function Hyperlink(start, end, link) {
-        this.start = start;
-        this.end = end;
-        this.link = link;
-    }
-    Hyperlink.prototype = new Span();
 
     function StructuredTextAsHtml (blocks, linkResolver) {
 
@@ -279,11 +253,11 @@
                 output = new StructuredText(field.value);
                 break;
 
-            case "Link.Document":
-                throw new Error("not implemented");
+            case "Link.document":
+                output = new DocumentLink(field.value);
                 break;
 
-            case "Link.Web":
+            case "Link.eeb":
                 throw new Error("not implemented");
                 break;
 
