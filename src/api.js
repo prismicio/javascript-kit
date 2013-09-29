@@ -2,8 +2,8 @@
 
     "use strict";
 
-    var prismic = function(url, onReady) {
-        var api = new prismic.fn.init(url);
+    var prismic = function(url, onReady, accessToken) {
+        var api = new prismic.fn.init(url, accessToken);
         onReady && api.get(onReady);
         return api;
     };
@@ -21,6 +21,7 @@
                 url: this.url,
                 success: function (data) {
                     self.data = self.parse(data);
+                    self.bookmarks = self.data.bookmarks;
                     if (cb) {
                         cb(self, this);
                     }
@@ -40,6 +41,14 @@
             for (i in data.forms) {
                 if (data.forms.hasOwnProperty(i)) {
                     f = data.forms[i];
+                    
+                    if(this.accessToken) {
+                        f.fields['accessToken'] = {
+                            type: 'string',
+                            default: this.accessToken
+                        };
+                    }
+
                     form = new Form(
                         f.name,
                         f.fields,
@@ -70,7 +79,7 @@
             }
 
             return {
-                bookmarks: data.bookmarks || [],
+                bookmarks: data.bookmarks || {},
                 refs: refs,
                 forms: forms,
                 master: master[0],
@@ -80,13 +89,18 @@
 
         },
 
-        init: function (url) {
-            this.url = url;
-
+        init: function (url, accessToken) {
+            this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
+            this.accessToken = accessToken;
             return this;
         },
 
         forms: function (formId) {
+           // For compatibility
+           return this.form(formId); 
+        },
+
+        form: function(formId) {
             var form = this.data.forms[formId];
             if(form) {
                 return new SearchForm(this, form, {});
@@ -95,10 +109,6 @@
 
         master: function () {
             return this.data.master.ref;
-        },
-
-        bookmarks: function () {
-            return this.data.bookmarks;
         }
 
     };
@@ -167,11 +177,16 @@
                 params = {
                     ref: ref
                 };
+
             if (this.data.q.length === 1 && this.data.q[0] === "") {
 
             } else {
                 params.q = q;
             }
+
+            if(this.data.accessToken && this.data.accessToken.length) {
+                params['access_token'] = this.data.accessToken[0];
+            } 
 
             $.getJSON(
                 this.form.action + '#json',
@@ -268,12 +283,16 @@
             },
 
             getImageView: function (field, view) {
-                var img = this.get(field);
-                if (img instanceof Prismic.Fragments.Image) {
-                    return img.getView(view);
+                var fragment = this.get(field);
+                if (fragment instanceof Prismic.Fragments.Image) {
+                    return fragment.getView(view);
                 }
-                if (img instanceof Prismic.Fragments.StructuredText) {
-                    throw new Error("Not done.");
+                if (fragment instanceof Prismic.Fragments.StructuredText) {
+                    for(var i=0; i<fragment.blocks.length; i++) {
+                        if(fragment.blocks[i].type == 'image') {
+                            return fragment.blocks[i];
+                        }
+                    }
                 }
                 return null;
             },
@@ -282,20 +301,54 @@
                 return this.getAllImages(field).map(function (image) {
                     return image.getView(view);
                 });
-
             },
 
-            getText: function(field) {
+            getDate: function(field) {
+                var fragment = this.get(field);
+
+                if(fragment instanceof Prismic.Fragments.Date) {
+                    return fragment.value;
+                }
+            },
+
+            getBoolean: function(field) {
+                var fragment = this.get(field);
+                return fragment.value && (fragment.value.toLowerCase() == 'yes' || fragment.value.toLowerCase() == 'on' || fragment.value.toLowerCase() == 'true');
+            },
+
+            getText: function(field, after) {
                 var fragment = this.get(field);
 
                 if (fragment instanceof Prismic.Fragments.StructuredText) {
                     return fragment.blocks.map(function(block) {
-                        return block.text;
+                        if(block.text) {
+                            return block.text + (after ? after : '');
+                        }
                     }).join('\n');
                 }
 
+                if (fragment instanceof Prismic.Fragments.Text) {
+                    if(fragment.value) {
+                        return fragment.value + (after ? after : '');
+                    }
+                }
+
                 if (fragment instanceof Prismic.Fragments.Number) {
-                    return fragment.value + '';
+                    if(fragment.value) {
+                        return fragment.value + (after ? after : '');
+                    }
+                }
+
+                if (fragment instanceof Prismic.Fragments.Select) {
+                    if(fragment.value) {
+                        return fragment.value + (after ? after : '');
+                    }
+                }
+
+                if (fragment instanceof Prismic.Fragments.Color) {
+                    if(fragment.value) {
+                        return fragment.value + (after ? after : '');
+                    }
                 }
             },
 

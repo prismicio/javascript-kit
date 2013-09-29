@@ -257,7 +257,7 @@
                 output = new DocumentLink(field.value);
                 break;
 
-            case "Link.eeb":
+            case "Link.web":
                 throw new Error("not implemented");
                 break;
 
