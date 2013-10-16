@@ -137,6 +137,21 @@
             }
         },
 
+        getParagraphs: function() {
+            var paragraphs = [];
+            for(var i=0; i<this.blocks.length; i++) {
+                var block = this.blocks[i];
+                if(block.type == 'paragraph') {
+                    paragraphs.push(block);
+                }
+            }
+            return paragraphs;
+        },
+        
+        getParagraph: function(n) {
+            return this.getParagraphs()[n];
+        },
+
         getFirstImage: function() {
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];
