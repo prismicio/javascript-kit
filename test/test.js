@@ -1,38 +1,26 @@
 (function(Prismic) {
-  /*
-    ======== A Handy Little QUnit Reference ========
-    http://api.qunitjs.com/
 
-    Test methods:
-      module(name, {[setup][ ,teardown]})
-      test(name, callback)
-      expect(numberOfAssertions)
-      stop(increment)
-      start(decrement)
-    Test assertions:
-      ok(value, [message])
-      equal(actual, expected, [message])
-      notEqual(actual, expected, [message])
-      deepEqual(actual, expected, [message])
-      notDeepEqual(actual, expected, [message])
-      strictEqual(actual, expected, [message])
-      notStrictEqual(actual, expected, [message])
-      throws(block, [expected], [message])
-  */
+  /* === TESTS ARE RUN OVER "LES BONNES CHOSES" EXAMPLE REPOSITORY === */
+
+  var testRepository = 'https://lesbonneschoses.prismic.io/api',
+
+      // This token allow to preview future releases of this repository (nothing secret ;)
+      previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70';
 
   module('Prismic.io', {
     setup: function() {}
   });
 
-  asyncTest('Retrieve the API', 1, function() {
-    Prismic.Api('https://lesbonneschoses.prismic.io/api', function(Api) {
-      equal(Api.url, 'https://lesbonneschoses.prismic.io/api');
+  asyncTest('Retrieve the API', 2, function() {
+    Prismic.Api(testRepository, function(Api) {
+      equal(Api.data.refs.length, 1);
+      equal(Api.url, testRepository);
       start();
     });
   });
 
   asyncTest('Submit the `everything` form', 1, function() {
-    Prismic.Api('https://lesbonneschoses.prismic.io/api', function(Api) {
+    Prismic.Api(testRepository, function(Api) {
       Api.forms('everything').ref(Api.master()).submit(function(results) {
         equal(results.length, 20);
         start();
@@ -40,8 +28,17 @@
     });
   });
 
+  asyncTest('Submit the `products` form', 1, function() {
+    Prismic.Api(testRepository, function(Api) {
+      Api.forms('products').ref(Api.master()).submit(function(results) {
+        equal(results.length, 16);
+        start();
+      });
+    });
+  });
+
   asyncTest('Render a document to Html', 1, function() {
-    Prismic.Api('https://lesbonneschoses.prismic.io/api', function(Api) {
+    Prismic.Api(testRepository, function(Api) {
       Api.forms('everything').ref(Api.master()).submit(function(results) {
         var first = results[0];
         notEqual(null, first);
@@ -49,6 +46,22 @@
         start();
       });
     });
+  });
+
+  asyncTest('Retrieve the API with master+releases privilege', 1, function() {
+    Prismic.Api(testRepository, function(Api) {
+      equal(Api.data.refs.length, 3);
+      start();
+    }, previewToken);
+  });
+
+  asyncTest('Submit the `products` form in the future', 1, function() {
+    Prismic.Api(testRepository, function(Api) {
+      Api.forms('products').ref(Api.ref('Announcement of new SF shop')).submit(function(results) {
+        equal(results.length, 17);
+        start();
+      });
+    }, previewToken);
   });
 
 }(window.Prismic));

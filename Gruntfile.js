@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
 
-    VERSION: '1.0.0',
+    VERSION: '1.0.1-SNAPSHOT',
 
     pkg: grunt.file.readJSON('package.json'),
 

@@ -18,7 +18,7 @@
     }
     DocumentLink.prototype = {
         asHtml: function () {
-            return "BOUH";
+            return "<a></a>";
         }
     };
 
@@ -138,8 +138,16 @@
         },
 
         getFirstImage: function() {
-
-
+            for(var i=0; i<this.blocks.length; i++) {
+                var block = this.blocks[i];
+                if(block.type == 'image') {
+                    return new ImageView(
+                        block.data.url, 
+                        block.data.dimensions.width,
+                        block.data.dimensions.height
+                    );
+                }
+            }
         },
 
         asHtml: function() {
