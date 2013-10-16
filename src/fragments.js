@@ -1,4 +1,4 @@
-(function (Prismic) {
+(function (Global, undefined) {
 
     "use strict";
 
@@ -293,7 +293,7 @@
 
     }
 
-    Prismic.Fragments = {
+    Global.Prismic.Fragments = {
         Image: ImageEl,
         ImageView: ImageView,
         Text: Text,
@@ -305,4 +305,4 @@
         initField: initField
     }
 
-}(window.Prismic));
+}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
