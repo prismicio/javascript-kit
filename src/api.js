@@ -304,21 +304,21 @@
 
         get: function(field) {
             var frags = getFragments.call(this, field);
-            return frags.length ? Prismic.Fragments.initField(frags[0]) : null;
+            return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
         },
 
         getAll: function(field) {
             return getFragments.call(this, field).map(function (fragment) {
-                return Prismic.Fragments.initField(fragment);
+                return Global.Prismic.Fragments.initField(fragment);
             }, this);
         },
 
         getImage: function(field) {
             var img = this.get(field);
-            if (img instanceof Prismic.Fragments.Image) {
+            if (img instanceof Global.Prismic.Fragments.Image) {
                 return img;
             }
-            if (img instanceof Prismic.Fragments.StructuredText) {
+            if (img instanceof Global.Prismic.Fragments.StructuredText) {
                 // find first image in st.
                 return img
             }
@@ -329,10 +329,10 @@
             var images = this.getAll(field);
 
             return images.map(function (image) {
-                if (image instanceof Prismic.Fragments.Image) {
+                if (image instanceof Global.Prismic.Fragments.Image) {
                     return image;
                 }
-                if (image instanceof Prismic.Fragments.StructuredText) {
+                if (image instanceof Global.Prismic.Fragments.StructuredText) {
                     throw new Error("Not done.");
                 }
                 return null;
@@ -341,10 +341,10 @@
 
         getImageView: function(field, view) {
             var fragment = this.get(field);
-            if (fragment instanceof Prismic.Fragments.Image) {
+            if (fragment instanceof Global.Prismic.Fragments.Image) {
                 return fragment.getView(view);
             }
-            if (fragment instanceof Prismic.Fragments.StructuredText) {
+            if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 for(var i=0; i<fragment.blocks.length; i++) {
                     if(fragment.blocks[i].type == 'image') {
                         return fragment.blocks[i];
@@ -363,7 +363,7 @@
         getDate: function(field) {
             var fragment = this.get(field);
 
-            if(fragment instanceof Prismic.Fragments.Date) {
+            if(fragment instanceof Global.Prismic.Fragments.Date) {
                 return fragment.value;
             }
         },
@@ -376,7 +376,7 @@
         getText: function(field, after) {
             var fragment = this.get(field);
 
-            if (fragment instanceof Prismic.Fragments.StructuredText) {
+            if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment.blocks.map(function(block) {
                     if(block.text) {
                         return block.text + (after ? after : '');
@@ -384,25 +384,25 @@
                 }).join('\n');
             }
 
-            if (fragment instanceof Prismic.Fragments.Text) {
+            if (fragment instanceof Global.Prismic.Fragments.Text) {
                 if(fragment.value) {
                     return fragment.value + (after ? after : '');
                 }
             }
 
-            if (fragment instanceof Prismic.Fragments.Number) {
+            if (fragment instanceof Global.Prismic.Fragments.Number) {
                 if(fragment.value) {
                     return fragment.value + (after ? after : '');
                 }
             }
 
-            if (fragment instanceof Prismic.Fragments.Select) {
+            if (fragment instanceof Global.Prismic.Fragments.Select) {
                 if(fragment.value) {
                     return fragment.value + (after ? after : '');
                 }
             }
 
-            if (fragment instanceof Prismic.Fragments.Color) {
+            if (fragment instanceof Global.Prismic.Fragments.Color) {
                 if(fragment.value) {
                     return fragment.value + (after ? after : '');
                 }
@@ -412,7 +412,7 @@
         getStructuredText: function(field) {
             var fragment = this.get(field);
 
-            if (fragment instanceof Prismic.Fragments.StructuredText) {
+            if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment;
             }
         },
@@ -420,7 +420,7 @@
         getNumber: function(field) {
             var fragment = this.get(field);
             
-            if (fragment instanceof Prismic.Fragments.Number) {
+            if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value
             }
         },
