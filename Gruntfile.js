@@ -11,13 +11,13 @@ module.exports = function(grunt) {
     },
     
     clean: {
-      src: ['build', 'dist']
+      src: ['dist']
     },
 
     concat: {
       dist: {
         src: ['src/api.js', 'src/fragments.js'],
-        dest: 'build/prismic.io.js'
+        dest: 'dist/prismic.io.js'
       }
     },
     
@@ -26,7 +26,7 @@ module.exports = function(grunt) {
         banner: '/*! <%= pkg.name %> <%= VERSION %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
       },
       build: {
-        src: 'build/prismic.io.js',
+        src: 'dist/prismic.io.js',
         dest: 'dist/prismic.io-<%= VERSION %>.min.js'
       }
     }

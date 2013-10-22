@@ -10,6 +10,12 @@ https://github.com/prismicio/repository/raw/master/javascript/prismic.io-1.0.1.m
 
 *(you may need to adapt the version number)*
 
+Or fetch it from __npm__:
+
+```
+npm install prismic.io
+```
+
 ### Licence
 
 This software is licensed under the Apache 2 license, quoted below.
