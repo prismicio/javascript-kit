@@ -13,40 +13,97 @@
     // -- Request handlers
 
     var ajaxRequest = (function() {
-        return function(url, callback) {
-            
-            var xhr = new XMLHttpRequest();
+        if(typeof XMLHttpRequest != 'undefined') {
+            return function(url, callback) {
+                
+                var xhr = new XMLHttpRequest();
 
-            // Called on success
-            var resolve = function() {
-                callback(JSON.parse(xhr.responseText));
-            }
-
-            // Called on error
-            var reject = function() {
-                var status = xhr.status;
-                throw new Error("Unexpected status code [" + status + "]");
-            }
-
-            // Bind the XHR finished callback
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if(xhr.status && xhr.status == 200) {
-                        resolve(xhr);
-                    } else {
-                        reject(xhr);
-                    }
+                // Called on success
+                var resolve = function() {
+                    callback(JSON.parse(xhr.responseText));
                 }
+
+                // Called on error
+                var reject = function() {
+                    var status = xhr.status;
+                    throw new Error("Unexpected status code [" + status + "]");
+                }
+
+                // Bind the XHR finished callback
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4) {
+                        if(xhr.status && xhr.status == 200) {
+                            resolve(xhr);
+                        } else {
+                            reject(xhr);
+                        }
+                    }
+                };
+
+                // Open the XHR
+                xhr.open('GET', url + '#json', true);
+
+                // Json request
+                xhr.setRequestHeader('Accept', 'application/json');
+
+                // Send the XHR
+                xhr.send();
+            }
+        }
+    })();
+
+    var nodeJSRequest = (function() {
+        if(typeof require == 'function' && require('http')) {
+            var requestsCache = {},
+                http = require('http'),
+                https = require('https'),
+                url = require('url'),
+                querystring = require('querystring');
+
+            return function(requestUrl, callback) {
+                if(requestsCache[requestUrl]) {
+                    callback(requestsCache[requestUrl]);
+                } else {
+  
+                    console.log('[prismic.io] ' + requestUrl)
+  
+                    var parsed = url.parse(requestUrl),
+                        h = parsed.protocol == 'https:' ? https : http,
+                        options = {
+                            hostname: parsed.hostname,
+                            path: parsed.path,
+                            query: parsed.query,
+                            headers: { 'Accept': 'application/json' }
+                        };
+  
+                    h.get(options, function(response) {
+                        if(response.statusCode && response.statusCode == 200) {
+                            var jsonStr = '';
+        
+                            response.setEncoding('utf8');
+                            response.on('data', function (chunk) {
+                                jsonStr += chunk;
+                            });
+        
+                            response.on('end', function () {
+                              var cacheControl = response.headers['cache-control'],
+                                  maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1]) : undefined,
+                                  json = JSON.parse(jsonStr);
+                              
+                              if(maxAge) {
+                                  requestsCache[requestUrl] = json;
+                              }
+                              
+                              callback(json);
+                            });
+                        } else {
+                            throw new Error("Unexpected status code [" + response.statusCode + "]")
+                        }
+                    });
+  
+                }
+
             };
-
-            // Open the XHR
-            xhr.open('GET', url + '#json', true);
-
-            // Json request
-            xhr.setRequestHeader('Accept', 'application/json');
-
-            // Send the XHR
-            xhr.send();
         }
     })();
 
@@ -134,7 +191,7 @@
         init: function(url, accessToken, maybeRequestHandler) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
-            this.requestHandler = maybeRequestHandler || ajaxRequest;
+            this.requestHandler = maybeRequestHandler || ajaxRequest || nodeJSRequest || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)")})();
             return this;
         },
 
