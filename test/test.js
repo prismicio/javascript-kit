@@ -28,10 +28,28 @@
     });
   });
 
+  asyncTest('Submit the `everything` form with a predicate', 1, function() {
+    Prismic.Api(testRepository, function(Api) {
+      Api.forms('everything').ref(Api.master()).query('[[:d = at(document.type, "product")]]').submit(function(results) {
+        equal(results.length, 16);
+        start();
+      });
+    });
+  });
+
   asyncTest('Submit the `products` form', 1, function() {
     Prismic.Api(testRepository, function(Api) {
       Api.forms('products').ref(Api.master()).submit(function(results) {
         equal(results.length, 16);
+        start();
+      });
+    });
+  });
+
+  asyncTest('Submit the `products` form with a predicate', 1, function() {
+    Prismic.Api(testRepository, function(Api) {
+      Api.forms('products').ref(Api.master()).query('[[:d = at(my.product.flavour, "Chocolate")]]').submit(function(results) {
+        equal(results.length, 5);
         start();
       });
     });

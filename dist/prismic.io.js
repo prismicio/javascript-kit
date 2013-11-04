@@ -50,7 +50,7 @@
                 xhr.send();
             }
         }
-    })();
+    });
 
     var nodeJSRequest = (function() {
         if(typeof require == 'function' && require('http')) {
@@ -64,8 +64,6 @@
                 if(requestsCache[requestUrl]) {
                     callback(requestsCache[requestUrl]);
                 } else {
-  
-                    console.log('[prismic.io] ' + requestUrl)
   
                     var parsed = url.parse(requestUrl),
                         h = parsed.protocol == 'https:' ? https : http,
@@ -105,7 +103,7 @@
 
             };
         }
-    })();
+    });
 
     // --
 
@@ -191,7 +189,7 @@
         init: function(url, accessToken, maybeRequestHandler) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
-            this.requestHandler = maybeRequestHandler || ajaxRequest || nodeJSRequest || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)")})();
+            this.requestHandler = maybeRequestHandler || ajaxRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)")})();
             return this;
         },
 
@@ -239,76 +237,65 @@
         this.form = form;
         this.data = data || {};
 
-        if(form.fields && form.fields.q) {
-            for (var f in form.fields) {
-                var val = this.data[f];
-                if(!val) {
-                    this.data[f] = [];
-                }
-                // FIXME: only handle value "default"?
-                if(f === "q") {
-                    this.query(form.fields[f].default);
-                } else {
-                    this.data[f].push(form.fields[f].default);
-                }
+        for(var field in form.fields) {
+            if(form.fields[field].default) {
+                this.data[field] = [form.fields[field].default];
             }
         }
-
     };
 
     SearchForm.prototype = {
 
-        ref: function(ref) {
-            this.data.ref = ref;
+        set: function(field, value) {
+            var fieldDesc = this.form.fields[field];
+            if(!fieldDesc) throw new Error("Unknown field " + field);
+            var values= this.data[field] || [];
+            if(fieldDesc.multiple) {
+                values.push(value);
+            } else {
+                values = [value];
+            }
+            this.data[field] = values;
             return this;
         },
 
-        query: function(query) {
+        ref: function(ref) {
+            return this.set("ref", ref);
+        },
 
-            function strip(q) {
-                if(q == null) return "";
-                if(q.indexOf("[") === 0 && q.lastIndexOf("]") === q.length - 1) {
-                    return q.substring(1, q.length - 1);
-                }
-                return q;
-            }
+        query: function(query) {
+            if(this.form.fields.q.multiple) {
+                return this.set("q", query);
+            } 
+
             this.data.q = this.data.q || [];
-            this.data.q.push(strip(query));
+            this.data.q.push(query);
 
             return this;
         },
 
         submit: function(cb) {
-            var self = this;
+            var self = this,
+                url = this.form.action;
 
-            var q = "[" + this.data.q.join("") + "]",
-                ref = this.data.ref,
-                params = {
-                    ref: ref
-                };
-
-            if (this.data.q.length === 1 && this.data.q[0] === "") {
-
-            } else {
-                params.q = q;
-            }
-
-            if(this.data.accessToken && this.data.accessToken.length) {
-                params['access_token'] = this.data.accessToken[0];
-            } 
-
-            var url = this.form.action;
-
-            if(params) {
+            if(this.data) {
                 var sep = (url.indexOf('?') > -1 ? '&' : '?');
-                for(var key in params) {
-                    url += sep + key + '=' + encodeURIComponent(params[key]);
-                    sep = '&';
+                for(var key in this.data) {
+                    var values = this.data[key];
+                    if(values) {
+                        for(var i=0; i<values.length; i++) {
+                            url += sep + key + '=' + encodeURIComponent(values[i]);
+                            sep = '&';
+                        }
+                    }
                 }
             }
 
             this.api.requestHandler(url, function (d) {
-                var docs = d.map(function (doc) {
+
+                var results = d.results || d;
+
+                var docs = results.map(function (doc) {
                     var fragments = {}
 
                     for(var field in doc.data[doc.type]) {
