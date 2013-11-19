@@ -312,8 +312,8 @@
                     )
                 });
 
-                if (cb && docs.length) {
-                    cb(docs);
+                if (cb) {
+                    cb(docs || []);
                 }
             });
 

@@ -37,6 +37,15 @@
     });
   });
 
+  asyncTest('Submit the `everything` form with a predicate that give no results', 1, function() {
+    Prismic.Api(testRepository, function(Api) {
+      Api.forms('everything').ref(Api.master()).query('[[:d = at(document.type, "youhou")]]').submit(function(results) {
+        equal(results.length, 0);
+        start();
+      });
+    });
+  });
+
   asyncTest('Submit the `products` form', 1, function() {
     Prismic.Api(testRepository, function(Api) {
       Api.forms('products').ref(Api.master()).submit(function(results) {
