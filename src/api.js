@@ -232,6 +232,11 @@
 
     Form.prototype = {};
 
+    /**
+     * @constructor
+     * Creates a SearchForm objects from scratch. To create SearchForm objects
+     * that are allowed in the API, please use the API.forms() method.
+     */
     function SearchForm(api, form, data) {
         this.api = api;
         this.form = form;
@@ -246,6 +251,16 @@
 
     SearchForm.prototype = {
 
+        /**
+         * Set an API call parameter. This will only work if field is a valid field of the
+         * RESTful form in the first place (as described in the /api document); otherwise,
+         * an "Unknown field" error is thrown.
+         * Please prefer using dedicated methods like query(), orderings(), ...
+         * 
+         * @param {string} field - The name of the field to set
+         * @param {string} value - The value that gets assigned
+         * @returns {SearchForm} - The SearchForm itself
+         */
         set: function(field, value) {
             var fieldDesc = this.form.fields[field];
             if(!fieldDesc) throw new Error("Unknown field " + field);
@@ -259,21 +274,44 @@
             return this;
         },
 
+        /**
+         * Sets a ref to query on for this SearchForm. This is a mandatory
+         * method to call before calling submit(), and api.form('everything').submit()
+         * will not work.
+         * 
+         * @param {Ref} ref - The Ref object defining the ref to query
+         * @returns {SearchForm} - The SearchForm itself
+         */
         ref: function(ref) {
             return this.set("ref", ref);
         },
 
+        /**
+         * Sets a predicate-based query for this SearchForm. This is where you
+         * paste what you compose in your prismic.io API browser.
+         * You can pass an empty string, the method will simply not send that query.
+         * 
+         * @param {string} query - The query to perform
+         * @returns {SearchForm} - The SearchForm itself
+         */
         query: function(query) {
-            if(this.form.fields.q.multiple) {
-                return this.set("q", query);
-            } 
+            if (query !== '' && query !== '[]') {
+                if(this.form.fields.q.multiple) {
+                    return this.set("q", query);
+                }
 
-            this.data.q = this.data.q || [];
-            this.data.q.push(query);
+                this.data.q = this.data.q || [];
+                this.data.q.push(query);
+            }
 
             return this;
         },
 
+        /**
+         * Submits the query, and calls the callback function.
+         * 
+         * @param {function} cb - Function that carries one parameter: an array of Document objects
+         */
         submit: function(cb) {
             var self = this,
                 url = this.form.action;
