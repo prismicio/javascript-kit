@@ -18,7 +18,16 @@
     }
     DocumentLink.prototype = {
         asHtml: function () {
-            return "<a></a>";
+            return "<a></a>"; //Follows RFC /s
+        }
+    };
+
+    function WebLink(data) {
+        this.value = data;
+    }
+    WebLink.prototype = {
+        asHtml: function () {
+            return "<a href='"+this.value.url+"'>"+this.value.url+"</a>";
         }
     };
 
@@ -147,7 +156,7 @@
             }
             return paragraphs;
         },
-        
+
         getParagraph: function(n) {
             return this.getParagraphs()[n];
         },
@@ -157,7 +166,7 @@
                 var block = this.blocks[i];
                 if(block.type == 'image') {
                     return new ImageView(
-                        block.data.url, 
+                        block.data.url,
                         block.data.dimensions.width,
                         block.data.dimensions.height
                     );
@@ -171,6 +180,48 @@
 
     };
 
+    function ApplySpansToText (text, spans) {
+        function get_tag_for_span (span, position){
+            if(position == "beginning"){
+                if(span.type == "strong" || span.type == "em") { return "<"+ span.type +">" }
+                if(span.type == "hyperlink"){
+                    if (span.data.type === "Link.web"){
+                        return "<a href='"+span.data.value.url+"'>" //Probably needs to be done in a safer way
+                    } else {
+                        return "" //Ideally there is a LinkSpecToURI function that takes in a link and just returns this, but unsure how that fits in
+                    }
+                }
+            } else if (position == "end"){
+                if(span.type == "strong" || span.type == "em") { return "</"+ span.type +">" }
+                if(span.type == "hyperlink"){ return "</a>" }
+            }
+        }
+
+        var tags = {} //Keep track of where we have to insert the tags
+        spans.forEach(function(span){
+            if(tags[span.start] == null){ tags[span.start] = [] }
+            tags[span.start].push(get_tag_for_span(span, "beginning"))
+        })
+        spans.reverse().forEach(function(span){
+            if(tags[span.end] == null){ tags[span.end] = []}
+            tags[span.end].push(get_tag_for_span(span, "end"))
+        })
+
+        var result = ""
+        for(var i=0; i<text.length; i++){
+            if(tags[i]){
+                result += tags[i].join("")
+            }
+            result += text[i]
+        }
+
+        if(tags[text.length]){ //If there are any tags at the end of the text they won't be added in the loop. Probably an easier way to do this too
+            result += tags[text.length].join("")
+        }
+
+        return result
+    }
+
     function StructuredTextAsHtml (blocks, linkResolver) {
 
         var groups = [],
@@ -180,17 +231,10 @@
 
         if (Array.isArray(blocks)) {
             blocks.forEach(function (block) {
-                if (groups.length > 0) {
-                    var lastGroup = groups[groups.length - 1];
-
-                    group = new Group(null, []);
-                    group.blocks.push(block);
-                    groups.push(group);
-                } else {
-                    group = new Group(null, []);
-                    group.blocks.push(block);
-                    groups.push(group);
-                }
+                var lastGroup = groups[groups.length - 1] || null;
+                group = new Group(null, []);
+                group.blocks.push(block);
+                groups.push(group);
             });
 
             groups.forEach(function (group) {
@@ -207,24 +251,24 @@
                 }
             });
 
-        } else {
-            if(blocks.type == "heading1") {
-                html.push('<h1>' + blocks.text + '</h1>');
+        } else if (blocks.type) { //Single block
+            var block = blocks
+
+            if(block.type == "image") {
+                html.push('<p><img src="' + block.url + '"></p>');
+            } else if(block.type == "heading1") {
+                html.push('<h1>' + ApplySpansToText(block.text, block.spans) + '</h1>');
             }
             if(blocks.type == "heading2") {
-                html.push('<h2>' + blocks.text + '</h2>');
+                html.push('<h2>' + ApplySpansToText(block.text, block.spans) +  '</h2>');
             }
             if(blocks.type == "heading3") {
-                html.push('<h3>' + blocks.text + '</h3>');
+                html.push('<h3>' + ApplySpansToText(block.text, block.spans) +  '</h3>');
             }
             if(blocks.type == "paragraph") {
-                html.push('<p>' + blocks.text + '</p>');
-            }
-            if(blocks.type == "image") {
-                html.push('<p><img src="' + blocks.url + '"></p>');
+                html.push('<p>' + ApplySpansToText(block.text, block.spans) +  '</p>');
             }
         }
-
         return html.join('');
 
     }
@@ -281,7 +325,7 @@
                 break;
 
             case "Link.web":
-                throw new Error("not implemented");
+                output = new WebLink(field.value);
                 break;
 
             default:
