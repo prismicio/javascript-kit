@@ -685,6 +685,48 @@
 
     };
 
+    function ApplySpansToText (text, spans) {
+        function get_tag_for_span (span, position){
+            if(position == "beginning"){
+                if(span.type == "strong" || span.type == "em") { return "<"+ span.type +">" }
+                if(span.type == "hyperlink"){
+                    if (span.data.type === "Link.web"){
+                        return "<a href='"+span.data.value.url+"'>" //Probably needs to be done in a safer way
+                    } else {
+                        return "" //Ideally there is a LinkSpecToURI function that takes in a link and just returns this, but unsure how that fits in
+                    }
+                }
+            } else if (position == "end"){
+                if(span.type == "strong" || span.type == "em") { return "</"+ span.type +">" }
+                if(span.type == "hyperlink"){ return "</a>" }
+            }
+        }
+
+        var tags = {} //Keep track of where we have to insert the tags
+        spans.forEach(function(span){
+            if(tags[span.start] == null){ tags[span.start] = [] }
+            tags[span.start].push(get_tag_for_span(span, "beginning"))
+        })
+        spans.reverse().forEach(function(span){
+            if(tags[span.end] == null){ tags[span.end] = []}
+            tags[span.end].push(get_tag_for_span(span, "end"))
+        })
+
+        var result = ""
+        for(var i=0; i<text.length; i++){
+            if(tags[i]){
+                result += tags[i].join("")
+            }
+            result += text[i]
+        }
+
+        if(tags[text.length]){ //If there are any tags at the end of the text they won't be added in the loop. Probably an easier way to do this too
+            result += tags[text.length].join("")
+        }
+
+        return result
+    }
+
     function StructuredTextAsHtml (blocks, linkResolver) {
 
         var groups = [],
@@ -694,17 +736,11 @@
 
         if (Array.isArray(blocks)) {
             blocks.forEach(function (block) {
-                if (groups.length > 0) {
-                    var lastGroup = groups[groups.length - 1];
-
-                    group = new Group(null, []);
-                    group.blocks.push(block);
-                    groups.push(group);
-                } else {
-                    group = new Group(null, []);
-                    group.blocks.push(block);
-                    groups.push(group);
-                }
+                var lastGroup = groups[groups.length - 1] || null;
+                console.log(lastGroup)
+                group = new Group(null, []);
+                group.blocks.push(block);
+                groups.push(group);
             });
 
             groups.forEach(function (group) {
@@ -721,72 +757,22 @@
                 }
             });
 
-        } else if (blocks.type) {
-            if(blocks.type == "image") {
-                html.push('<p><img src="' + blocks.url + '"></p>');
-            } else {
-                var final_string = []
-                var tags = {}
-                var span_spec = {
-                    em: function(span, beginning) {
-                        if (beginning){
-                            return "<em>"
-                        }
-                        return "</em>"
-                    },
-                    strong: function(span, beginning) {
-                        if (beginning){
-                            return "<strong>"
-                        }
-                        return "</strong>"
-                    },
-                    hyperlink: function(span, beginning) {
-                        var link_spec = span.data
-                        if(link_spec.type === "Link.web"){
-                            if(beginning){
-                                return "<a href='"+link_spec.value.url+"'>" //Probably needs to be done in a safer way
-                            } else {
-                                return "</a>"
-                            }
-                        } else {
-                            //There is no helping you now
-                            return ""
-                        }
-                    },
-                }
-                blocks.spans.forEach(function(span){
-                    if(tags[span.start] == null){
-                        tags[span.start] = []
-                    }
-                    tags[span.start].push(span_spec[span.type](span, true))
-                })
-                blocks.spans.reverse().forEach(function(span){
-                    if(tags[span.end] == null){
-                        tags[span.end] = []
-                    }
-                    tags[span.end].push(span_spec[span.type](span, false))
-                })
+        } else if (blocks.type) { //Single block
+            var block = blocks
 
-                for(var i=0;i<=blocks.text.length;i++){
-                    if(tags[i]){
-                        final_string.push(tags[i].join(""))
-                    }
-                    final_string.push(blocks.text[i])
-                }
-
-                if(blocks.type == "heading1") {
-                    html.push('<h1>' + final_string.join("") + '</h1>');
-                }
-                if(blocks.type == "heading2") {
-                    html.push('<h2>' + final_string.join("") + '</h2>');
-                }
-                if(blocks.type == "heading3") {
-                    html.push('<h3>' + final_string.join("") + '</h3>');
-                }
-                if(blocks.type == "paragraph") {
-                    html.push('<p>' + final_string.join("") + '</p>');
-                }
-
+            if(block.type == "image") {
+                html.push('<p><img src="' + block.url + '"></p>');
+            } else if(block.type == "heading1") {
+                html.push('<h1>' + ApplySpansToText(block.text, block.spans) + '</h1>');
+            }
+            if(blocks.type == "heading2") {
+                html.push('<h2>' + ApplySpansToText(block.text, block.spans) +  '</h2>');
+            }
+            if(blocks.type == "heading3") {
+                html.push('<h3>' + ApplySpansToText(block.text, block.spans) +  '</h3>');
+            }
+            if(blocks.type == "paragraph") {
+                html.push('<p>' + ApplySpansToText(block.text, block.spans) +  '</p>');
             }
         }
         return html.join('');
