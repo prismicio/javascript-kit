@@ -15,7 +15,7 @@
     var ajaxRequest = (function() {
         if(typeof XMLHttpRequest != 'undefined') {
             return function(url, callback) {
-                
+
                 var xhr = new XMLHttpRequest();
 
                 // Called on success
@@ -64,7 +64,7 @@
                 if(requestsCache[requestUrl]) {
                     callback(requestsCache[requestUrl]);
                 } else {
-  
+
                     var parsed = url.parse(requestUrl),
                         h = parsed.protocol == 'https:' ? https : http,
                         options = {
@@ -73,32 +73,32 @@
                             query: parsed.query,
                             headers: { 'Accept': 'application/json' }
                         };
-  
+
                     h.get(options, function(response) {
                         if(response.statusCode && response.statusCode == 200) {
                             var jsonStr = '';
-        
+
                             response.setEncoding('utf8');
                             response.on('data', function (chunk) {
                                 jsonStr += chunk;
                             });
-        
+
                             response.on('end', function () {
                               var cacheControl = response.headers['cache-control'],
                                   maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1]) : undefined,
                                   json = JSON.parse(jsonStr);
-                              
+
                               if(maxAge) {
                                   requestsCache[requestUrl] = json;
                               }
-                              
+
                               callback(json);
                             });
                         } else {
                             throw new Error("Unexpected status code [" + response.statusCode + "]")
                         }
                     });
-  
+
                 }
 
             };
@@ -138,7 +138,7 @@
             for (i in data.forms) {
                 if (data.forms.hasOwnProperty(i)) {
                     f = data.forms[i];
-                    
+
                     if(this.accessToken) {
                         f.fields['accessToken'] = {
                             type: 'string',
@@ -195,7 +195,7 @@
 
         // For compatibility
         forms: function(formId) {
-            return this.form(formId); 
+            return this.form(formId);
         },
 
         form: function(formId) {
@@ -266,7 +266,7 @@
         query: function(query) {
             if(this.form.fields.q.multiple) {
                 return this.set("q", query);
-            } 
+            }
 
             this.data.q = this.data.q || [];
             this.data.q.push(query);
@@ -349,7 +349,7 @@
          * Gets the field in the current Document object. Since you most likely know the type
          * of this field, it is advised that you use a dedicated method, like get StructuredText() or getDate(),
          * for instance.
-         * 
+         *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.author"
          * @returns {object} - The json object to manipulate
          */
@@ -367,7 +367,7 @@
         /**
          * Gets the image field in the current Document object, for further manipulation.
          * Typical use: document.getImage('blog-post.photo').asHtml(ctx.link_resolver)
-         * 
+         *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
          * @returns {Image} - The Image object to manipulate
          */
@@ -401,7 +401,7 @@
         /**
          * Gets the view within the image field in the current Document object, for further manipulation.
          * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx.link_resolver)
-         * 
+         *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageView} - The View object to manipulate
          */
@@ -429,7 +429,7 @@
         /**
          * Gets the date field in the current Document object, for further manipulation.
          * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx.link_resolver)
-         * 
+         *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
          */
@@ -445,7 +445,7 @@
          * Gets the boolean field in the current Document object, for further manipulation.
          * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx.link_resolver).
          * This works great with a Select field. The Select values that are considered true are: 'yes', 'on', and 'true'.
-         * 
+         *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.enableComments"
          * @returns {boolean}
          */
@@ -458,7 +458,7 @@
          * Gets the text field in the current Document object, for further manipulation.
          * Typical use: document.getText('blog-post.label').asHtml(ctx.link_resolver).
          * The method works with StructuredText fields, Text fields, Number fields, Select fields and Color fields.
-         * 
+         *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.label"
          * @returns {object} - either StructuredText, or Text, or Number, or Select, or Color.
          */
@@ -501,7 +501,7 @@
         /**
          * Gets the StructuredText field in the current Document object, for further manipulation.
          * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx.link_resolver).
-         * 
+         *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText field to manipulate.
          */
@@ -516,13 +516,13 @@
         /**
          * Gets the Number field in the current Document object, for further manipulation.
          * Typical use: document.getNumber('product.price').asHtml(ctx.link_resolver).
-         * 
+         *
          * @param {string} field - The name of the field to get, with its type; for instance, "product.price"
          * @returns {Number} - The Number field to manipulate.
          */
         getNumber: function(field) {
             var fragment = this.get(field);
-            
+
             if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value
             }
@@ -531,7 +531,7 @@
         /**
          * Shortcut to get the HTML output of the field in the current document.
          * This is the same as writing document.get(field).asHtml(linkResolver);
-         * 
+         *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
          * @param {function} linkResolver - The function to apply to resolve found links, with one parameter: the current ref
          * @returns {string} - The HTML output
@@ -547,7 +547,7 @@
         /**
          * Transforms the whole document as an HTML output. Each field is separated by a <section> tag,
          * with the attribute data-field="nameoffield"
-         * 
+         *
          * @param {function} linkResolver - The function to apply to resolve found links, with one parameter: the current ref
          * @returns {string} - The HTML output
          */

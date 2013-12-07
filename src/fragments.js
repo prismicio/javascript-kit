@@ -22,6 +22,15 @@
         }
     };
 
+    function WebLink(data) {
+        this.value = data;
+    }
+    WebLink.prototype = {
+        asHtml: function () {
+            return "<a href='"+this.value.url+"'>"+this.value.url+"</a>";
+        }
+    };
+
     function Select(data) {
         this.value = data;
     }
@@ -147,7 +156,7 @@
             }
             return paragraphs;
         },
-        
+
         getParagraph: function(n) {
             return this.getParagraphs()[n];
         },
@@ -157,7 +166,7 @@
                 var block = this.blocks[i];
                 if(block.type == 'image') {
                     return new ImageView(
-                        block.data.url, 
+                        block.data.url,
                         block.data.dimensions.width,
                         block.data.dimensions.height
                     );
@@ -323,7 +332,7 @@
                 break;
 
             case "Link.web":
-                throw new Error("not implemented");
+                output = new WebLink(field.value);
                 break;
 
             default:
