@@ -179,50 +179,55 @@
             html = [];
 
         if (Array.isArray(blocks)) {
-            blocks.forEach(function (block) {
-                if (groups.length > 0) {
-                    var lastGroup = groups[groups.length - 1];
+            for(var i=0; i<blocks.length; i++) {
+                block = blocks[i];
 
-                    group = new Group(null, []);
-                    group.blocks.push(block);
-                    groups.push(group);
-                } else {
-                    group = new Group(null, []);
-                    group.blocks.push(block);
+                if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
+                    group = new Group(block.type, []);
                     groups.push(group);
                 }
-            });
+                else if (group && group.tag != block.type) { // it's a new type
+                    group = new Group(block.type, []);
+                    groups.push(group);
+                }
+                // else: it's the same type as before, no touching group
+
+                group.blocks.push(block);
+            };
 
             groups.forEach(function (group) {
-                if (group.tag) {
-                    html.push("<" + group.tag + ">");
-                    group.blocks.forEach(function (block) {
-                        html.push(StructuredTextAsHtml(block));
-                    });
-                    html.push("</" + group.tag + ">");
-                } else {
-                    group.blocks.forEach(function (block) {
-                        html.push(StructuredTextAsHtml(block));
-                    });
+
+                if(group.tag == "heading1") {
+                    html.push('<h1>' + group.blocks[0].text + '</h1>');
                 }
+                else if(group.tag == "heading2") {
+                    html.push('<h2>' + group.blocks[0].text + '</h2>');
+                }
+                else if(group.tag == "heading3") {
+                    html.push('<h3>' + group.blocks[0].text + '</h3>');
+                }
+                else if(group.tag == "paragraph") {
+                    html.push('<p>' + group.blocks[0].text + '</p>');
+                }
+                else if(group.tag == "image") {
+                    html.push('<p><img src="' + group.blocks[0].url + '"></p>');
+                }
+                else if(group.tag == "embed") {
+                    html.push('<div data-oembed="'+ group.blocks[0].embed_url
+                        + '" data-oembed-type="'+ group.blocks[0].type
+                        + '" data-oembed-provider="'+ group.blocks[0].provider_name
+                        + '">' + group.blocks[0].oembed.html+"</div>")
+                }
+                else if(group.tag == "list-item" || group.tag == "o-list-item") {
+                    html.push(group.tag == "list-item"?'<ul>':"<ol>");
+                    group.blocks.forEach(function(block){
+                        html.push("<li>"+block.text+"</li>");
+                    });
+                    html.push(group.tag == "list-item"?'</ul>':"</ol>");
+                }
+                else throw new Error(group.tag+" not implemented");
             });
 
-        } else {
-            if(blocks.type == "heading1") {
-                html.push('<h1>' + blocks.text + '</h1>');
-            }
-            if(blocks.type == "heading2") {
-                html.push('<h2>' + blocks.text + '</h2>');
-            }
-            if(blocks.type == "heading3") {
-                html.push('<h3>' + blocks.text + '</h3>');
-            }
-            if(blocks.type == "paragraph") {
-                html.push('<p>' + blocks.text + '</p>');
-            }
-            if(blocks.type == "image") {
-                html.push('<p><img src="' + blocks.url + '"></p>');
-            }
         }
 
         return html.join('');
