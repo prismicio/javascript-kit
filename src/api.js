@@ -15,7 +15,7 @@
     var ajaxRequest = (function() {
         if(typeof XMLHttpRequest != 'undefined') {
             return function(url, callback) {
-                
+
                 var xhr = new XMLHttpRequest();
 
                 // Called on success
@@ -64,7 +64,7 @@
                 if(requestsCache[requestUrl]) {
                     callback(requestsCache[requestUrl]);
                 } else {
-  
+
                     var parsed = url.parse(requestUrl),
                         h = parsed.protocol == 'https:' ? https : http,
                         options = {
@@ -73,32 +73,32 @@
                             query: parsed.query,
                             headers: { 'Accept': 'application/json' }
                         };
-  
+
                     h.get(options, function(response) {
                         if(response.statusCode && response.statusCode == 200) {
                             var jsonStr = '';
-        
+
                             response.setEncoding('utf8');
                             response.on('data', function (chunk) {
                                 jsonStr += chunk;
                             });
-        
+
                             response.on('end', function () {
                               var cacheControl = response.headers['cache-control'],
                                   maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1]) : undefined,
                                   json = JSON.parse(jsonStr);
-                              
+
                               if(maxAge) {
                                   requestsCache[requestUrl] = json;
                               }
-                              
+
                               callback(json);
                             });
                         } else {
                             throw new Error("Unexpected status code [" + response.statusCode + "]")
                         }
                     });
-  
+
                 }
 
             };
@@ -138,7 +138,7 @@
             for (i in data.forms) {
                 if (data.forms.hasOwnProperty(i)) {
                     f = data.forms[i];
-                    
+
                     if(this.accessToken) {
                         f.fields['accessToken'] = {
                             type: 'string',
@@ -195,7 +195,7 @@
 
         // For compatibility
         forms: function(formId) {
-            return this.form(formId); 
+            return this.form(formId);
         },
 
         form: function(formId) {
@@ -266,7 +266,7 @@
         query: function(query) {
             if(this.form.fields.q.multiple) {
                 return this.set("q", query);
-            } 
+            }
 
             this.data.q = this.data.q || [];
             this.data.q.push(query);
@@ -463,7 +463,7 @@
 
         getNumber: function(field) {
             var fragment = this.get(field);
-            
+
             if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value
             }

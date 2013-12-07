@@ -15,7 +15,7 @@
     var ajaxRequest = (function() {
         if(typeof XMLHttpRequest != 'undefined') {
             return function(url, callback) {
-                
+
                 var xhr = new XMLHttpRequest();
 
                 // Called on success
@@ -64,7 +64,7 @@
                 if(requestsCache[requestUrl]) {
                     callback(requestsCache[requestUrl]);
                 } else {
-  
+
                     var parsed = url.parse(requestUrl),
                         h = parsed.protocol == 'https:' ? https : http,
                         options = {
@@ -73,32 +73,32 @@
                             query: parsed.query,
                             headers: { 'Accept': 'application/json' }
                         };
-  
+
                     h.get(options, function(response) {
                         if(response.statusCode && response.statusCode == 200) {
                             var jsonStr = '';
-        
+
                             response.setEncoding('utf8');
                             response.on('data', function (chunk) {
                                 jsonStr += chunk;
                             });
-        
+
                             response.on('end', function () {
                               var cacheControl = response.headers['cache-control'],
                                   maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1]) : undefined,
                                   json = JSON.parse(jsonStr);
-                              
+
                               if(maxAge) {
                                   requestsCache[requestUrl] = json;
                               }
-                              
+
                               callback(json);
                             });
                         } else {
                             throw new Error("Unexpected status code [" + response.statusCode + "]")
                         }
                     });
-  
+
                 }
 
             };
@@ -138,7 +138,7 @@
             for (i in data.forms) {
                 if (data.forms.hasOwnProperty(i)) {
                     f = data.forms[i];
-                    
+
                     if(this.accessToken) {
                         f.fields['accessToken'] = {
                             type: 'string',
@@ -195,7 +195,7 @@
 
         // For compatibility
         forms: function(formId) {
-            return this.form(formId); 
+            return this.form(formId);
         },
 
         form: function(formId) {
@@ -266,7 +266,7 @@
         query: function(query) {
             if(this.form.fields.q.multiple) {
                 return this.set("q", query);
-            } 
+            }
 
             this.data.q = this.data.q || [];
             this.data.q.push(query);
@@ -463,7 +463,7 @@
 
         getNumber: function(field) {
             var fragment = this.get(field);
-            
+
             if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value
             }
@@ -523,7 +523,16 @@
     }
     DocumentLink.prototype = {
         asHtml: function () {
-            return "<a></a>";
+            return "<a></a>"; //Follows RFC /s
+        }
+    };
+
+    function WebLink(data) {
+        this.value = data;
+    }
+    WebLink.prototype = {
+        asHtml: function () {
+            return "<a href='"+this.value.url+"'>"+this.value.url+"</a>";
         }
     };
 
@@ -652,7 +661,7 @@
             }
             return paragraphs;
         },
-        
+
         getParagraph: function(n) {
             return this.getParagraphs()[n];
         },
@@ -662,7 +671,7 @@
                 var block = this.blocks[i];
                 if(block.type == 'image') {
                     return new ImageView(
-                        block.data.url, 
+                        block.data.url,
                         block.data.dimensions.width,
                         block.data.dimensions.height
                     );
@@ -712,24 +721,74 @@
                 }
             });
 
-        } else {
-            if(blocks.type == "heading1") {
-                html.push('<h1>' + blocks.text + '</h1>');
-            }
-            if(blocks.type == "heading2") {
-                html.push('<h2>' + blocks.text + '</h2>');
-            }
-            if(blocks.type == "heading3") {
-                html.push('<h3>' + blocks.text + '</h3>');
-            }
-            if(blocks.type == "paragraph") {
-                html.push('<p>' + blocks.text + '</p>');
-            }
+        } else if (blocks.type) {
             if(blocks.type == "image") {
                 html.push('<p><img src="' + blocks.url + '"></p>');
+            } else {
+                var final_string = []
+                var tags = {}
+                var span_spec = {
+                    em: function(span, beginning) {
+                        if (beginning){
+                            return "<em>"
+                        }
+                        return "</em>"
+                    },
+                    strong: function(span, beginning) {
+                        if (beginning){
+                            return "<strong>"
+                        }
+                        return "</strong>"
+                    },
+                    hyperlink: function(span, beginning) {
+                        var link_spec = span.data
+                        if(link_spec.type === "Link.web"){
+                            if(beginning){
+                                return "<a href='"+link_spec.value.url+"'>" //Probably needs to be done in a safer way
+                            } else {
+                                return "</a>"
+                            }
+                        } else {
+                            //There is no helping you now
+                            return ""
+                        }
+                    },
+                }
+                blocks.spans.forEach(function(span){
+                    if(tags[span.start] == null){
+                        tags[span.start] = []
+                    }
+                    tags[span.start].push(span_spec[span.type](span, true))
+                })
+                blocks.spans.reverse().forEach(function(span){
+                    if(tags[span.end] == null){
+                        tags[span.end] = []
+                    }
+                    tags[span.end].push(span_spec[span.type](span, false))
+                })
+
+                for(var i=0;i<=blocks.text.length;i++){
+                    if(tags[i]){
+                        final_string.push(tags[i].join(""))
+                    }
+                    final_string.push(blocks.text[i])
+                }
+
+                if(blocks.type == "heading1") {
+                    html.push('<h1>' + final_string.join("") + '</h1>');
+                }
+                if(blocks.type == "heading2") {
+                    html.push('<h2>' + final_string.join("") + '</h2>');
+                }
+                if(blocks.type == "heading3") {
+                    html.push('<h3>' + final_string.join("") + '</h3>');
+                }
+                if(blocks.type == "paragraph") {
+                    html.push('<p>' + final_string.join("") + '</p>');
+                }
+
             }
         }
-
         return html.join('');
 
     }
@@ -786,7 +845,7 @@
                 break;
 
             case "Link.web":
-                throw new Error("not implemented");
+                output = new WebLink(field.value);
                 break;
 
             default:
