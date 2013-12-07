@@ -345,7 +345,14 @@
     }
 
     Doc.prototype = {
-
+        /**
+         * Gets the field in the current Document object. Since you most likely know the type
+         * of this field, it is advised that you use a dedicated method, like get StructuredText() or getDate(),
+         * for instance.
+         * 
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.author"
+         * @returns {object} - The json object to manipulate
+         */
         get: function(field) {
             var frags = getFragments.call(this, field);
             return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
@@ -357,6 +364,13 @@
             }, this);
         },
 
+        /**
+         * Gets the image field in the current Document object, for further manipulation.
+         * Typical use: document.getImage('blog-post.photo').asHtml(ctx.link_resolver)
+         * 
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
+         * @returns {Image} - The Image object to manipulate
+         */
         getImage: function(field) {
             var img = this.get(field);
             if (img instanceof Global.Prismic.Fragments.Image) {
@@ -383,6 +397,14 @@
             });
         },
 
+
+        /**
+         * Gets the view within the image field in the current Document object, for further manipulation.
+         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx.link_resolver)
+         * 
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
+         * @returns {ImageView} - The View object to manipulate
+         */
         getImageView: function(field, view) {
             var fragment = this.get(field);
             if (fragment instanceof Global.Prismic.Fragments.Image) {
@@ -404,6 +426,13 @@
             });
         },
 
+        /**
+         * Gets the date field in the current Document object, for further manipulation.
+         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx.link_resolver)
+         * 
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.publicationdate"
+         * @returns {Date} - The Date object to manipulate
+         */
         getDate: function(field) {
             var fragment = this.get(field);
 
@@ -412,11 +441,27 @@
             }
         },
 
+        /**
+         * Gets the boolean field in the current Document object, for further manipulation.
+         * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx.link_resolver).
+         * This works great with a Select field. The Select values that are considered true are: 'yes', 'on', and 'true'.
+         * 
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.enableComments"
+         * @returns {boolean}
+         */
         getBoolean: function(field) {
             var fragment = this.get(field);
             return fragment.value && (fragment.value.toLowerCase() == 'yes' || fragment.value.toLowerCase() == 'on' || fragment.value.toLowerCase() == 'true');
         },
 
+        /**
+         * Gets the text field in the current Document object, for further manipulation.
+         * Typical use: document.getText('blog-post.label').asHtml(ctx.link_resolver).
+         * The method works with StructuredText fields, Text fields, Number fields, Select fields and Color fields.
+         * 
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.label"
+         * @returns {object} - either StructuredText, or Text, or Number, or Select, or Color.
+         */
         getText: function(field, after) {
             var fragment = this.get(field);
 
@@ -453,6 +498,13 @@
             }
         },
 
+        /**
+         * Gets the StructuredText field in the current Document object, for further manipulation.
+         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx.link_resolver).
+         * 
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
+         * @returns {StructuredText} - The StructuredText field to manipulate.
+         */
         getStructuredText: function(field) {
             var fragment = this.get(field);
 
@@ -461,6 +513,13 @@
             }
         },
 
+        /**
+         * Gets the Number field in the current Document object, for further manipulation.
+         * Typical use: document.getNumber('product.price').asHtml(ctx.link_resolver).
+         * 
+         * @param {string} field - The name of the field to get, with its type; for instance, "product.price"
+         * @returns {Number} - The Number field to manipulate.
+         */
         getNumber: function(field) {
             var fragment = this.get(field);
             
@@ -469,6 +528,14 @@
             }
         },
 
+        /**
+         * Shortcut to get the HTML output of the field in the current document.
+         * This is the same as writing document.get(field).asHtml(linkResolver);
+         * 
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
+         * @param {function} linkResolver - The function to apply to resolve found links, with one parameter: the current ref
+         * @returns {string} - The HTML output
+         */
         getHtml: function(field, linkResolver) {
             var fragment = this.get(field);
 
@@ -477,6 +544,13 @@
             }
         },
 
+        /**
+         * Transforms the whole document as an HTML output. Each field is separated by a <section> tag,
+         * with the attribute data-field="nameoffield"
+         * 
+         * @param {function} linkResolver - The function to apply to resolve found links, with one parameter: the current ref
+         * @returns {string} - The HTML output
+         */
         asHtml: function(linkResolver) {
             var htmls = [];
             for(var field in this.fragments) {

@@ -198,16 +198,16 @@
             groups.forEach(function (group) {
 
                 if(group.tag == "heading1") {
-                    html.push('<h1>' + group.blocks[0].text + '</h1>');
+                    html.push('<h1>' + insertSpans(group.blocks[0].text, group.blocks[0].spans) + '</h1>');
                 }
                 else if(group.tag == "heading2") {
-                    html.push('<h2>' + group.blocks[0].text + '</h2>');
+                    html.push('<h2>' + insertSpans(group.blocks[0].text, group.blocks[0].spans) + '</h2>');
                 }
                 else if(group.tag == "heading3") {
-                    html.push('<h3>' + group.blocks[0].text + '</h3>');
+                    html.push('<h3>' + insertSpans(group.blocks[0].text, group.blocks[0].spans) + '</h3>');
                 }
                 else if(group.tag == "paragraph") {
-                    html.push('<p>' + group.blocks[0].text + '</p>');
+                    html.push('<p>' + insertSpans(group.blocks[0].text, group.blocks[0].spans) + '</p>');
                 }
                 else if(group.tag == "image") {
                     html.push('<p><img src="' + group.blocks[0].url + '"></p>');
@@ -232,6 +232,43 @@
 
         return html.join('');
 
+    }
+
+    function insertSpans(text, spans) {
+        var textBits = [];
+        var tags = [];
+        var cursor = 0;
+        var html = [];
+
+        /* checking the spans are following each other, or else not doing anything */
+        spans.forEach(function(span){
+            if (span.end < span.start) return text;
+            if (span.start < cursor) return text;
+            cursor = span.end;
+        });
+
+        cursor = 0;
+
+        spans.forEach(function(span){
+            textBits.push(text.substring(0, span.start-cursor));
+            text = text.substring(span.start-cursor);
+            cursor = span.start;
+            textBits.push(text.substring(0, span.end-cursor));
+            text = text.substring(span.end-cursor);
+            tags.push(span.type);
+            cursor = span.end;
+        });
+        textBits.push(text);
+
+        tags.forEach(function(tag, index){
+            html.push(textBits.shift());
+            html.push('<'+tag+'>');
+            html.push(textBits.shift());
+            html.push('</'+tag+'>');
+        });
+        html.push(textBits.shift());
+
+        return html.join('');
     }
 
     function initField(field) {
