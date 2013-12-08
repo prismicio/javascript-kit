@@ -809,7 +809,7 @@
                 else if(group.tag == "list-item" || group.tag == "o-list-item") {
                     html.push(group.tag == "list-item"?'<ul>':"<ol>");
                     group.blocks.forEach(function(block){
-                        html.push("<li>"+block.text+"</li>");
+                        html.push("<li>"+insertSpans(block.text, block.spans)+"</li>");
                     });
                     html.push(group.tag == "list-item"?'</ul>':"</ol>");
                 }
@@ -820,6 +820,16 @@
 
         return html.join('');
 
+    }
+
+    //Takes in a link of any type (Link.web or Link.document etc) and returns a uri to use inside of a link tag or such
+    //Should pass in linkResolver when support added for that
+    function linkToURI(link){
+        if(link.type == "Link.web") {
+            return link.value.url
+        } else {
+            return "" //Todo
+        }
     }
 
     function insertSpans(text, spans) {
@@ -843,16 +853,22 @@
             cursor = span.start;
             textBits.push(text.substring(0, span.end-cursor));
             text = text.substring(span.end-cursor);
-            tags.push(span.type);
+            tags.push(span);
             cursor = span.end;
         });
         textBits.push(text);
 
         tags.forEach(function(tag, index){
             html.push(textBits.shift());
-            html.push('<'+tag+'>');
-            html.push(textBits.shift());
-            html.push('</'+tag+'>');
+            if(tag.type == "hyperlink"){
+                html.push('<a href="'+ linkToURI(tag.data) +'">');
+                html.push(textBits.shift());
+                html.push('</a>');
+            } else {
+                html.push('<'+tag.type+'>');
+                html.push(textBits.shift());
+                html.push('</'+tag.type+'>');
+            }
         });
         html.push(textBits.shift());
 
