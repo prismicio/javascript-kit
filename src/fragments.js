@@ -248,8 +248,16 @@
     function linkToURI(link){
         if(link.type == "Link.web") {
             return link.value.url
-        } else {
-            return "" //Todo
+        }
+        else if(link.type == "Link.image") {
+            return link.value.image.url;
+        }
+        else if(link.type == "Link.document") {
+            // return ctx.linkResolver(ctx, link.value.document, link.value.document.isBroken);
+            /* Should we change the signature of asHtml everywhere, since linkResolver needs it? */
+        }
+        else {
+            throw new Error(link.type+" not implemented in linkToURI");
         }
     }
 
