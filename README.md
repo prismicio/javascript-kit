@@ -12,9 +12,20 @@ https://github.com/prismicio/repository/raw/master/javascript/prismic.io-1.0.4.m
 
 Or fetch it from __npm__:
 
-```
+```sh
 npm install prismic.io
 ```
+
+#### Getting started with prismic.io
+
+On our [prismic.io developer's portal](https://developers.prismic.io/), on top of the complete documentation, you will:
+ * get a better understanding of [what prismic.io is and how to get started with it](https://developers.prismic.io/documentation/UjBaQsuvzdIHvE4D/getting-started).
+ * get a thorough understanding of [how prismic.io kits work](https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#kits-and-helpers), including this one.
+ * see [what else is available for Javascript](https://developers.prismic.io/technologies/UjBh28uvzeMJvE4i/javascript): starter kits, examples, ...
+
+#### Changelog
+
+Need to see what changed, or to upgrade your kit? Check out [this kit's changelog](changelog.md).
 
 ### Licence
 
