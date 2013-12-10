@@ -15,7 +15,7 @@
     var ajaxRequest = (function() {
         if(typeof XMLHttpRequest != 'undefined') {
             return function(url, callback) {
-                
+
                 var xhr = new XMLHttpRequest();
 
                 // Called on success
@@ -64,7 +64,7 @@
                 if(requestsCache[requestUrl]) {
                     callback(requestsCache[requestUrl]);
                 } else {
-  
+
                     var parsed = url.parse(requestUrl),
                         h = parsed.protocol == 'https:' ? https : http,
                         options = {
@@ -73,32 +73,32 @@
                             query: parsed.query,
                             headers: { 'Accept': 'application/json' }
                         };
-  
+
                     h.get(options, function(response) {
                         if(response.statusCode && response.statusCode == 200) {
                             var jsonStr = '';
-        
+
                             response.setEncoding('utf8');
                             response.on('data', function (chunk) {
                                 jsonStr += chunk;
                             });
-        
+
                             response.on('end', function () {
                               var cacheControl = response.headers['cache-control'],
                                   maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1]) : undefined,
                                   json = JSON.parse(jsonStr);
-                              
+
                               if(maxAge) {
                                   requestsCache[requestUrl] = json;
                               }
-                              
+
                               callback(json);
                             });
                         } else {
                             throw new Error("Unexpected status code [" + response.statusCode + "]")
                         }
                     });
-  
+
                 }
 
             };
@@ -138,7 +138,7 @@
             for (i in data.forms) {
                 if (data.forms.hasOwnProperty(i)) {
                     f = data.forms[i];
-                    
+
                     if(this.accessToken) {
                         f.fields['accessToken'] = {
                             type: 'string',
@@ -195,7 +195,7 @@
 
         // For compatibility
         forms: function(formId) {
-            return this.form(formId); 
+            return this.form(formId);
         },
 
         form: function(formId) {
@@ -266,7 +266,7 @@
         query: function(query) {
             if(this.form.fields.q.multiple) {
                 return this.set("q", query);
-            } 
+            }
 
             this.data.q = this.data.q || [];
             this.data.q.push(query);
@@ -345,7 +345,14 @@
     }
 
     Doc.prototype = {
-
+        /**
+         * Gets the field in the current Document object. Since you most likely know the type
+         * of this field, it is advised that you use a dedicated method, like get StructuredText() or getDate(),
+         * for instance.
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.author"
+         * @returns {object} - The json object to manipulate
+         */
         get: function(field) {
             var frags = getFragments.call(this, field);
             return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
@@ -357,6 +364,13 @@
             }, this);
         },
 
+        /**
+         * Gets the image field in the current Document object, for further manipulation.
+         * Typical use: document.getImage('blog-post.photo').asHtml(ctx.link_resolver)
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
+         * @returns {Image} - The Image object to manipulate
+         */
         getImage: function(field) {
             var img = this.get(field);
             if (img instanceof Global.Prismic.Fragments.Image) {
@@ -383,6 +397,14 @@
             });
         },
 
+
+        /**
+         * Gets the view within the image field in the current Document object, for further manipulation.
+         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx.link_resolver)
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
+         * @returns {ImageView} - The View object to manipulate
+         */
         getImageView: function(field, view) {
             var fragment = this.get(field);
             if (fragment instanceof Global.Prismic.Fragments.Image) {
@@ -404,6 +426,13 @@
             });
         },
 
+        /**
+         * Gets the date field in the current Document object, for further manipulation.
+         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx.link_resolver)
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.publicationdate"
+         * @returns {Date} - The Date object to manipulate
+         */
         getDate: function(field) {
             var fragment = this.get(field);
 
@@ -412,11 +441,27 @@
             }
         },
 
+        /**
+         * Gets the boolean field in the current Document object, for further manipulation.
+         * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx.link_resolver).
+         * This works great with a Select field. The Select values that are considered true are: 'yes', 'on', and 'true'.
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.enableComments"
+         * @returns {boolean}
+         */
         getBoolean: function(field) {
             var fragment = this.get(field);
             return fragment.value && (fragment.value.toLowerCase() == 'yes' || fragment.value.toLowerCase() == 'on' || fragment.value.toLowerCase() == 'true');
         },
 
+        /**
+         * Gets the text field in the current Document object, for further manipulation.
+         * Typical use: document.getText('blog-post.label').asHtml(ctx.link_resolver).
+         * The method works with StructuredText fields, Text fields, Number fields, Select fields and Color fields.
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.label"
+         * @returns {object} - either StructuredText, or Text, or Number, or Select, or Color.
+         */
         getText: function(field, after) {
             var fragment = this.get(field);
 
@@ -453,6 +498,13 @@
             }
         },
 
+        /**
+         * Gets the StructuredText field in the current Document object, for further manipulation.
+         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx.link_resolver).
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
+         * @returns {StructuredText} - The StructuredText field to manipulate.
+         */
         getStructuredText: function(field) {
             var fragment = this.get(field);
 
@@ -461,14 +513,29 @@
             }
         },
 
+        /**
+         * Gets the Number field in the current Document object, for further manipulation.
+         * Typical use: document.getNumber('product.price').asHtml(ctx.link_resolver).
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "product.price"
+         * @returns {Number} - The Number field to manipulate.
+         */
         getNumber: function(field) {
             var fragment = this.get(field);
-            
+
             if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value
             }
         },
 
+        /**
+         * Shortcut to get the HTML output of the field in the current document.
+         * This is the same as writing document.get(field).asHtml(linkResolver);
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
+         * @param {function} linkResolver - The function to apply to resolve found links, with one parameter: the current ref
+         * @returns {string} - The HTML output
+         */
         getHtml: function(field, linkResolver) {
             var fragment = this.get(field);
 
@@ -477,11 +544,18 @@
             }
         },
 
-        asHtml: function(linkResolver) {
+        /**
+         * Transforms the whole document as an HTML output. Each field is separated by a <section> tag,
+         * with the attribute data-field="nameoffield"
+         *
+         * @param {object} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), et ctx.linkResolver()
+         * @returns {string} - The HTML output
+         */
+        asHtml: function(ctx) {
             var htmls = [];
             for(var field in this.fragments) {
                 var fragment = this.get(field)
-                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(linkResolver) + '</section>' : '')
+                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '')
             }
             return htmls.join('')
         }
@@ -524,6 +598,15 @@
     DocumentLink.prototype = {
         asHtml: function () {
             return "<a></a>";
+        }
+    };
+
+    function WebLink(data) {
+        this.value = data;
+    }
+    WebLink.prototype = {
+        asHtml: function () {
+            return "<a href='"+this.value.url+"'>"+this.value.url+"</a>";
         }
     };
 
@@ -652,7 +735,7 @@
             }
             return paragraphs;
         },
-        
+
         getParagraph: function(n) {
             return this.getParagraphs()[n];
         },
@@ -662,7 +745,7 @@
                 var block = this.blocks[i];
                 if(block.type == 'image') {
                     return new ImageView(
-                        block.data.url, 
+                        block.data.url,
                         block.data.dimensions.width,
                         block.data.dimensions.height
                     );
@@ -670,13 +753,13 @@
             }
         },
 
-        asHtml: function() {
-            return StructuredTextAsHtml.call(this, this.blocks);
+        asHtml: function(ctx) {
+            return StructuredTextAsHtml.call(this, this.blocks, ctx);
         }
 
     };
 
-    function StructuredTextAsHtml (blocks, linkResolver) {
+    function StructuredTextAsHtml (blocks, ctx) {
 
         var groups = [],
             group,
@@ -684,54 +767,119 @@
             html = [];
 
         if (Array.isArray(blocks)) {
-            blocks.forEach(function (block) {
-                if (groups.length > 0) {
-                    var lastGroup = groups[groups.length - 1];
+            for(var i=0; i<blocks.length; i++) {
+                block = blocks[i];
 
-                    group = new Group(null, []);
-                    group.blocks.push(block);
-                    groups.push(group);
-                } else {
-                    group = new Group(null, []);
-                    group.blocks.push(block);
+                if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
+                    group = new Group(block.type, []);
                     groups.push(group);
                 }
-            });
+                else if (group && group.tag != block.type) { // it's a new type
+                    group = new Group(block.type, []);
+                    groups.push(group);
+                }
+                // else: it's the same type as before, no touching group
+
+                group.blocks.push(block);
+            };
 
             groups.forEach(function (group) {
-                if (group.tag) {
-                    html.push("<" + group.tag + ">");
-                    group.blocks.forEach(function (block) {
-                        html.push(StructuredTextAsHtml(block));
-                    });
-                    html.push("</" + group.tag + ">");
-                } else {
-                    group.blocks.forEach(function (block) {
-                        html.push(StructuredTextAsHtml(block));
-                    });
+
+                if(group.tag == "heading1") {
+                    html.push('<h1>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h1>');
                 }
+                else if(group.tag == "heading2") {
+                    html.push('<h2>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h2>');
+                }
+                else if(group.tag == "heading3") {
+                    html.push('<h3>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h3>');
+                }
+                else if(group.tag == "paragraph") {
+                    html.push('<p>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</p>');
+                }
+                else if(group.tag == "image") {
+                    html.push('<p><img src="' + group.blocks[0].url + '"></p>');
+                }
+                else if(group.tag == "embed") {
+                    html.push('<div data-oembed="'+ group.blocks[0].embed_url
+                        + '" data-oembed-type="'+ group.blocks[0].type
+                        + '" data-oembed-provider="'+ group.blocks[0].provider_name
+                        + '">' + group.blocks[0].oembed.html+"</div>")
+                }
+                else if(group.tag == "list-item" || group.tag == "o-list-item") {
+                    html.push(group.tag == "list-item"?'<ul>':"<ol>");
+                    group.blocks.forEach(function(block){
+                        html.push("<li>"+insertSpans(block.text, block.spans, ctx)+"</li>");
+                    });
+                    html.push(group.tag == "list-item"?'</ul>':"</ol>");
+                }
+                else throw new Error(group.tag+" not implemented");
             });
 
-        } else {
-            if(blocks.type == "heading1") {
-                html.push('<h1>' + blocks.text + '</h1>');
-            }
-            if(blocks.type == "heading2") {
-                html.push('<h2>' + blocks.text + '</h2>');
-            }
-            if(blocks.type == "heading3") {
-                html.push('<h3>' + blocks.text + '</h3>');
-            }
-            if(blocks.type == "paragraph") {
-                html.push('<p>' + blocks.text + '</p>');
-            }
-            if(blocks.type == "image") {
-                html.push('<p><img src="' + blocks.url + '"></p>');
-            }
         }
 
         return html.join('');
 
+    }
+
+    //Takes in a link of any type (Link.web or Link.document etc) and returns a uri to use inside of a link tag or such
+    //Should pass in linkResolver when support added for that
+    function linkToURI(link, ctx){
+        if(link.type == "Link.web") {
+            return link.value.url
+        }
+        else if(link.type == "Link.image") {
+            return link.value.image.url;
+        }
+        else if(link.type == "Link.document") {
+            return ctx.linkResolver(ctx, link.value.document, link.value.document.isBroken);
+        }
+        else {
+            throw new Error(link.type+" not implemented in linkToURI");
+        }
+    }
+
+    function insertSpans(text, spans, ctx) {
+        var textBits = [];
+        var tags = [];
+        var cursor = 0;
+        var html = [];
+
+        /* checking the spans are following each other, or else not doing anything */
+        spans.forEach(function(span){
+            if (span.end < span.start) return text;
+            if (span.start < cursor) return text;
+            cursor = span.end;
+        });
+
+        cursor = 0;
+
+        spans.forEach(function(span){
+            textBits.push(text.substring(0, span.start-cursor));
+            text = text.substring(span.start-cursor);
+            cursor = span.start;
+            textBits.push(text.substring(0, span.end-cursor));
+            text = text.substring(span.end-cursor);
+            tags.push(span);
+            cursor = span.end;
+        });
+        textBits.push(text);
+
+        tags.forEach(function(tag, index){
+            html.push(textBits.shift());
+            if(tag.type == "hyperlink"){
+                html.push('<a href="'+ linkToURI(tag.data, ctx) +'">');
+                html.push(textBits.shift());
+                html.push('</a>');
+            } else {
+                html.push('<'+tag.type+'>');
+                html.push(textBits.shift());
+                html.push('</'+tag.type+'>');
+            }
+        });
+        html.push(textBits.shift());
+
+        return html.join('');
     }
 
     function initField(field) {
@@ -786,7 +934,7 @@
                 break;
 
             case "Link.web":
-                throw new Error("not implemented");
+                output = new WebLink(field.value);
                 break;
 
             default:

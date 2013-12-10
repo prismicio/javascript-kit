@@ -22,6 +22,15 @@
         }
     };
 
+    function WebLink(data) {
+        this.value = data;
+    }
+    WebLink.prototype = {
+        asHtml: function () {
+            return "<a href='"+this.value.url+"'>"+this.value.url+"</a>";
+        }
+    };
+
     function Select(data) {
         this.value = data;
     }
@@ -147,7 +156,7 @@
             }
             return paragraphs;
         },
-        
+
         getParagraph: function(n) {
             return this.getParagraphs()[n];
         },
@@ -157,7 +166,7 @@
                 var block = this.blocks[i];
                 if(block.type == 'image') {
                     return new ImageView(
-                        block.data.url, 
+                        block.data.url,
                         block.data.dimensions.width,
                         block.data.dimensions.height
                     );
@@ -165,13 +174,13 @@
             }
         },
 
-        asHtml: function() {
-            return StructuredTextAsHtml.call(this, this.blocks);
+        asHtml: function(ctx) {
+            return StructuredTextAsHtml.call(this, this.blocks, ctx);
         }
 
     };
 
-    function StructuredTextAsHtml (blocks, linkResolver) {
+    function StructuredTextAsHtml (blocks, ctx) {
 
         var groups = [],
             group,
@@ -179,54 +188,119 @@
             html = [];
 
         if (Array.isArray(blocks)) {
-            blocks.forEach(function (block) {
-                if (groups.length > 0) {
-                    var lastGroup = groups[groups.length - 1];
+            for(var i=0; i<blocks.length; i++) {
+                block = blocks[i];
 
-                    group = new Group(null, []);
-                    group.blocks.push(block);
-                    groups.push(group);
-                } else {
-                    group = new Group(null, []);
-                    group.blocks.push(block);
+                if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
+                    group = new Group(block.type, []);
                     groups.push(group);
                 }
-            });
+                else if (group && group.tag != block.type) { // it's a new type
+                    group = new Group(block.type, []);
+                    groups.push(group);
+                }
+                // else: it's the same type as before, no touching group
+
+                group.blocks.push(block);
+            };
 
             groups.forEach(function (group) {
-                if (group.tag) {
-                    html.push("<" + group.tag + ">");
-                    group.blocks.forEach(function (block) {
-                        html.push(StructuredTextAsHtml(block));
-                    });
-                    html.push("</" + group.tag + ">");
-                } else {
-                    group.blocks.forEach(function (block) {
-                        html.push(StructuredTextAsHtml(block));
-                    });
+
+                if(group.tag == "heading1") {
+                    html.push('<h1>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h1>');
                 }
+                else if(group.tag == "heading2") {
+                    html.push('<h2>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h2>');
+                }
+                else if(group.tag == "heading3") {
+                    html.push('<h3>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h3>');
+                }
+                else if(group.tag == "paragraph") {
+                    html.push('<p>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</p>');
+                }
+                else if(group.tag == "image") {
+                    html.push('<p><img src="' + group.blocks[0].url + '"></p>');
+                }
+                else if(group.tag == "embed") {
+                    html.push('<div data-oembed="'+ group.blocks[0].embed_url
+                        + '" data-oembed-type="'+ group.blocks[0].type
+                        + '" data-oembed-provider="'+ group.blocks[0].provider_name
+                        + '">' + group.blocks[0].oembed.html+"</div>")
+                }
+                else if(group.tag == "list-item" || group.tag == "o-list-item") {
+                    html.push(group.tag == "list-item"?'<ul>':"<ol>");
+                    group.blocks.forEach(function(block){
+                        html.push("<li>"+insertSpans(block.text, block.spans, ctx)+"</li>");
+                    });
+                    html.push(group.tag == "list-item"?'</ul>':"</ol>");
+                }
+                else throw new Error(group.tag+" not implemented");
             });
 
-        } else {
-            if(blocks.type == "heading1") {
-                html.push('<h1>' + blocks.text + '</h1>');
-            }
-            if(blocks.type == "heading2") {
-                html.push('<h2>' + blocks.text + '</h2>');
-            }
-            if(blocks.type == "heading3") {
-                html.push('<h3>' + blocks.text + '</h3>');
-            }
-            if(blocks.type == "paragraph") {
-                html.push('<p>' + blocks.text + '</p>');
-            }
-            if(blocks.type == "image") {
-                html.push('<p><img src="' + blocks.url + '"></p>');
-            }
         }
 
         return html.join('');
 
+    }
+
+    //Takes in a link of any type (Link.web or Link.document etc) and returns a uri to use inside of a link tag or such
+    //Should pass in linkResolver when support added for that
+    function linkToURI(link, ctx){
+        if(link.type == "Link.web") {
+            return link.value.url
+        }
+        else if(link.type == "Link.image") {
+            return link.value.image.url;
+        }
+        else if(link.type == "Link.document") {
+            return ctx.linkResolver(ctx, link.value.document, link.value.document.isBroken);
+        }
+        else {
+            throw new Error(link.type+" not implemented in linkToURI");
+        }
+    }
+
+    function insertSpans(text, spans, ctx) {
+        var textBits = [];
+        var tags = [];
+        var cursor = 0;
+        var html = [];
+
+        /* checking the spans are following each other, or else not doing anything */
+        spans.forEach(function(span){
+            if (span.end < span.start) return text;
+            if (span.start < cursor) return text;
+            cursor = span.end;
+        });
+
+        cursor = 0;
+
+        spans.forEach(function(span){
+            textBits.push(text.substring(0, span.start-cursor));
+            text = text.substring(span.start-cursor);
+            cursor = span.start;
+            textBits.push(text.substring(0, span.end-cursor));
+            text = text.substring(span.end-cursor);
+            tags.push(span);
+            cursor = span.end;
+        });
+        textBits.push(text);
+
+        tags.forEach(function(tag, index){
+            html.push(textBits.shift());
+            if(tag.type == "hyperlink"){
+                html.push('<a href="'+ linkToURI(tag.data, ctx) +'">');
+                html.push(textBits.shift());
+                html.push('</a>');
+            } else {
+                html.push('<'+tag.type+'>');
+                html.push(textBits.shift());
+                html.push('</'+tag.type+'>');
+            }
+        });
+        html.push(textBits.shift());
+
+        return html.join('');
     }
 
     function initField(field) {
@@ -281,7 +355,7 @@
                 break;
 
             case "Link.web":
-                throw new Error("not implemented");
+                output = new WebLink(field.value);
                 break;
 
             default:
