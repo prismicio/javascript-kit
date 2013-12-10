@@ -174,13 +174,13 @@
             }
         },
 
-        asHtml: function() {
-            return StructuredTextAsHtml.call(this, this.blocks);
+        asHtml: function(ctx) {
+            return StructuredTextAsHtml.call(this, this.blocks, ctx);
         }
 
     };
 
-    function StructuredTextAsHtml (blocks, linkResolver) {
+    function StructuredTextAsHtml (blocks, ctx) {
 
         var groups = [],
             group,
@@ -207,16 +207,16 @@
             groups.forEach(function (group) {
 
                 if(group.tag == "heading1") {
-                    html.push('<h1>' + insertSpans(group.blocks[0].text, group.blocks[0].spans) + '</h1>');
+                    html.push('<h1>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h1>');
                 }
                 else if(group.tag == "heading2") {
-                    html.push('<h2>' + insertSpans(group.blocks[0].text, group.blocks[0].spans) + '</h2>');
+                    html.push('<h2>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h2>');
                 }
                 else if(group.tag == "heading3") {
-                    html.push('<h3>' + insertSpans(group.blocks[0].text, group.blocks[0].spans) + '</h3>');
+                    html.push('<h3>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h3>');
                 }
                 else if(group.tag == "paragraph") {
-                    html.push('<p>' + insertSpans(group.blocks[0].text, group.blocks[0].spans) + '</p>');
+                    html.push('<p>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</p>');
                 }
                 else if(group.tag == "image") {
                     html.push('<p><img src="' + group.blocks[0].url + '"></p>');
@@ -230,7 +230,7 @@
                 else if(group.tag == "list-item" || group.tag == "o-list-item") {
                     html.push(group.tag == "list-item"?'<ul>':"<ol>");
                     group.blocks.forEach(function(block){
-                        html.push("<li>"+insertSpans(block.text, block.spans)+"</li>");
+                        html.push("<li>"+insertSpans(block.text, block.spans, ctx)+"</li>");
                     });
                     html.push(group.tag == "list-item"?'</ul>':"</ol>");
                 }
@@ -245,7 +245,7 @@
 
     //Takes in a link of any type (Link.web or Link.document etc) and returns a uri to use inside of a link tag or such
     //Should pass in linkResolver when support added for that
-    function linkToURI(link){
+    function linkToURI(link, ctx){
         if(link.type == "Link.web") {
             return link.value.url
         }
@@ -253,15 +253,14 @@
             return link.value.image.url;
         }
         else if(link.type == "Link.document") {
-            // return ctx.linkResolver(ctx, link.value.document, link.value.document.isBroken);
-            /* Should we change the signature of asHtml everywhere, since linkResolver needs it? */
+            return ctx.linkResolver(ctx, link.value.document, link.value.document.isBroken);
         }
         else {
             throw new Error(link.type+" not implemented in linkToURI");
         }
     }
 
-    function insertSpans(text, spans) {
+    function insertSpans(text, spans, ctx) {
         var textBits = [];
         var tags = [];
         var cursor = 0;
@@ -290,7 +289,7 @@
         tags.forEach(function(tag, index){
             html.push(textBits.shift());
             if(tag.type == "hyperlink"){
-                html.push('<a href="'+ linkToURI(tag.data) +'">');
+                html.push('<a href="'+ linkToURI(tag.data, ctx) +'">');
                 html.push(textBits.shift());
                 html.push('</a>');
             } else {

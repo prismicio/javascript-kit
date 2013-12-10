@@ -548,14 +548,14 @@
          * Transforms the whole document as an HTML output. Each field is separated by a <section> tag,
          * with the attribute data-field="nameoffield"
          *
-         * @param {function} linkResolver - The function to apply to resolve found links, with one parameter: the current ref
+         * @param {object} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), et ctx.linkResolver()
          * @returns {string} - The HTML output
          */
-        asHtml: function(linkResolver) {
+        asHtml: function(ctx) {
             var htmls = [];
             for(var field in this.fragments) {
                 var fragment = this.get(field)
-                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(linkResolver) + '</section>' : '')
+                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '')
             }
             return htmls.join('')
         }

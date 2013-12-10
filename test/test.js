@@ -118,4 +118,23 @@
     }, previewToken);
   });
 
+  asyncTest('StructuredTexts asHtml handles span Link.document', 1, function() {
+    var ctx = {
+      api: undefined,
+      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
+      maybeRef: 'XXXXX',
+      oauth: function() { },
+      linkResolver: function(ctx, doc, isBroken) {
+        if (isBroken) return '#broken';
+        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
+      }
+    };
+    Prismic.Api(testRepository, function(Api) {
+      Api.forms('everything').query('[[:d = at(document.id, "UkL0gMuvzYUANCpo")]]').ref(Api.master()).submit(function(results) {
+        equal(results[0].getStructuredText('blog-post.body').asHtml(ctx), '');
+        start();
+      });
+    }, previewToken);
+  });
+
 }(window.Prismic));
