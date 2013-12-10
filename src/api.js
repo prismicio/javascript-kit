@@ -265,10 +265,14 @@
             var fieldDesc = this.form.fields[field];
             if(!fieldDesc) throw new Error("Unknown field " + field);
             var values= this.data[field] || [];
+            if(value === '' || value === undefined) {
+                // we must compare value to null because we want to allow 0
+                value = null;
+            }
             if(fieldDesc.multiple) {
-                values.push(value);
+                value != null && values.push(value);
             } else {
-                values = [value];
+                values = value != null && [value];
             }
             this.data[field] = values;
             return this;
@@ -295,14 +299,7 @@
          * @returns {SearchForm} - The SearchForm itself
          */
         query: function(query) {
-            if(this.form.fields.q.multiple) {
-                return this.set("q", query);
-            }
-
-            this.data.q = this.data.q || [];
-            this.data.q.push(query);
-
-            return this;
+            return this.set("q", query);
         },
 
         /**

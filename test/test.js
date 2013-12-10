@@ -64,7 +64,7 @@
     });
   });
 
-  asyncTest('Submit the `products` form with an empty predicate', 1, function() {
+  asyncTest('Submit the `products` form with an empty query', 1, function() {
     Prismic.Api(testRepository, function(Api) {
       Api.forms('products').ref(Api.master()).query('').submit(function(results) {
         equal(results.length, 16);
