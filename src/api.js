@@ -233,9 +233,9 @@
     Form.prototype = {};
 
     /**
-     * @constructor
      * Creates a SearchForm objects from scratch. To create SearchForm objects
      * that are allowed in the API, please use the API.forms() method.
+     * @constructor
      */
     function SearchForm(api, form, data) {
         this.api = api;
