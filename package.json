@@ -3,7 +3,7 @@
   "description": "JavaScript development kit for prismic.io",
   "url": "https://github.com/prismicio/javascript-kit",
   "keywords": ["prismic", "prismic.io", "cms", "content", "api"],
-  "version": "1.0.4",
+  "version": "1.0.5",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-clean": "~0.5.0",

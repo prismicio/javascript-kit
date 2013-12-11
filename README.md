@@ -5,7 +5,7 @@
 You can find the latest version of the library at:
 
 ```
-https://github.com/prismicio/repository/raw/master/javascript/prismic.io-1.0.4.min.js
+https://github.com/prismicio/repository/raw/master/javascript/prismic.io-1.0.5.min.js
 ```
 
 *(you may need to adapt the version number)*
