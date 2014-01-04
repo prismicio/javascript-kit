@@ -78,7 +78,7 @@
 
     Embed.prototype = {
         asHtml: function () {
-            return "<span>" + this.value + "</span>";
+            return this.oembed.html;
         }
     };
 
