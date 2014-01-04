@@ -131,6 +131,8 @@
                 master,
                 forms = {},
                 form,
+                types,
+                tags,
                 f,
                 i;
 
@@ -171,6 +173,10 @@
                 return r.isMaster === true;
             });
 
+            types = data.types;
+
+            tags = data.tags;
+
             if (master.length === 0) {
                 throw ("No master ref.");
             }
@@ -180,6 +186,8 @@
                 refs: refs,
                 forms: forms,
                 master: master[0],
+                types: types,
+                tags: tags,
                 oauthInitiate: data['oauth_initiate'],
                 oauthToken: data['oauth_token']
             };
