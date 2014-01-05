@@ -2,7 +2,7 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
 
-    VERSION: '1.0.5',
+    VERSION: grunt.file.readJSON('bower.json').version,
 
     pkg: grunt.file.readJSON('package.json'),
 
@@ -29,6 +29,22 @@ module.exports = function(grunt) {
         src: 'dist/prismic.io.js',
         dest: 'dist/prismic.io-<%= VERSION %>.min.js'
       }
+    },
+
+    bump: {
+      options: {
+          files: ['package.json', 'bower.json'],
+          updateConfigs: [],
+          commit: false,
+          commitMessage: 'Release v%VERSION%',
+          commitFiles: ['-a'], // '-a' for all files
+          createTag: true,
+          tagName: 'v%VERSION%',
+          tagMessage: 'Version %VERSION%',
+          push: false,
+          pushTo: 'upstream',
+          gitDescribeOptions: '--tags --always --abbrev=1 --dirty=-d' // options to use with '$ git describe'
+      }
     }
 
   });
@@ -38,8 +54,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-bump');
 
   // Default task.
   grunt.registerTask('default', ['qunit', 'clean', 'concat', 'uglify']);
+
+  //bump task to increment version numbers in bower.json and package.json, and create a git tag. Remember to push your tag if you want a release available on bower.
+  grunt.registerTask('bump', ['bump']);
 
 };
