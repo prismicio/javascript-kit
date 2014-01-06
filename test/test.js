@@ -19,6 +19,14 @@
     });
   });
 
+  asyncTest('Parsing stores types and tags', 2, function() {
+    Prismic.Api(testRepository, function(Api) {
+      equal(Object.keys(Api.data.types).length, 6);
+      equal(Api.data.tags.length, 4);
+      start();
+    });
+  });
+
   asyncTest('Submit the `everything` form', 1, function() {
     Prismic.Api(testRepository, function(Api) {
       Api.forms('everything').ref(Api.master()).submit(function(results) {
