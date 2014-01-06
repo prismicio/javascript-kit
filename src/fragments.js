@@ -78,7 +78,7 @@
 
     Embed.prototype = {
         asHtml: function () {
-            return "<span>" + this.value + "</span>";
+            return this.oembed.html;
         }
     };
 
@@ -327,7 +327,7 @@
                 break;
 
             case "Embed":
-                throw new Error("not implemented");
+                output = new Embed(field.value);
                 break;
 
             case "Select":
