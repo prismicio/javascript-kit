@@ -1,14 +1,21 @@
 ## JavaScript development kit for prismic.io
 
-### Minified, ready to use, version
+### Getting started
 
-You can find the latest version of the library at:
+You can find the latest version of the library at GitHub at:
 
 ```
 https://github.com/prismicio/repository/raw/master/javascript/prismic.io-1.0.5.min.js
 ```
 
 *(you may need to adapt the version number)*
+
+
+You can install it using bower
+
+```sh
+bower install prismic.io
+```
 
 Or fetch it from __npm__:
 
