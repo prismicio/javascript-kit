@@ -109,6 +109,16 @@
   /* Document manipulation */
   /*************************/
 
+  asyncTest('Stores and retrieves all document slugs well', 1, function() {
+    Prismic.Api(testRepository, function(Api) {
+      Api.forms('everything').query('[[:d = at(document.id, "UkL0gMuvzYUANCpV")]]').ref(Api.master()).submit(function(results) {
+        var doc = results[0];
+        equal(doc.slugs.length, 2);
+        start();
+      });
+    });
+  });
+
   asyncTest('Render a document to Html', 1, function() {
     Prismic.Api(testRepository, function(Api) {
       Api.forms('everything').ref(Api.master()).submit(function(results) {

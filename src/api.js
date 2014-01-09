@@ -382,6 +382,7 @@
         this.href = href;
         this.tags = tags;
         this.slug = slugs ? slugs[0] : "-";
+        this.slugs = slugs;
         this.fragments = fragments;
     }
 
