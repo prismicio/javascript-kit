@@ -11,6 +11,10 @@
     setup: function() {}
   });
 
+  /************************************/
+  /* API document retrieval & parsing */
+  /************************************/
+
   asyncTest('Retrieve the API', 2, function() {
     Prismic.Api(testRepository, function(Api) {
       equal(Api.data.refs.length, 1);
@@ -26,6 +30,17 @@
       start();
     });
   });
+
+  asyncTest('Retrieve the API with master+releases privilege', 1, function() {
+    Prismic.Api(testRepository, function(Api) {
+      equal(Api.data.refs.length, 3);
+      start();
+    }, previewToken);
+  });
+
+  /************************/
+  /* API form submissions */
+  /************************/
 
   asyncTest('Submit the `everything` form', 1, function() {
     Prismic.Api(testRepository, function(Api) {
@@ -81,6 +96,19 @@
     });
   });
 
+  asyncTest('Submit the `products` form in the future', 1, function() {
+    Prismic.Api(testRepository, function(Api) {
+      Api.forms('products').ref(Api.ref('Announcement of new SF shop')).submit(function(results) {
+        equal(results.length, 17);
+        start();
+      });
+    }, previewToken);
+  });
+
+  /*************************/
+  /* Document manipulation */
+  /*************************/
+
   asyncTest('Render a document to Html', 1, function() {
     Prismic.Api(testRepository, function(Api) {
       Api.forms('everything').ref(Api.master()).submit(function(results) {
@@ -90,22 +118,6 @@
         start();
       });
     });
-  });
-
-  asyncTest('Retrieve the API with master+releases privilege', 1, function() {
-    Prismic.Api(testRepository, function(Api) {
-      equal(Api.data.refs.length, 3);
-      start();
-    }, previewToken);
-  });
-
-  asyncTest('Submit the `products` form in the future', 1, function() {
-    Prismic.Api(testRepository, function(Api) {
-      Api.forms('products').ref(Api.ref('Announcement of new SF shop')).submit(function(results) {
-        equal(results.length, 17);
-        start();
-      });
-    }, previewToken);
   });
 
   asyncTest('StructuredTexts asHtml handles embeds and lists', 1, function() {
