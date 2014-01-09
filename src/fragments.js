@@ -2,92 +2,189 @@
 
     "use strict";
 
+    /**
+     * Embodies a plain text fragment (beware: not a structured text)
+     */
     function Text(data) {
         this.value = data;
     }
     Text.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
         }
     };
 
+    /**
+     * Embodies a document link fragment (a link that is internal to a prismic.io repository)
+     */
     function DocumentLink(data) {
         this.value = data;
         this.document = data.document;
         this.isBroken = data.isBroken;
     }
     DocumentLink.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function (ctx) {
             return "<a href=\""+this.url(ctx)+"\">"+this.url(ctx)+"</a>";
         },
+        /**
+         * Returns the URL of the document link.
+         * 
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @returns {string} - the proper URL to use
+         */
         url: function (ctx) {
             return ctx.linkResolver(ctx, this.document, this.isBroken);
         }
     };
 
+    /**
+     * Embodies a web link fragment
+     */
     function WebLink(data) {
         this.value = data;
     }
     WebLink.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
         },
+        /**
+         * Returns the URL of the link.
+         * 
+         * @returns {string} - the proper URL to use
+         */
         url: function() {
             return this.value.url;
         }
     };
 
+    /**
+     * Embodies a file link fragment
+     */
     function FileLink(data) {
         this.value = data;
     }
     FileLink.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
         },
+        /**
+         * Returns the URL of the link.
+         * 
+         * @returns {string} - the proper URL to use
+         */
         url: function() {
             return this.value.url;
         }
     };
 
+    /**
+     * Embodies an image link fragment
+     */
     function ImageLink(data) {
         this.value = data;
     }
     ImageLink.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
         },
+        /**
+         * Returns the URL of the link.
+         * 
+         * @returns {string} - the proper URL to use
+         */
         url: function() {
             return this.value.url;
         }
     };
 
+    /**
+     * Embodies a select fragment
+     */
     function Select(data) {
         this.value = data;
     }
     Select.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
         }
     };
 
+    /**
+     * Embodies a color fragment
+     */
     function Color(data) {
         this.value = data;
     }
     Color.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
         }
     };
 
+    /**
+     * Embodies a Number fragment
+     */
     function Num(data) {
         this.value = data;
     }
     Num.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
         }
     };
 
+    /**
+     * Embodies a DateTime fragment
+     */
     function DateTime(data) {
         this.value = new Date(data);
     }
@@ -96,39 +193,71 @@
         asText: function (pattern) {
             throw new Error("not implemented");
         },
-
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<time>" + this.value + "</time>";
         }
     };
 
+    /**
+     * Embodies an embed fragment
+     */
     function Embed(data) {
         this.value = data;
     }
 
     Embed.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return this.oembed.html;
         }
     };
 
+    /**
+     * Embodies an Image fragment
+     */
     function ImageEl(main, views) {
         this.main = main;
         this.views = views || {};
     }
     ImageEl.prototype = {
-        getView: function (key) {
+        /**
+         * Gets the view of the image, from its name
+         *
+         * @param {string} name - the name of the view to get
+         * @returns {ImageView} - the proper view
+         */
+        getView: function(name) {
             if (key === "main") {
                 return this.main;
             } else {
-                return this.views[key];
+                return this.views[name];
             }
         },
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return this.main.asHtml()
         }
     };
 
+    /**
+     * Embodies an image view (an image in prismic.io can be defined with several different thumbnail sizes, each size is called a "view")
+     */
     function ImageView(url, width, height) {
         this.url = url;
         this.width = width;
@@ -138,7 +267,12 @@
         ratio: function () {
             return this.width / this.height;
         },
-
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<img src=" + this.url + " width=" + this.width + " height=" + this.height + ">";
         }
@@ -149,7 +283,9 @@
         this.blocks = blocks;
     }
 
-
+    /**
+     * Embodies a structured text fragment
+     */
     function StructuredText(blocks) {
 
         this.blocks = blocks;
@@ -204,12 +340,25 @@
             }
         },
 
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function(ctx) {
             return StructuredTextAsHtml.call(this, this.blocks, ctx);
         }
 
     };
 
+    /**
+     * Transforms a list of blocks as proper HTML.
+     *
+     * @param {array} blocks - the array of blocks to deal with
+     * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
+     * @returns {string} - the HTML output
+     */
     function StructuredTextAsHtml (blocks, ctx) {
 
         var groups = [],
@@ -273,6 +422,14 @@
 
     }
 
+    /**
+     * Parses a block that has spans, and inserts the proper HTML code.
+     *
+     * @param {string} text - the original text of the block
+     * @param {object} span - the spans as returned by the API
+     * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
+     * @returns {string} - the HTML output
+     */
     function insertSpans(text, spans, ctx) {
         var textBits = [];
         var tags = [];
@@ -317,6 +474,12 @@
         return html.join('');
     }
 
+    /**
+     * From a fragment's name, casts it into the proper object type (like Prismic.Fragments.StructuredText)
+     *
+     * @param {string} field - the fragment's name
+     * @returns {object} - the object of the proper Fragments type.
+     */
     function initField(field) {
 
         var output,

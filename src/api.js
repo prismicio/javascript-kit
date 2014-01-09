@@ -2,8 +2,15 @@
 
     "use strict";
 
-    // -- Main entry point
-
+    /**
+     * The kit's main entry point; initialize your API like this: Prismic.Api(url, onReady, accessToken, maybeRequestHandler)
+     *
+     * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
+     * @param {function} onReady - Optional callback function that is called after the API was retrieved, to which you may pass a parameter that is the API object
+     * @param {string} accessToken - The optional accessToken for the OAuth2 connection
+     * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
+     * @returns {Api} - The Api object that can be manipulated
+     */
     var prismic = function(url, onReady, accessToken, maybeRequestHandler) {
         var api = new prismic.fn.init(url, accessToken, maybeRequestHandler);
         onReady && api.get(onReady);
@@ -105,14 +112,23 @@
         }
     });
 
-    // --
+    /**
+     * The Api object you can manipulate, notably to perform queries in your repository.
+     * Most useful fields: bookmarks, refs, types, tags, ...
+     */
 
     prismic.fn = prismic.prototype = {
 
         constructor: prismic,
         data: null,
 
-        // Retrieve and parse the entry document
+        /**
+         * Requests (with the proper handler), parses, and returns the /api document.
+         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         *
+         * @param {function} cb - Optional callback to call upon success, you may pass the API object to it
+         * @returns {Api} - The Api object that can be manipulated
+         */
         get: function(cb) {
             var self = this;
 
@@ -126,6 +142,13 @@
 
         },
 
+        /**
+         * Parses and returns the /api document.
+         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         *
+         * @param {string} data - The JSON document responded on the API's endpoint
+         * @returns {Api} - The Api object that can be manipulated
+         */
         parse: function(data) {
             var refs,
                 master,
@@ -194,6 +217,10 @@
 
         },
 
+        /**
+         * Initialisation of the API object.
+         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         */
         init: function(url, accessToken, maybeRequestHandler) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
@@ -201,11 +228,21 @@
             return this;
         },
 
-        // For compatibility
+        /**
+         * @deprecated use form() now
+         * Returns a useable form from its id, as described in the RESTful description of the API.
+         */
         forms: function(formId) {
             return this.form(formId);
         },
 
+        /**
+         * Returns a useable form from its id, as described in the RESTful description of the API.
+         * For instance: api.form("everything") works on every repository (as "everything" exists by default)
+         * You can then chain the calls: api.form("everything").query('[[:d = at(document.id, "UkL0gMuvzYUANCpf")]]').ref(ref).submit()
+         *
+         * @returns {SearchForm} - the SearchForm that can be used.
+         */
         form: function(formId) {
             var form = this.data.forms[formId];
             if(form) {
@@ -213,10 +250,24 @@
             }
         },
 
+        /**
+         * The ID of the master ref on this prismic.io API.
+         * Do not use like this: searchForm.ref(api.master()).
+         * Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+         *
+         * @returns {string}
+         */
         master: function() {
             return this.data.master.ref;
         },
 
+        /**
+         * Returns the ref ID for a given ref's label.
+         * Do not use like this: searchForm.ref(api.ref("Future release label")).
+         * Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+         *
+         * @returns {string}
+         */
         ref: function(label) {
             for(var i=0; i<this.data.refs.length; i++) {
                 if(this.data.refs[i].label == label) {
@@ -229,6 +280,9 @@
 
     prismic.fn.init.prototype = prismic.fn;
 
+    /**
+     * Embodies a submittable RESTful form as described on the API endpoint (as per RESTful standards)
+     */
     function Form(name, fields, form_method, rel, enctype, action) {
         this.name = name;
         this.fields = fields;
@@ -241,8 +295,7 @@
     Form.prototype = {};
 
     /**
-     * Creates a SearchForm objects from scratch. To create SearchForm objects
-     * that are allowed in the API, please use the API.forms() method.
+     * Embodies a SearchForm object. To create SearchForm objects that are allowed in the API, please use the API.form() method.
      * @constructor
      */
     function SearchForm(api, form, data) {
@@ -264,7 +317,7 @@
          * RESTful form in the first place (as described in the /api document); otherwise,
          * an "Unknown field" error is thrown.
          * Please prefer using dedicated methods like query(), orderings(), ...
-         * 
+         *
          * @param {string} field - The name of the field to set
          * @param {string} value - The value that gets assigned
          * @returns {SearchForm} - The SearchForm itself
@@ -290,7 +343,7 @@
          * Sets a ref to query on for this SearchForm. This is a mandatory
          * method to call before calling submit(), and api.form('everything').submit()
          * will not work.
-         * 
+         *
          * @param {Ref} ref - The Ref object defining the ref to query
          * @returns {SearchForm} - The SearchForm itself
          */
@@ -302,7 +355,7 @@
          * Sets a predicate-based query for this SearchForm. This is where you
          * paste what you compose in your prismic.io API browser.
          * You can pass an empty string, the method will simply not send that query.
-         * 
+         *
          * @param {string} query - The query to perform
          * @returns {SearchForm} - The SearchForm itself
          */
@@ -312,7 +365,7 @@
 
         /**
          * Submits the query, and calls the callback function.
-         * 
+         *
          * @param {function} cb - Function that carries one parameter: an array of Document objects
          */
         submit: function(cb) {
@@ -362,19 +415,27 @@
 
     };
 
-    function getFragments(field) {
-        if (!this.fragments || !this.fragments[field]) {
+    /**
+     * An array of the fragments with the given fragment name.
+     * The array is often a single-element array, expect when the field is a multiple field.
+     */
+    function getFragments(name) {
+        if (!this.fragments || !this.fragments[name]) {
             return [];
         }
 
-        if (Array.isArray(this.fragments[field])) {
-            return this.fragments[field];
+        if (Array.isArray(this.fragments[name])) {
+            return this.fragments[name];
         } else {
-            return [this.fragments[field]];
+            return [this.fragments[name]];
         }
 
     };
 
+    /**
+     * Embodies a document as returned by the API.
+     * Most useful fields: id, type, tags, slug, slugs, ...
+     */
     function Doc(id, type, href, tags, slugs, fragments) {
 
         this.id = id;
@@ -392,16 +453,22 @@
          * of this field, it is advised that you use a dedicated method, like get StructuredText() or getDate(),
          * for instance.
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.author"
-         * @returns {object} - The json object to manipulate
+         * @param {string} name - The name of the field to get, with its type; for instance, "blog-post.author"
+         * @returns {object} - The JavaScript Fragment object to manipulate
          */
-        get: function(field) {
-            var frags = getFragments.call(this, field);
+        get: function(name) {
+            var frags = getFragments.call(this, name);
             return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
         },
 
-        getAll: function(field) {
-            return getFragments.call(this, field).map(function (fragment) {
+        /**
+         * Builds an array of all the fragments in case they are multiple.
+         *
+         * @param {string} name - The name of the multiple fragment to get, with its type; for instance, "blog-post.author"
+         * @returns {array} - An array of each JavaScript fragment object to manipulate.
+         */
+        getAll: function(name) {
+            return getFragments.call(this, name).map(function (fragment) {
                 return Global.Prismic.Fragments.initField(fragment);
             }, this);
         },
@@ -604,6 +671,9 @@
 
     };
 
+    /**
+     * Embodies a prismic.io ref (a past or future point in time you can query  )
+     */
     function Ref(ref, label, isMaster) {
         this.ref = ref;
         this.label = label;
