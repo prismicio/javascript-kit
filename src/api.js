@@ -575,14 +575,14 @@
          * This is the same as writing document.get(field).asHtml(linkResolver);
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
-         * @param {function} linkResolver - The function to apply to resolve found links, with one parameter: the current ref
+         * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), et ctx.linkResolver()
          * @returns {string} - The HTML output
          */
-        getHtml: function(field, linkResolver) {
+        getHtml: function(field, ctx) {
             var fragment = this.get(field);
 
             if(fragment && fragment.asHtml) {
-                return fragment.asHtml(linkResolver);
+                return fragment.asHtml(ctx);
             }
         },
 

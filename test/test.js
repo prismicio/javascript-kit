@@ -120,11 +120,21 @@
   });
 
   asyncTest('Render a document to Html', 1, function() {
+    var ctx = {
+      api: undefined,
+      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
+      maybeRef: 'XXXXX',
+      oauth: function() { },
+      linkResolver: function(ctx, doc, isBroken) {
+        if (isBroken) return '#broken';
+        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
+      }
+    };
     Prismic.Api(testRepository, function(Api) {
       Api.forms('everything').ref(Api.master()).submit(function(results) {
         var first = results[0];
         notEqual(null, first);
-        first.asHtml();
+        first.asHtml(ctx);
         start();
       });
     });

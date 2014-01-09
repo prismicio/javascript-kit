@@ -17,8 +17,11 @@
         this.isBroken = data.isBroken;
     }
     DocumentLink.prototype = {
-        asHtml: function () {
-            return "<a></a>";
+        asHtml: function (ctx) {
+            return "<a href=\""+this.url(ctx)+"\">"+this.url(ctx)+"</a>";
+        },
+        url: function (ctx) {
+            return ctx.linkResolver(ctx, this.document, this.isBroken);
         }
     };
 
@@ -27,7 +30,34 @@
     }
     WebLink.prototype = {
         asHtml: function () {
-            return "<a href='"+this.value.url+"'>"+this.value.url+"</a>";
+            return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
+        },
+        url: function() {
+            return this.value.url;
+        }
+    };
+
+    function FileLink(data) {
+        this.value = data;
+    }
+    FileLink.prototype = {
+        asHtml: function () {
+            return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
+        },
+        url: function() {
+            return this.value.url;
+        }
+    };
+
+    function ImageLink(data) {
+        this.value = data;
+    }
+    ImageLink.prototype = {
+        asHtml: function () {
+            return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
+        },
+        url: function() {
+            return this.value.url;
         }
     };
 
@@ -243,23 +273,6 @@
 
     }
 
-    //Takes in a link of any type (Link.web or Link.document etc) and returns a uri to use inside of a link tag or such
-    //Should pass in linkResolver when support added for that
-    function linkToURI(link, ctx){
-        if(link.type == "Link.web") {
-            return link.value.url
-        }
-        else if(link.type == "Link.image") {
-            return link.value.image.url;
-        }
-        else if(link.type == "Link.document") {
-            return ctx.linkResolver(ctx, link.value.document, link.value.document.isBroken);
-        }
-        else {
-            throw new Error(link.type+" not implemented in linkToURI");
-        }
-    }
-
     function insertSpans(text, spans, ctx) {
         var textBits = [];
         var tags = [];
@@ -289,7 +302,8 @@
         tags.forEach(function(tag, index){
             html.push(textBits.shift());
             if(tag.type == "hyperlink"){
-                html.push('<a href="'+ linkToURI(tag.data, ctx) +'">');
+                // Since the content of tag.data is similar to a link fragment, we can initialize it just like a fragment.
+                html.push('<a href="'+ initField(tag.data).url(ctx) +'">');
                 html.push(textBits.shift());
                 html.push('</a>');
             } else {
@@ -358,8 +372,16 @@
                 output = new WebLink(field.value);
                 break;
 
+            case "Link.file":
+                output = new FileLink(field.value);
+                break;
+
+            case "Link.image":
+                output = new ImageLink(field.value);
+                break;
+
             default:
-                console.log("Type not found:", field.type);
+                console.log("Link type not supported: ", field.type);
                 break;
         }
 
@@ -376,6 +398,10 @@
         Select: Select,
         Color: Color,
         StructuredText: StructuredText,
+        WebLink: WebLink,
+        DocumentLink: DocumentLink,
+        ImageLink: ImageLink,
+        FileLink: FileLink,
         initField: initField
     }
 
