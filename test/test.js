@@ -186,4 +186,23 @@
     }, previewToken);
   });
 
+  asyncTest('Handles multiple fields', 1, function() {
+    var ctx = {
+      api: undefined,
+      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
+      maybeRef: 'XXXXX',
+      oauth: function() { },
+      linkResolver: function(ctx, doc, isBroken) {
+        if (isBroken) return '#broken';
+        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
+      }
+    };
+    Prismic.Api(testRepository, function(Api) {
+      Api.form('everything').query('[[:d = at(document.id, "UkL0gMuvzYUANCpr")]]').ref(Api.master()).submit(function(results) {
+        equal(results[0].getAll('blog-post.relatedpost')[0].asHtml(ctx), '<a href="/testing_url/UkL0gMuvzYUANCpn/tips-to-dress-a-pastry?ref=XXXXX">/testing_url/UkL0gMuvzYUANCpn/tips-to-dress-a-pastry?ref=XXXXX</a>');
+        start();
+      });
+    }, previewToken);
+  });
+
 }(window.Prismic));
