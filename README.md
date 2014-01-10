@@ -4,26 +4,24 @@
 
 #### Install the kit
 
-You can find the latest version of the library at GitHub at:
+You can find the minified latest (unstable) version of the library at:
 
 ```
-https://github.com/prismicio/repository/raw/master/javascript/prismic.io-1.0.5.min.js
+https://raw.github.com/prismicio/javascript-kit/master/dist/prismic.io-1.0.5.min.js
 ```
 
-*(you may need to adapt the version number)*
+You can install a stable version using __npm__:
 
+```sh
+npm install prismic.io
+```
 
-You can install it using bower
+Or using __bower__:
 
 ```sh
 bower install prismic.io
 ```
 
-Or fetch it from __npm__:
-
-```sh
-npm install prismic.io
-```
 
 #### Get started with prismic.io
 
