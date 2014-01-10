@@ -90,7 +90,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
+            return "<a href=\""+this.url()+"\">"+this.value.file.name+"</a>";
         },
         /**
          * Returns the URL of the link.
@@ -98,7 +98,7 @@
          * @returns {string} - the proper URL to use
          */
         url: function() {
-            return this.value.url;
+            return this.value.file.url;
         }
     };
 
@@ -116,7 +116,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
+            return "<a href=\""+this.url()+"\"><img src=\""+this.url()+"\"</a>";
         },
         /**
          * Returns the URL of the link.
@@ -124,7 +124,7 @@
          * @returns {string} - the proper URL to use
          */
         url: function() {
-            return this.value.url;
+            return this.value.image.url;
         }
     };
 
