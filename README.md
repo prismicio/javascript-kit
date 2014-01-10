@@ -7,7 +7,7 @@
 You can find the minified latest (unstable) version of the library at:
 
 ```
-https://raw.github.com/prismicio/javascript-kit/master/dist/prismic.io-1.0.6.min.js
+https://raw.github.com/prismicio/javascript-kit/master/dist/prismic.io-1.0.7.min.js
 ```
 
 You can install a stable version using __npm__:

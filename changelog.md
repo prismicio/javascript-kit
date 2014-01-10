@@ -1,5 +1,11 @@
 ## Changelog for prismic.io JavaScript development kit
 
+### 1.0.7
+
+#### Bugfixes
+ * Fixed bug on img.getView when getting the main view, that was introduced in 1.0.6
+ * Fixed bug on img.getView when getting other views, that seem never to have worked
+
 ### 1.0.6
 
 #### Potentially breaking changes
