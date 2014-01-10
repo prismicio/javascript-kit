@@ -2,8 +2,15 @@
 
     "use strict";
 
-    // -- Main entry point
-
+    /**
+     * The kit's main entry point; initialize your API like this: Prismic.Api(url, onReady, accessToken, maybeRequestHandler)
+     *
+     * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
+     * @param {function} onReady - Optional callback function that is called after the API was retrieved, to which you may pass a parameter that is the API object
+     * @param {string} accessToken - The optional accessToken for the OAuth2 connection
+     * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
+     * @returns {Api} - The Api object that can be manipulated
+     */
     var prismic = function(url, onReady, accessToken, maybeRequestHandler) {
         var api = new prismic.fn.init(url, accessToken, maybeRequestHandler);
         onReady && api.get(onReady);
@@ -105,14 +112,23 @@
         }
     });
 
-    // --
+    /**
+     * The Api object you can manipulate, notably to perform queries in your repository.
+     * Most useful fields: bookmarks, refs, types, tags, ...
+     */
 
     prismic.fn = prismic.prototype = {
 
         constructor: prismic,
         data: null,
 
-        // Retrieve and parse the entry document
+        /**
+         * Requests (with the proper handler), parses, and returns the /api document.
+         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         *
+         * @param {function} cb - Optional callback to call upon success, you may pass the API object to it
+         * @returns {Api} - The Api object that can be manipulated
+         */
         get: function(cb) {
             var self = this;
 
@@ -126,11 +142,20 @@
 
         },
 
+        /**
+         * Parses and returns the /api document.
+         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         *
+         * @param {string} data - The JSON document responded on the API's endpoint
+         * @returns {Api} - The Api object that can be manipulated
+         */
         parse: function(data) {
             var refs,
                 master,
                 forms = {},
                 form,
+                types,
+                tags,
                 f,
                 i;
 
@@ -171,6 +196,10 @@
                 return r.isMaster === true;
             });
 
+            types = data.types;
+
+            tags = data.tags;
+
             if (master.length === 0) {
                 throw ("No master ref.");
             }
@@ -180,12 +209,18 @@
                 refs: refs,
                 forms: forms,
                 master: master[0],
+                types: types,
+                tags: tags,
                 oauthInitiate: data['oauth_initiate'],
                 oauthToken: data['oauth_token']
             };
 
         },
 
+        /**
+         * Initialisation of the API object.
+         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         */
         init: function(url, accessToken, maybeRequestHandler) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
@@ -193,11 +228,21 @@
             return this;
         },
 
-        // For compatibility
+        /**
+         * @deprecated use form() now
+         * Returns a useable form from its id, as described in the RESTful description of the API.
+         */
         forms: function(formId) {
             return this.form(formId);
         },
 
+        /**
+         * Returns a useable form from its id, as described in the RESTful description of the API.
+         * For instance: api.form("everything") works on every repository (as "everything" exists by default)
+         * You can then chain the calls: api.form("everything").query('[[:d = at(document.id, "UkL0gMuvzYUANCpf")]]').ref(ref).submit()
+         *
+         * @returns {SearchForm} - the SearchForm that can be used.
+         */
         form: function(formId) {
             var form = this.data.forms[formId];
             if(form) {
@@ -205,10 +250,24 @@
             }
         },
 
+        /**
+         * The ID of the master ref on this prismic.io API.
+         * Do not use like this: searchForm.ref(api.master()).
+         * Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+         *
+         * @returns {string}
+         */
         master: function() {
             return this.data.master.ref;
         },
 
+        /**
+         * Returns the ref ID for a given ref's label.
+         * Do not use like this: searchForm.ref(api.ref("Future release label")).
+         * Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+         *
+         * @returns {string}
+         */
         ref: function(label) {
             for(var i=0; i<this.data.refs.length; i++) {
                 if(this.data.refs[i].label == label) {
@@ -221,6 +280,9 @@
 
     prismic.fn.init.prototype = prismic.fn;
 
+    /**
+     * Embodies a submittable RESTful form as described on the API endpoint (as per RESTful standards)
+     */
     function Form(name, fields, form_method, rel, enctype, action) {
         this.name = name;
         this.fields = fields;
@@ -233,8 +295,7 @@
     Form.prototype = {};
 
     /**
-     * Creates a SearchForm objects from scratch. To create SearchForm objects
-     * that are allowed in the API, please use the API.forms() method.
+     * Embodies a SearchForm object. To create SearchForm objects that are allowed in the API, please use the API.form() method.
      * @constructor
      */
     function SearchForm(api, form, data) {
@@ -256,7 +317,7 @@
          * RESTful form in the first place (as described in the /api document); otherwise,
          * an "Unknown field" error is thrown.
          * Please prefer using dedicated methods like query(), orderings(), ...
-         * 
+         *
          * @param {string} field - The name of the field to set
          * @param {string} value - The value that gets assigned
          * @returns {SearchForm} - The SearchForm itself
@@ -282,7 +343,7 @@
          * Sets a ref to query on for this SearchForm. This is a mandatory
          * method to call before calling submit(), and api.form('everything').submit()
          * will not work.
-         * 
+         *
          * @param {Ref} ref - The Ref object defining the ref to query
          * @returns {SearchForm} - The SearchForm itself
          */
@@ -294,7 +355,7 @@
          * Sets a predicate-based query for this SearchForm. This is where you
          * paste what you compose in your prismic.io API browser.
          * You can pass an empty string, the method will simply not send that query.
-         * 
+         *
          * @param {string} query - The query to perform
          * @returns {SearchForm} - The SearchForm itself
          */
@@ -304,7 +365,7 @@
 
         /**
          * Submits the query, and calls the callback function.
-         * 
+         *
          * @param {function} cb - Function that carries one parameter: an array of Document objects
          */
         submit: function(cb) {
@@ -354,19 +415,27 @@
 
     };
 
-    function getFragments(field) {
-        if (!this.fragments || !this.fragments[field]) {
+    /**
+     * An array of the fragments with the given fragment name.
+     * The array is often a single-element array, expect when the field is a multiple field.
+     */
+    function getFragments(name) {
+        if (!this.fragments || !this.fragments[name]) {
             return [];
         }
 
-        if (Array.isArray(this.fragments[field])) {
-            return this.fragments[field];
+        if (Array.isArray(this.fragments[name])) {
+            return this.fragments[name];
         } else {
-            return [this.fragments[field]];
+            return [this.fragments[name]];
         }
 
     };
 
+    /**
+     * Embodies a document as returned by the API.
+     * Most useful fields: id, type, tags, slug, slugs, ...
+     */
     function Doc(id, type, href, tags, slugs, fragments) {
 
         this.id = id;
@@ -374,6 +443,7 @@
         this.href = href;
         this.tags = tags;
         this.slug = slugs ? slugs[0] : "-";
+        this.slugs = slugs;
         this.fragments = fragments;
     }
 
@@ -383,16 +453,22 @@
          * of this field, it is advised that you use a dedicated method, like get StructuredText() or getDate(),
          * for instance.
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.author"
-         * @returns {object} - The json object to manipulate
+         * @param {string} name - The name of the field to get, with its type; for instance, "blog-post.author"
+         * @returns {object} - The JavaScript Fragment object to manipulate
          */
-        get: function(field) {
-            var frags = getFragments.call(this, field);
+        get: function(name) {
+            var frags = getFragments.call(this, name);
             return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
         },
 
-        getAll: function(field) {
-            return getFragments.call(this, field).map(function (fragment) {
+        /**
+         * Builds an array of all the fragments in case they are multiple.
+         *
+         * @param {string} name - The name of the multiple fragment to get, with its type; for instance, "blog-post.author"
+         * @returns {array} - An array of each JavaScript fragment object to manipulate.
+         */
+        getAll: function(name) {
+            return getFragments.call(this, name).map(function (fragment) {
                 return Global.Prismic.Fragments.initField(fragment);
             }, this);
         },
@@ -566,14 +642,14 @@
          * This is the same as writing document.get(field).asHtml(linkResolver);
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
-         * @param {function} linkResolver - The function to apply to resolve found links, with one parameter: the current ref
+         * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), et ctx.linkResolver()
          * @returns {string} - The HTML output
          */
-        getHtml: function(field, linkResolver) {
+        getHtml: function(field, ctx) {
             var fragment = this.get(field);
 
             if(fragment && fragment.asHtml) {
-                return fragment.asHtml(linkResolver);
+                return fragment.asHtml(ctx);
             }
         },
 
@@ -595,6 +671,9 @@
 
     };
 
+    /**
+     * Embodies a prismic.io ref (a past or future point in time you can query  )
+     */
     function Ref(ref, label, isMaster) {
         this.ref = ref;
         this.label = label;
@@ -614,62 +693,189 @@
 
     "use strict";
 
+    /**
+     * Embodies a plain text fragment (beware: not a structured text)
+     */
     function Text(data) {
         this.value = data;
     }
     Text.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
         }
     };
 
+    /**
+     * Embodies a document link fragment (a link that is internal to a prismic.io repository)
+     */
     function DocumentLink(data) {
         this.value = data;
         this.document = data.document;
         this.isBroken = data.isBroken;
     }
     DocumentLink.prototype = {
-        asHtml: function () {
-            return "<a></a>";
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function (ctx) {
+            return "<a href=\""+this.url(ctx)+"\">"+this.url(ctx)+"</a>";
+        },
+        /**
+         * Returns the URL of the document link.
+         * 
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @returns {string} - the proper URL to use
+         */
+        url: function (ctx) {
+            return ctx.linkResolver(ctx, this.document, this.isBroken);
         }
     };
 
+    /**
+     * Embodies a web link fragment
+     */
     function WebLink(data) {
         this.value = data;
     }
     WebLink.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
-            return "<a href='"+this.value.url+"'>"+this.value.url+"</a>";
+            return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
+        },
+        /**
+         * Returns the URL of the link.
+         * 
+         * @returns {string} - the proper URL to use
+         */
+        url: function() {
+            return this.value.url;
         }
     };
 
+    /**
+     * Embodies a file link fragment
+     */
+    function FileLink(data) {
+        this.value = data;
+    }
+    FileLink.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function () {
+            return "<a href=\""+this.url()+"\">"+this.value.file.name+"</a>";
+        },
+        /**
+         * Returns the URL of the link.
+         * 
+         * @returns {string} - the proper URL to use
+         */
+        url: function() {
+            return this.value.file.url;
+        }
+    };
+
+    /**
+     * Embodies an image link fragment
+     */
+    function ImageLink(data) {
+        this.value = data;
+    }
+    ImageLink.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function () {
+            return "<a href=\""+this.url()+"\"><img src=\""+this.url()+"\"</a>";
+        },
+        /**
+         * Returns the URL of the link.
+         * 
+         * @returns {string} - the proper URL to use
+         */
+        url: function() {
+            return this.value.image.url;
+        }
+    };
+
+    /**
+     * Embodies a select fragment
+     */
     function Select(data) {
         this.value = data;
     }
     Select.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
         }
     };
 
+    /**
+     * Embodies a color fragment
+     */
     function Color(data) {
         this.value = data;
     }
     Color.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
         }
     };
 
+    /**
+     * Embodies a Number fragment
+     */
     function Num(data) {
         this.value = data;
     }
     Num.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
         }
     };
 
+    /**
+     * Embodies a DateTime fragment
+     */
     function DateTime(data) {
         this.value = new Date(data);
     }
@@ -678,39 +884,71 @@
         asText: function (pattern) {
             throw new Error("not implemented");
         },
-
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<time>" + this.value + "</time>";
         }
     };
 
+    /**
+     * Embodies an embed fragment
+     */
     function Embed(data) {
         this.value = data;
     }
 
     Embed.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
-            return "<span>" + this.value + "</span>";
+            return this.oembed.html;
         }
     };
 
+    /**
+     * Embodies an Image fragment
+     */
     function ImageEl(main, views) {
         this.main = main;
         this.views = views || {};
     }
     ImageEl.prototype = {
-        getView: function (key) {
+        /**
+         * Gets the view of the image, from its name
+         *
+         * @param {string} name - the name of the view to get
+         * @returns {ImageView} - the proper view
+         */
+        getView: function(name) {
             if (key === "main") {
                 return this.main;
             } else {
-                return this.views[key];
+                return this.views[name];
             }
         },
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return this.main.asHtml()
         }
     };
 
+    /**
+     * Embodies an image view (an image in prismic.io can be defined with several different thumbnail sizes, each size is called a "view")
+     */
     function ImageView(url, width, height) {
         this.url = url;
         this.width = width;
@@ -720,7 +958,12 @@
         ratio: function () {
             return this.width / this.height;
         },
-
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function () {
             return "<img src=" + this.url + " width=" + this.width + " height=" + this.height + ">";
         }
@@ -731,7 +974,9 @@
         this.blocks = blocks;
     }
 
-
+    /**
+     * Embodies a structured text fragment
+     */
     function StructuredText(blocks) {
 
         this.blocks = blocks;
@@ -786,12 +1031,25 @@
             }
         },
 
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
         asHtml: function(ctx) {
             return StructuredTextAsHtml.call(this, this.blocks, ctx);
         }
 
     };
 
+    /**
+     * Transforms a list of blocks as proper HTML.
+     *
+     * @param {array} blocks - the array of blocks to deal with
+     * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
+     * @returns {string} - the HTML output
+     */
     function StructuredTextAsHtml (blocks, ctx) {
 
         var groups = [],
@@ -855,23 +1113,14 @@
 
     }
 
-    //Takes in a link of any type (Link.web or Link.document etc) and returns a uri to use inside of a link tag or such
-    //Should pass in linkResolver when support added for that
-    function linkToURI(link, ctx){
-        if(link.type == "Link.web") {
-            return link.value.url
-        }
-        else if(link.type == "Link.image") {
-            return link.value.image.url;
-        }
-        else if(link.type == "Link.document") {
-            return ctx.linkResolver(ctx, link.value.document, link.value.document.isBroken);
-        }
-        else {
-            throw new Error(link.type+" not implemented in linkToURI");
-        }
-    }
-
+    /**
+     * Parses a block that has spans, and inserts the proper HTML code.
+     *
+     * @param {string} text - the original text of the block
+     * @param {object} span - the spans as returned by the API
+     * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
+     * @returns {string} - the HTML output
+     */
     function insertSpans(text, spans, ctx) {
         var textBits = [];
         var tags = [];
@@ -901,7 +1150,8 @@
         tags.forEach(function(tag, index){
             html.push(textBits.shift());
             if(tag.type == "hyperlink"){
-                html.push('<a href="'+ linkToURI(tag.data, ctx) +'">');
+                // Since the content of tag.data is similar to a link fragment, we can initialize it just like a fragment.
+                html.push('<a href="'+ initField(tag.data).url(ctx) +'">');
                 html.push(textBits.shift());
                 html.push('</a>');
             } else {
@@ -915,6 +1165,12 @@
         return html.join('');
     }
 
+    /**
+     * From a fragment's name, casts it into the proper object type (like Prismic.Fragments.StructuredText)
+     *
+     * @param {string} field - the fragment's name
+     * @returns {object} - the object of the proper Fragments type.
+     */
     function initField(field) {
 
         var output,
@@ -939,7 +1195,7 @@
                 break;
 
             case "Embed":
-                throw new Error("not implemented");
+                output = new Embed(field.value);
                 break;
 
             case "Select":
@@ -970,8 +1226,16 @@
                 output = new WebLink(field.value);
                 break;
 
+            case "Link.file":
+                output = new FileLink(field.value);
+                break;
+
+            case "Link.image":
+                output = new ImageLink(field.value);
+                break;
+
             default:
-                console.log("Type not found:", field.type);
+                console.log("Link type not supported: ", field.type);
                 break;
         }
 
@@ -988,6 +1252,10 @@
         Select: Select,
         Color: Color,
         StructuredText: StructuredText,
+        WebLink: WebLink,
+        DocumentLink: DocumentLink,
+        ImageLink: ImageLink,
+        FileLink: FileLink,
         initField: initField
     }
 
