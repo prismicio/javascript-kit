@@ -45,7 +45,7 @@ Contribution is open to all developer levels, read our "[Contribute to the offic
 
 #### Install the kit locally
 
-You can simply execute this JavaScript kit with a web browser, but more advanced users can feel free to use grunt tasks.
+You can simply execute this JavaScript kit with a web browser, but before committing, we kindly ask you to run the ```grunt``` command (it will make sure all tests still pass, and concatenate/minify your changes).
 
 To install grunt and other required packages: [install Node.js and npm](http://www.joyent.com/blog/installing-node-and-npm/), and then run this from your kit's repository, as an administrator:
 ```

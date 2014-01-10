@@ -18,6 +18,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
 
     VERSION: grunt.file.readJSON('bower.json').version,
+    pkg: grunt.file.readJSON('package.json'),
 
     qunit: {
       files: ['test/**/*.html']
