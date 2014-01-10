@@ -929,7 +929,7 @@
          * @returns {ImageView} - the proper view
          */
         getView: function(name) {
-            if (key === "main") {
+            if (name === "main") {
                 return this.main;
             } else {
                 return this.views[name];
@@ -1210,8 +1210,16 @@
                         img.dimensions.width,
                         img.dimensions.height
                     ),
-                    field.value.views
+                    {}
                 );
+                for (var name in field.value.views) {
+                    var img = field.value.views[name];
+                    output.views[name] = new ImageView(
+                        img.url,
+                        img.dimensions.width,
+                        img.dimensions.height
+                    );
+                }
                 break;
 
             case "StructuredText":

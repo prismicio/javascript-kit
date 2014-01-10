@@ -212,4 +212,14 @@
     }, previewToken);
   });
 
+  asyncTest('ImageViews are well retrieved', 2, function() {
+    Prismic.Api(testRepository, function(Api) {
+      Api.form('everything').query('[[:d = at(document.id, "UkL0gMuvzYUANCpR")]]').ref(Api.master()).submit(function(results) {
+        equal(results[0].getImageView('product.image', 'main').asHtml(), '<img src=https://prismic-io.s3.amazonaws.com/lesbonneschoses/f606ad513fcc2a73b909817119b84d6fd0d61a6d.png width=500 height=500>');
+        equal(results[0].getImageView('product.image', 'icon').asHtml(), '<img src=https://prismic-io.s3.amazonaws.com/lesbonneschoses/fe4f9379ee325456992d48204b8d94aeb60cc976.png width=250 height=250>');
+        start();
+      });
+    }, previewToken);
+  });
+
 }(window.Prismic));
