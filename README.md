@@ -37,7 +37,7 @@ Also on our [prismic.io developer's portal](https://developers.prismic.io/), on 
 
 ### Changelog
 
-Need to see what changed, or to upgrade your kit? We keep our changelog on [this repository's "Releases" tab](https://github.com/prismicio/ruby-kit/releases).
+Need to see what changed, or to upgrade your kit? We keep our changelog on [this repository's "Releases" tab](https://github.com/prismicio/javascript-kit/releases).
 
 ### Contribute to the kit
 
