@@ -3,18 +3,17 @@
     "use strict";
 
     /**
-     * The kit's main entry point; initialize your API like this: Prismic.Api(url, onReady, accessToken, maybeRequestHandler)
+     * The kit's main entry point; initialize your API like this: Prismic.Api(url, callback, accessToken, maybeRequestHandler)
      *
      * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
-     * @param {function} onReady - Optional callback function that is called after the API was retrieved, to which you may pass a parameter that is the API object
+     * @param {function} callback - Optional callback function that is called after the API was retrieved, to which you may pass a parameter that is the API object
      * @param {string} accessToken - The optional accessToken for the OAuth2 connection
      * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
-     * @param {function} onError - Optional callback function that is called if something bad happened while calling the API
      * @returns {Api} - The Api object that can be manipulated
      */
-    var prismic = function(url, onReady, accessToken, maybeRequestHandler, onError) {
+    var prismic = function(url, callback, accessToken, maybeRequestHandler) {
         var api = new prismic.fn.init(url, accessToken, maybeRequestHandler);
-        onReady && api.get(onReady, onError);
+        callback && api.get(callback);
         return api;
     };
 
@@ -22,24 +21,19 @@
 
     var ajaxRequest = (function() {
         if(typeof XMLHttpRequest != 'undefined') {
-            return function(url, onReady, onError) {
+            return function(url, callback) {
 
                 var xhr = new XMLHttpRequest();
 
                 // Called on success
                 var resolve = function() {
-                    onReady(JSON.parse(xhr.responseText));
+                    callback(null, JSON.parse(xhr.responseText));
                 }
 
                 // Called on error
                 var reject = function() {
                     var status = xhr.status;
-                    if (onError){
-                        onError("Unexpected status code [" + status + "]")
-                    }
-                    else {
-                        throw new Error("Unexpected status code [" + status + "]");
-                    }
+                    callback(new Error("Unexpected status code [" + status + "]"));
                 }
 
                 // Bind the XHR finished callback
@@ -73,9 +67,9 @@
                 url = require('url'),
                 querystring = require('querystring');
 
-            return function(requestUrl, onReady, onError) {
+            return function(requestUrl, callback) {
                 if(requestsCache[requestUrl]) {
-                    onReady(requestsCache[requestUrl]);
+                    callback(null, requestsCache[requestUrl]);
                 } else {
 
                     var parsed = url.parse(requestUrl),
@@ -105,15 +99,10 @@
                                   requestsCache[requestUrl] = json;
                               }
 
-                              onReady(json);
+                              callback(null, json);
                             });
                         } else {
-                            if (onError) {
-                                onError("Unexpected status code [" + response.statusCode + "]");
-                            }
-                            else {
-                                throw new Error("Unexpected status code [" + response.statusCode + "]")
-                            }
+                            callback(new Error("Unexpected status code [" + response.statusCode + "]"));
                         }
                     });
 
@@ -137,22 +126,20 @@
          * Requests (with the proper handler), parses, and returns the /api document.
          * This is for internal use, from outside this kit, you should call Prismic.Api()
          *
-         * @param {function} onReady - Optional callback to call upon success, you may pass the API object to it
-     * @param {function} onError - Optional callback function that is called if something bad happened while calling the API
+         * @param {function} callback - callback to call upon success, you may pass the API object to it
          * @returns {Api} - The Api object that can be manipulated
          */
-        get: function(onReady, onError) {
+        get: function(callback) {
             var self = this;
 
-            this.requestHandler(this.url, function(data) {
-                self.data = self.parse(data);
-                self.bookmarks = self.data.bookmarks;
-                if (onReady) {
-                    onReady(self, this);
+            this.requestHandler(this.url, function(error, data) {
+                if (error) {
+                    callback(error);
+                } else {
+                    self.data = self.parse(data);
+                    self.bookmarks = self.data.bookmarks;
+                    callback(null, self, this);
                 }
-            },
-            function(errorMessage){
-                onError(errorMessage);
             });
 
         },
@@ -381,9 +368,9 @@
         /**
          * Submits the query, and calls the callback function.
          *
-         * @param {function} cb - Function that carries one parameter: an array of Document objects
+         * @param {function} callback - Function that carries one parameter: an array of Document objects
          */
-        submit: function(cb) {
+        submit: function(callback) {
             var self = this,
                 url = this.form.action;
 
@@ -421,9 +408,7 @@
                     )
                 });
 
-                if (cb) {
-                    cb(docs || []);
-                }
+                callback(docs || []);
             });
 
         }

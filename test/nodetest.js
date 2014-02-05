@@ -5,7 +5,7 @@ var prismic = require('../dist/prismic.io').Prismic;
 setTimeout(function(){
 	prismic.Api(
 		'https://lesbonneschoses.prismic.io/api',
-		function(api){console.log("Test 1: "+(api.master()==='UkL0hcuvzYUANCrm' ? "OK" : "NOK"));},
+		function(error, api){console.log("Test 1: "+((api && api.master())==='UkL0hcuvzYUANCrm' ? "OK" : "NOK"));},
 		null,
 		null,
 		null
@@ -16,10 +16,15 @@ setTimeout(function(){
 setTimeout(function(){
 	prismic.Api(
 		'https://lesbonneschoses.prismic.io/api/error',
-		function(api){console.log("Test 2: NOK");},
+		function(error, api){
+			if (error) {
+				console.log("Test 2: "+(error.message==="Unexpected status code [404]" ? "OK" : "NOK"));
+			} else {
+				console.log("Test 2: NOK");
+			}
+		},
 		null,
-		null,
-		function(errorMessage){console.log("Test 2: "+(errorMessage==="Unexpected status code [404]" ? "OK" : "NOK"));}
+		null
 	);
 }, 2000);
 
