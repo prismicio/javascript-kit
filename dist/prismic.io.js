@@ -9,11 +9,12 @@
      * @param {function} onReady - Optional callback function that is called after the API was retrieved, to which you may pass a parameter that is the API object
      * @param {string} accessToken - The optional accessToken for the OAuth2 connection
      * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
+     * @param {function} onError - Optional callback function that is called if something bad happened while calling the API
      * @returns {Api} - The Api object that can be manipulated
      */
-    var prismic = function(url, onReady, accessToken, maybeRequestHandler) {
+    var prismic = function(url, onReady, accessToken, maybeRequestHandler, onError) {
         var api = new prismic.fn.init(url, accessToken, maybeRequestHandler);
-        onReady && api.get(onReady);
+        onReady && api.get(onReady, onError);
         return api;
     };
 
@@ -21,19 +22,24 @@
 
     var ajaxRequest = (function() {
         if(typeof XMLHttpRequest != 'undefined') {
-            return function(url, callback) {
+            return function(url, onReady, onError) {
 
                 var xhr = new XMLHttpRequest();
 
                 // Called on success
                 var resolve = function() {
-                    callback(JSON.parse(xhr.responseText));
+                    onReady(JSON.parse(xhr.responseText));
                 }
 
                 // Called on error
                 var reject = function() {
                     var status = xhr.status;
-                    throw new Error("Unexpected status code [" + status + "]");
+                    if (onError){
+                        onError("Unexpected status code [" + status + "]")
+                    }
+                    else {
+                        throw new Error("Unexpected status code [" + status + "]");
+                    }
                 }
 
                 // Bind the XHR finished callback
@@ -67,9 +73,9 @@
                 url = require('url'),
                 querystring = require('querystring');
 
-            return function(requestUrl, callback) {
+            return function(requestUrl, onReady, onError) {
                 if(requestsCache[requestUrl]) {
-                    callback(requestsCache[requestUrl]);
+                    onReady(requestsCache[requestUrl]);
                 } else {
 
                     var parsed = url.parse(requestUrl),
@@ -99,10 +105,15 @@
                                   requestsCache[requestUrl] = json;
                               }
 
-                              callback(json);
+                              onReady(json);
                             });
                         } else {
-                            throw new Error("Unexpected status code [" + response.statusCode + "]")
+                            if (onError) {
+                                onError("Unexpected status code [" + response.statusCode + "]");
+                            }
+                            else {
+                                throw new Error("Unexpected status code [" + response.statusCode + "]")
+                            }
                         }
                     });
 
@@ -126,18 +137,22 @@
          * Requests (with the proper handler), parses, and returns the /api document.
          * This is for internal use, from outside this kit, you should call Prismic.Api()
          *
-         * @param {function} cb - Optional callback to call upon success, you may pass the API object to it
+         * @param {function} onReady - Optional callback to call upon success, you may pass the API object to it
+     * @param {function} onError - Optional callback function that is called if something bad happened while calling the API
          * @returns {Api} - The Api object that can be manipulated
          */
-        get: function(cb) {
+        get: function(onReady, onError) {
             var self = this;
 
             this.requestHandler(this.url, function(data) {
                 self.data = self.parse(data);
                 self.bookmarks = self.data.bookmarks;
-                if (cb) {
-                    cb(self, this);
+                if (onReady) {
+                    onReady(self, this);
                 }
+            },
+            function(errorMessage){
+                onError(errorMessage);
             });
 
         },
