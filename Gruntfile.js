@@ -1,18 +1,18 @@
 module.exports = function(grunt) {
 
   /**
-   * To bump:
-   *  * you need to be on the master branch and have a clean working tree
-   *  * edit changelog.md with what is new
-   *  * run `grunt`
-   *  * run `grunt bump` / if doesn't work:
-   *    * change version number in package.json, bower.json, and README.md
-   *    * git commit -am "Release vx.x.x"
-   *    * git tag x.x.x
-   *  * run `grunt copy`, or if it doesn't work, `cp dist/prismic.io.min.js dist/prismic.io-x.x.x.min.js`
-   *  * run `git add . && git commit -m "Freezing minified file on the master branch"`
-   *  * run `git push prismicio master --tags`
-   *  * update on npm and bower
+   * Ideally, someday, it would be good to bump like that:
+   * > grunt
+   * > grunt bump
+   * > grunt copy
+   * > git push prismicio master --tags
+   * But grunt bump doesn't quite work, so for now:
+   * * run `grunt`
+   * * change version number in package.json, bower.json, and README.md
+   * * run `cp dist/prismic.io.min.js dist/prismic.io-x.x.x.min.js` to freeze the right minified version
+   * * run `git add .` then `git commit -m "Release vx.x.x"` and finally `git tag x.x.x`
+   * * run `git push https://github.com/prismicio/javascript-kit.git master --tags`
+   * Once you're done, update npm and bower, and update the release's description if needed
    */
 
   grunt.initConfig({
