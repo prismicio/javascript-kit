@@ -368,7 +368,9 @@
         /**
          * Submits the query, and calls the callback function.
          *
-         * @param {function} callback - Optional callback function that is called after the query was made, to which you may pass two parameters: a potential error (null if no problem), and the array of Document objects
+         * @param {function} callback - Optional callback function that is called after the query was made,
+         * to which you may pass two parameters: a potential error (null if no problem),
+         * and a Documents object (containing all the pagination specifics + the array of Docs)
          */
         submit: function(callback) {
             var self = this,
