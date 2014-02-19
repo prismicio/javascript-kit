@@ -387,13 +387,11 @@
                 }
             }
 
-            this.api.requestHandler(url, function (err, d) {
+            this.api.requestHandler(url, function (err, documents) {
 
                 if (err) { callback(err); return; }
 
-                var results = d.results || d;
-
-                var docs = results.map(function (doc) {
+                var results = documents.results.map(function (doc) {
                     var fragments = {}
 
                     for(var field in doc.data[doc.type]) {
@@ -410,7 +408,16 @@
                     )
                 });
 
-                callback(null, docs || []);
+                callback(null, new Documents(
+					documents.page,
+					documents.results_per_page,
+					documents.results_size,
+					documents.total_results_size,
+					documents.total_pages,
+					documents.next_page,
+					documents.prev_page,
+					results || [])
+                );
             });
 
         }
@@ -433,6 +440,22 @@
         }
 
     };
+
+    /**
+     * Embodies the result of a SearchForm query as returned by the API.
+     * It includes all the fields that are useful for pagination (page, total_pages, total_results_size, ...),
+     * as well as the field "results", which is an array of Doc objects, the documents themselves.
+     */
+    function Documents(page, results_per_page, results_size, total_results_size, total_pages, next_page, prev_page, results) {
+		this.page = page;
+		this.results_per_page = results_per_page;
+		this.results_size = results_size;
+		this.total_results_size = total_results_size;
+		this.total_pages = total_pages;
+		this.next_page = next_page;
+		this.prev_page = prev_page;
+		this.results = results; // an array of Doc objects
+    }
 
     /**
      * Embodies a document as returned by the API.
