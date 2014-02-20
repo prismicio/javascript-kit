@@ -7,8 +7,8 @@ module.exports = function(grunt) {
    * > grunt copy
    * > git push prismicio master --tags
    * But grunt bump doesn't quite work, so for now:
-   * * run `grunt`
    * * change version number in package.json, bower.json, and README.md
+   * * run `grunt`
    * * run `cp dist/prismic.io.min.js dist/prismic.io-x.x.x.min.js` to freeze the right minified version
    * * run `git add .` then `git commit -m "Release vx.x.x"` and finally `git tag x.x.x`
    * * run `git push https://github.com/prismicio/javascript-kit.git master --tags`
