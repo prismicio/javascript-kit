@@ -48,7 +48,7 @@
                 };
 
                 // Open the XHR
-                xhr.open('GET', url + '#json', true);
+                xhr.open('GET', url, true);
 
                 // Json request
                 xhr.setRequestHeader('Accept', 'application/json');
