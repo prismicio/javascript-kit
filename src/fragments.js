@@ -278,10 +278,34 @@
         }
     }
 
+    /**
+     * Embodies a group of fragments
+     */
     function Group(tag, blocks) {
         this.tag = tag;
         this.blocks = blocks;
     }
+
+    Group.prototype = {
+
+        /**
+         * Turns the group of fragments into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the group of fragments
+         */
+        asHtml: function(ctx) {
+            var chunks = [];
+
+            this.blocks.forEach(function(block) {
+                for (var key in block)
+                    chunks.push(block[key].asHtml(ctx));
+            });
+
+            return chunks.join('');
+        }
+
+    };
 
     /**
      * Embodies a structured text fragment
@@ -551,6 +575,17 @@
                 output = new ImageLink(field.value);
                 break;
 
+            case "Group":
+                var blocks = field.value.map(function (el) {
+                    var ret = {};
+                    for (var key in el)
+                        ret[key] = initField(el[key]);
+                    return ret;
+                });
+
+                output = new Group(undefined, blocks);
+                break;
+
             default:
                 console.log("Link type not supported: ", field.type);
                 break;
@@ -573,6 +608,7 @@
         DocumentLink: DocumentLink,
         ImageLink: ImageLink,
         FileLink: FileLink,
+        Group: Group,
         initField: initField
     }
 
