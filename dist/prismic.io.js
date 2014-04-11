@@ -789,7 +789,7 @@
         },
         /**
          * Returns the URL of the document link.
-         * 
+         *
          * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
          * @returns {string} - the proper URL to use
          */
@@ -816,7 +816,7 @@
         },
         /**
          * Returns the URL of the link.
-         * 
+         *
          * @returns {string} - the proper URL to use
          */
         url: function() {
@@ -842,7 +842,7 @@
         },
         /**
          * Returns the URL of the link.
-         * 
+         *
          * @returns {string} - the proper URL to use
          */
         url: function() {
@@ -868,7 +868,7 @@
         },
         /**
          * Returns the URL of the link.
-         * 
+         *
          * @returns {string} - the proper URL to use
          */
         url: function() {
@@ -967,7 +967,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return this.oembed.html;
+            return this.value.oembed.html;
         }
     };
 
