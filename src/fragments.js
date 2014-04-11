@@ -278,7 +278,7 @@
         }
     }
 
-    function Group(tag, blocks) {
+    function BlockGroup(tag, blocks) {
         this.tag = tag;
         this.blocks = blocks;
     }
@@ -361,8 +361,8 @@
      */
     function StructuredTextAsHtml (blocks, ctx) {
 
-        var groups = [],
-            group,
+        var blockGroups = [],
+            blockGroup,
             block,
             html = [];
 
@@ -371,49 +371,49 @@
                 block = blocks[i];
 
                 if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
-                    group = new Group(block.type, []);
-                    groups.push(group);
+                    blockGroup = new BlockGroup(block.type, []);
+                    blockGroups.push(blockGroup);
                 }
-                else if (group && group.tag != block.type) { // it's a new type
-                    group = new Group(block.type, []);
-                    groups.push(group);
+                else if (blockGroup && blockGroup.tag != block.type) { // it's a new type
+                    blockGroup = new BlockGroup(block.type, []);
+                    blockGroups.push(blockGroup);
                 }
                 // else: it's the same type as before, no touching group
 
-                group.blocks.push(block);
+                blockGroup.blocks.push(block);
             };
 
-            groups.forEach(function (group) {
+            blockGroups.forEach(function (blockGroup) {
 
-                if(group.tag == "heading1") {
-                    html.push('<h1>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h1>');
+                if(blockGroup.tag == "heading1") {
+                    html.push('<h1>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h1>');
                 }
-                else if(group.tag == "heading2") {
-                    html.push('<h2>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h2>');
+                else if(blockGroup.tag == "heading2") {
+                    html.push('<h2>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h2>');
                 }
-                else if(group.tag == "heading3") {
-                    html.push('<h3>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h3>');
+                else if(blockGroup.tag == "heading3") {
+                    html.push('<h3>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h3>');
                 }
-                else if(group.tag == "paragraph") {
-                    html.push('<p>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</p>');
+                else if(blockGroup.tag == "paragraph") {
+                    html.push('<p>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</p>');
                 }
-                else if(group.tag == "image") {
-                    html.push('<p><img src="' + group.blocks[0].url + '"></p>');
+                else if(blockGroup.tag == "image") {
+                    html.push('<p><img src="' + blockGroup.blocks[0].url + '"></p>');
                 }
-                else if(group.tag == "embed") {
-                    html.push('<div data-oembed="'+ group.blocks[0].embed_url
-                        + '" data-oembed-type="'+ group.blocks[0].type
-                        + '" data-oembed-provider="'+ group.blocks[0].provider_name
-                        + '">' + group.blocks[0].oembed.html+"</div>")
+                else if(blockGroup.tag == "embed") {
+                    html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
+                        + '" data-oembed-type="'+ blockGroup.blocks[0].type
+                        + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
+                        + '">' + blockGroup.blocks[0].oembed.html+"</div>")
                 }
-                else if(group.tag == "list-item" || group.tag == "o-list-item") {
-                    html.push(group.tag == "list-item"?'<ul>':"<ol>");
-                    group.blocks.forEach(function(block){
+                else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
+                    html.push(blockGroup.tag == "list-item"?'<ul>':"<ol>");
+                    blockGroup.blocks.forEach(function(block){
                         html.push("<li>"+insertSpans(block.text, block.spans, ctx)+"</li>");
                     });
-                    html.push(group.tag == "list-item"?'</ul>':"</ol>");
+                    html.push(blockGroup.tag == "list-item"?'</ul>':"</ol>");
                 }
-                else throw new Error(group.tag+" not implemented");
+                else throw new Error(blockGroup.tag+" not implemented");
             });
 
         }
