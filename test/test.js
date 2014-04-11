@@ -74,10 +74,22 @@
     });
   });
 
+  asyncTest('Submit the `everything` form with an ordering', 2, function() {
+    Prismic.Api(testRepository, function(err, Api) {
+      if (err) { console.log(err); return; }
+      Api.form('everything').ref(Api.master()).orderings('[my.product.price desc]').submit(function(err, documents) {
+        if (err) { console.log(err); return; }
+        equal(documents.results.length, 20);
+        equal(documents.results[0].id, 'UkL0gMuvzYUANCpm');
+        start();
+      });
+    });
+  });
+
   asyncTest('Get page 2 of the `everything` form', 8, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
-      Api.form('everything').set("page", 2).ref(Api.master()).submit(function(err, documents) {
+      Api.form('everything').page(2).ref(Api.master()).submit(function(err, documents) {
         if (err) { console.log(err); return; }
         equal(documents.results.length, 20);
         equal(documents.next_page, null);
@@ -95,7 +107,7 @@
   asyncTest('Get page 1 of the `everything` form with pagination set at 10', 8, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
-      Api.form('everything').set("pageSize", 10).ref(Api.master()).submit(function(err, documents) {
+      Api.form('everything').pageSize(10).ref(Api.master()).submit(function(err, documents) {
         if (err) { console.log(err); return; }
         equal(documents.results.length, 10);
         equal(documents.next_page, "https://lesbonneschoses.prismic.io/api/documents/search?ref=UkL0hcuvzYUANCrm&page=2&pageSize=10");
@@ -113,7 +125,7 @@
   asyncTest('Get page 2 of the `everything` form with pagination set at 10', 8, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
-      Api.form('everything').set("pageSize", 10).set("page", 2).ref(Api.master()).submit(function(err, documents) {
+      Api.form('everything').pageSize(10).page(2).ref(Api.master()).submit(function(err, documents) {
         if (err) { console.log(err); return; }
         equal(documents.results.length, 10);
         equal(documents.next_page, "https://lesbonneschoses.prismic.io/api/documents/search?ref=UkL0hcuvzYUANCrm&page=3&pageSize=10");
