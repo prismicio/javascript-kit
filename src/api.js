@@ -366,7 +366,7 @@
         },
 
         /**
-         * Sets a page size to query for this SearchForm. This is a optional method.
+         * Sets a page size to query for this SearchForm. This is an optional method.
          *
          * @param {number} pageSize - The page size
          * @returns {SearchForm} - The SearchForm itself
@@ -376,7 +376,7 @@
         },
 
         /**
-         * Sets the page number to query for this SearchForm. This is a optional method.
+         * Sets the page number to query for this SearchForm. This is an optional method.
          *
          * @param {number} page - The page number
          * @returns {SearchForm} - The SearchForm itself
@@ -386,7 +386,7 @@
         },
 
         /**
-         * Sets the orderings to query for this SearchForm. This is a optional method.
+         * Sets the orderings to query for this SearchForm. This is an optional method.
          *
          * @param {string} orderings - The orderings
          * @returns {SearchForm} - The SearchForm itself
