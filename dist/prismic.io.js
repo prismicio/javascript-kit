@@ -366,6 +366,36 @@
         },
 
         /**
+         * Sets a page size to query for this SearchForm. This is an optional method.
+         *
+         * @param {number} pageSize - The page size
+         * @returns {SearchForm} - The SearchForm itself
+         */
+        pageSize: function(size) {
+            return this.set("pageSize", size);
+        },
+
+        /**
+         * Sets the page number to query for this SearchForm. This is an optional method.
+         *
+         * @param {number} page - The page number
+         * @returns {SearchForm} - The SearchForm itself
+         */
+        page: function(p) {
+            return this.set("page", p);
+        },
+
+        /**
+         * Sets the orderings to query for this SearchForm. This is an optional method.
+         *
+         * @param {string} orderings - The orderings
+         * @returns {SearchForm} - The SearchForm itself
+         */
+        orderings: function(orderings) {
+            return this.set("orderings", orderings);
+        },
+
+        /**
          * Submits the query, and calls the callback function.
          *
          * @param {function} callback - Optional callback function that is called after the query was made,
