@@ -7,7 +7,18 @@
       // This token allow to preview future releases of this repository (nothing secret ;)
       previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70',
 
-      microRepository = 'https://micro.prismic.io/api';
+      microRepository = 'https://micro.prismic.io/api',
+
+      ctx = {
+        api: undefined,
+        ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
+        maybeRef: 'XXXXX',
+        oauth: function() { },
+        linkResolver: function(ctx, doc, isBroken) {
+          if (isBroken) return '#broken';
+          return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
+        }
+      };
 
   module('Prismic.io', {
     setup: function() {}
@@ -236,16 +247,6 @@
   });
 
   asyncTest('Render a document to Html', 1, function() {
-    var ctx = {
-      api: undefined,
-      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
-      maybeRef: 'XXXXX',
-      oauth: function() { },
-      linkResolver: function(ctx, doc, isBroken) {
-        if (isBroken) return '#broken';
-        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
-      }
-    };
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').ref(Api.master()).submit(function(err, documents) {
@@ -292,16 +293,6 @@
   });
 
   asyncTest('StructuredTexts asHtml handles span Link.document', 1, function() {
-    var ctx = {
-      api: undefined,
-      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
-      maybeRef: 'XXXXX',
-      oauth: function() { },
-      linkResolver: function(ctx, doc, isBroken) {
-        if (isBroken) return '#broken';
-        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
-      }
-    };
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').query('[[:d = at(document.id, "UkL0gMuvzYUANCpo")]]').ref(Api.master()).submit(function(err, documents) {
@@ -320,16 +311,6 @@
   });
 
   asyncTest('Handles multiple fields', 1, function() {
-    var ctx = {
-      api: undefined,
-      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
-      maybeRef: 'XXXXX',
-      oauth: function() { },
-      linkResolver: function(ctx, doc, isBroken) {
-        if (isBroken) return '#broken';
-        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
-      }
-    };
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').query('[[:d = at(document.id, "UkL0gMuvzYUANCpr")]]').ref(Api.master()).submit(function(err, documents) {
@@ -353,16 +334,6 @@
   });
 
   asyncTest('Block fragments are accessible, loopable, and serializable', 4, function() {
-    var ctx = {
-      api: undefined,
-      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
-      maybeRef: 'XXXXX',
-      oauth: function() { },
-      linkResolver: function(ctx, doc, isBroken) {
-        if (isBroken) return '#broken';
-        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
-      }
-    };
     Prismic.Api(microRepository, function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').query('[[:d = at(document.id, "UrDndQEAALQMyrXF")]]').ref(Api.master()).submit(function(err, documents) {
