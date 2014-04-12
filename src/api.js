@@ -532,7 +532,7 @@
 
         /**
          * Gets the image field in the current Document object, for further manipulation.
-         * Typical use: document.getImage('blog-post.photo').asHtml(ctx.link_resolver)
+         * Typical use: document.getImage('blog-post.photo').asHtml(ctx)
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
          * @returns {Image} - The Image object to manipulate
@@ -566,7 +566,7 @@
 
         /**
          * Gets the view within the image field in the current Document object, for further manipulation.
-         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx.link_resolver)
+         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx)
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageView} - The View object to manipulate
@@ -594,7 +594,7 @@
 
         /**
          * Gets the date field in the current Document object, for further manipulation.
-         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx.link_resolver)
+         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx)
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
@@ -609,7 +609,7 @@
 
         /**
          * Gets the boolean field in the current Document object, for further manipulation.
-         * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx.link_resolver).
+         * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx).
          * This works great with a Select field. The Select values that are considered true are: 'yes', 'on', and 'true'.
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.enableComments"
@@ -622,7 +622,7 @@
 
         /**
          * Gets the text field in the current Document object, for further manipulation.
-         * Typical use: document.getText('blog-post.label').asHtml(ctx.link_resolver).
+         * Typical use: document.getText('blog-post.label').asHtml(ctx).
          * The method works with StructuredText fields, Text fields, Number fields, Select fields and Color fields.
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.label"
@@ -666,7 +666,7 @@
 
         /**
          * Gets the StructuredText field in the current Document object, for further manipulation.
-         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx.link_resolver).
+         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx).
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText field to manipulate.
@@ -681,7 +681,7 @@
 
         /**
          * Gets the Number field in the current Document object, for further manipulation.
-         * Typical use: document.getNumber('product.price').asHtml(ctx.link_resolver).
+         * Typical use: document.getNumber('product.price').asHtml(ctx).
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "product.price"
          * @returns {Number} - The Number field to manipulate.
@@ -696,7 +696,7 @@
 
         /**
          * Shortcut to get the HTML output of the field in the current document.
-         * This is the same as writing document.get(field).asHtml(linkResolver);
+         * This is the same as writing document.get(field).asHtml(ctx);
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
          * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), et ctx.linkResolver()
