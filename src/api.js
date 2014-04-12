@@ -695,6 +695,21 @@
         },
 
         /**
+         * Gets the Group field in the current Document object, for further manipulation.
+         * Typical use: document.getGroup('product.gallery').asHtml(ctx).
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "product.gallery"
+         * @returns {Group} - The Group field to manipulate.
+         */
+        getGroup: function(field) {
+            var fragment = this.get(field);
+
+            if (fragment instanceof Global.Prismic.Fragments.Group) {
+                return fragment;
+            }
+        },
+
+        /**
          * Shortcut to get the HTML output of the field in the current document.
          * This is the same as writing document.get(field).asHtml(linkResolver);
          *

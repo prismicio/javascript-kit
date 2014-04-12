@@ -278,6 +278,44 @@
         }
     }
 
+    /**
+     * Embodies a fragment of type "Group" (which is a group of subfragments)
+     */
+    function Group(data) {
+      this.value = data;
+    }
+    Group.prototype = {
+      /**
+       * Turns the fragment into a useable HTML version of it.
+       * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+       *
+       * @returns {string} - basic HTML code for the fragment
+       */
+      asHtml: function(ctx) {
+        var output = "";
+        for (var i=0; i<this.value.length; i++) {
+          for (var fragmentName in this.value[i]) {
+            output += '<section data-field="'+fragmentName+'">';
+            output += this.value[i][fragmentName].asHtml(ctx);
+            output += '</section>';
+          }
+        }
+        return output;
+      },
+      /**
+       * Turns the Group fragment into an array in order to access its items (groups of fragments),
+       * or to loop through them.
+       */
+       toArray: function(){
+         return this.value;
+       }
+    }
+
+
+    /**
+     * Embodies a group of text blocks in a structured text fragment, like a group of list items.
+     * This is only used in the serialization into HTML of structured text fragments.
+     */
     function BlockGroup(tag, blocks) {
         this.tag = tag;
         this.blocks = blocks;
@@ -551,8 +589,22 @@
                 output = new ImageLink(field.value);
                 break;
 
+            case "Group":
+                var groups_array = [];
+                // for each array of groups
+                for (var i = 0; i < field.value.length; i++) {
+                  var group = {}; // recreate groups with...
+                  for (var fragmentName in field.value[i]) {
+                    // ... the same fragment name as keys, but reinitalized fragments as values
+                    group[fragmentName] = initField(field.value[i][fragmentName]);
+                  }
+                  groups_array.push(group);
+                }
+                output = new Group(groups_array);
+                break;
+
             default:
-                console.log("Link type not supported: ", field.type);
+                console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
@@ -573,6 +625,7 @@
         DocumentLink: DocumentLink,
         ImageLink: ImageLink,
         FileLink: FileLink,
+        Group: Group,
         initField: initField
     }
 
