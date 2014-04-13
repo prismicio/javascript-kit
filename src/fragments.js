@@ -397,6 +397,9 @@
                 else if(group.tag == "paragraph") {
                     html.push('<p>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</p>');
                 }
+                else if(group.tag == "preformatted") {
+                    html.push('<pre>' + group.blocks[0].text + '</pre>');
+                }
                 else if(group.tag == "image") {
                     html.push('<p><img src="' + group.blocks[0].url + '"></p>');
                 }
