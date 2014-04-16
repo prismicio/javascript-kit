@@ -532,7 +532,7 @@
 
         /**
          * Gets the image field in the current Document object, for further manipulation.
-         * Typical use: document.getImage('blog-post.photo').asHtml(ctx.link_resolver)
+         * Typical use: document.getImage('blog-post.photo').asHtml(ctx)
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
          * @returns {Image} - The Image object to manipulate
@@ -566,7 +566,7 @@
 
         /**
          * Gets the view within the image field in the current Document object, for further manipulation.
-         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx.link_resolver)
+         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx)
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageView} - The View object to manipulate
@@ -594,7 +594,7 @@
 
         /**
          * Gets the date field in the current Document object, for further manipulation.
-         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx.link_resolver)
+         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx)
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
@@ -609,7 +609,7 @@
 
         /**
          * Gets the boolean field in the current Document object, for further manipulation.
-         * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx.link_resolver).
+         * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx).
          * This works great with a Select field. The Select values that are considered true are: 'yes', 'on', and 'true'.
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.enableComments"
@@ -622,7 +622,7 @@
 
         /**
          * Gets the text field in the current Document object, for further manipulation.
-         * Typical use: document.getText('blog-post.label').asHtml(ctx.link_resolver).
+         * Typical use: document.getText('blog-post.label').asHtml(ctx).
          * The method works with StructuredText fields, Text fields, Number fields, Select fields and Color fields.
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.label"
@@ -666,7 +666,7 @@
 
         /**
          * Gets the StructuredText field in the current Document object, for further manipulation.
-         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx.link_resolver).
+         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx).
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText field to manipulate.
@@ -681,7 +681,7 @@
 
         /**
          * Gets the Number field in the current Document object, for further manipulation.
-         * Typical use: document.getNumber('product.price').asHtml(ctx.link_resolver).
+         * Typical use: document.getNumber('product.price').asHtml(ctx).
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "product.price"
          * @returns {Number} - The Number field to manipulate.
@@ -695,8 +695,23 @@
         },
 
         /**
+         * Gets the Group field in the current Document object, for further manipulation.
+         * Typical use: document.getGroup('product.gallery').asHtml(ctx).
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "product.gallery"
+         * @returns {Group} - The Group field to manipulate.
+         */
+        getGroup: function(field) {
+            var fragment = this.get(field);
+
+            if (fragment instanceof Global.Prismic.Fragments.Group) {
+                return fragment;
+            }
+        },
+
+        /**
          * Shortcut to get the HTML output of the field in the current document.
-         * This is the same as writing document.get(field).asHtml(linkResolver);
+         * This is the same as writing document.get(field).asHtml(ctx);
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
          * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), et ctx.linkResolver()
@@ -1026,7 +1041,45 @@
         }
     }
 
-    function Group(tag, blocks) {
+    /**
+     * Embodies a fragment of type "Group" (which is a group of subfragments)
+     */
+    function Group(data) {
+      this.value = data;
+    }
+    Group.prototype = {
+      /**
+       * Turns the fragment into a useable HTML version of it.
+       * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+       *
+       * @returns {string} - basic HTML code for the fragment
+       */
+      asHtml: function(ctx) {
+        var output = "";
+        for (var i=0; i<this.value.length; i++) {
+          for (var fragmentName in this.value[i]) {
+            output += '<section data-field="'+fragmentName+'">';
+            output += this.value[i][fragmentName].asHtml(ctx);
+            output += '</section>';
+          }
+        }
+        return output;
+      },
+      /**
+       * Turns the Group fragment into an array in order to access its items (groups of fragments),
+       * or to loop through them.
+       */
+       toArray: function(){
+         return this.value;
+       }
+    }
+
+
+    /**
+     * Embodies a group of text blocks in a structured text fragment, like a group of list items.
+     * This is only used in the serialization into HTML of structured text fragments.
+     */
+    function BlockGroup(tag, blocks) {
         this.tag = tag;
         this.blocks = blocks;
     }
@@ -1109,8 +1162,8 @@
      */
     function StructuredTextAsHtml (blocks, ctx) {
 
-        var groups = [],
-            group,
+        var blockGroups = [],
+            blockGroup,
             block,
             html = [];
 
@@ -1119,49 +1172,49 @@
                 block = blocks[i];
 
                 if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
-                    group = new Group(block.type, []);
-                    groups.push(group);
+                    blockGroup = new BlockGroup(block.type, []);
+                    blockGroups.push(blockGroup);
                 }
-                else if (group && group.tag != block.type) { // it's a new type
-                    group = new Group(block.type, []);
-                    groups.push(group);
+                else if (blockGroup && blockGroup.tag != block.type) { // it's a new type
+                    blockGroup = new BlockGroup(block.type, []);
+                    blockGroups.push(blockGroup);
                 }
                 // else: it's the same type as before, no touching group
 
-                group.blocks.push(block);
+                blockGroup.blocks.push(block);
             };
 
-            groups.forEach(function (group) {
+            blockGroups.forEach(function (blockGroup) {
 
-                if(group.tag == "heading1") {
-                    html.push('<h1>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h1>');
+                if(blockGroup.tag == "heading1") {
+                    html.push('<h1>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h1>');
                 }
-                else if(group.tag == "heading2") {
-                    html.push('<h2>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h2>');
+                else if(blockGroup.tag == "heading2") {
+                    html.push('<h2>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h2>');
                 }
-                else if(group.tag == "heading3") {
-                    html.push('<h3>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</h3>');
+                else if(blockGroup.tag == "heading3") {
+                    html.push('<h3>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h3>');
                 }
-                else if(group.tag == "paragraph") {
-                    html.push('<p>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '</p>');
+                else if(blockGroup.tag == "paragraph") {
+                    html.push('<p>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</p>');
                 }
-                else if(group.tag == "image") {
-                    html.push('<p><img src="' + group.blocks[0].url + '"></p>');
+                else if(blockGroup.tag == "image") {
+                    html.push('<p><img src="' + blockGroup.blocks[0].url + '"></p>');
                 }
-                else if(group.tag == "embed") {
-                    html.push('<div data-oembed="'+ group.blocks[0].embed_url
-                        + '" data-oembed-type="'+ group.blocks[0].type
-                        + '" data-oembed-provider="'+ group.blocks[0].provider_name
-                        + '">' + group.blocks[0].oembed.html+"</div>")
+                else if(blockGroup.tag == "embed") {
+                    html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
+                        + '" data-oembed-type="'+ blockGroup.blocks[0].type
+                        + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
+                        + '">' + blockGroup.blocks[0].oembed.html+"</div>")
                 }
-                else if(group.tag == "list-item" || group.tag == "o-list-item") {
-                    html.push(group.tag == "list-item"?'<ul>':"<ol>");
-                    group.blocks.forEach(function(block){
+                else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
+                    html.push(blockGroup.tag == "list-item"?'<ul>':"<ol>");
+                    blockGroup.blocks.forEach(function(block){
                         html.push("<li>"+insertSpans(block.text, block.spans, ctx)+"</li>");
                     });
-                    html.push(group.tag == "list-item"?'</ul>':"</ol>");
+                    html.push(blockGroup.tag == "list-item"?'</ul>':"</ol>");
                 }
-                else throw new Error(group.tag+" not implemented");
+                else throw new Error(blockGroup.tag+" not implemented");
             });
 
         }
@@ -1299,8 +1352,22 @@
                 output = new ImageLink(field.value);
                 break;
 
+            case "Group":
+                var groups_array = [];
+                // for each array of groups
+                for (var i = 0; i < field.value.length; i++) {
+                  var group = {}; // recreate groups with...
+                  for (var fragmentName in field.value[i]) {
+                    // ... the same fragment name as keys, but reinitalized fragments as values
+                    group[fragmentName] = initField(field.value[i][fragmentName]);
+                  }
+                  groups_array.push(group);
+                }
+                output = new Group(groups_array);
+                break;
+
             default:
-                console.log("Link type not supported: ", field.type);
+                console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
@@ -1321,6 +1388,7 @@
         DocumentLink: DocumentLink,
         ImageLink: ImageLink,
         FileLink: FileLink,
+        Group: Group,
         initField: initField
     }
 
