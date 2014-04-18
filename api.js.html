@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: /Users/rudyrigot/Documents/developmentkits/javascript-kit/dist/prismic.io.js</title>
-    
+    <title>JSDoc: Source: api.js</title>
+
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
@@ -16,24 +16,30 @@
 <body>
 
 <div id="main">
-    
-    <h1 class="page-title">Source: /Users/rudyrigot/Documents/developmentkits/javascript-kit/dist/prismic.io.js</h1>
-    
+
+    <h1 class="page-title">Source: api.js</h1>
+
     
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>(function (Global, undefined) {
-
+            <pre class="prettyprint source linenums"><code>
     "use strict";
 
-    // -- Main entry point
-
-    var prismic = function(url, onReady, accessToken, maybeRequestHandler) {
+    /**
+     * The kit's main entry point; initialize your API like this: Prismic.Api(url, callback, accessToken, maybeRequestHandler)
+     *
+     * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
+     * @param {function} callback - Optional callback function that is called after the API was retrieved, to which you may pass two parameters: a potential error (null if no problem), and the API object
+     * @param {string} accessToken - The optional accessToken for the OAuth2 connection
+     * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
+     * @returns {Api} - The Api object that can be manipulated
+     */
+    var prismic = function(url, callback, accessToken, maybeRequestHandler) {
         var api = new prismic.fn.init(url, accessToken, maybeRequestHandler);
-        onReady &amp;&amp; api.get(onReady);
+        callback &amp;&amp; api.get(callback);
         return api;
     };
 
@@ -47,13 +53,13 @@
 
                 // Called on success
                 var resolve = function() {
-                    callback(JSON.parse(xhr.responseText));
+                    callback(null, JSON.parse(xhr.responseText));
                 }
 
                 // Called on error
                 var reject = function() {
                     var status = xhr.status;
-                    throw new Error("Unexpected status code [" + status + "]");
+                    callback(new Error("Unexpected status code [" + status + "] on URL "+url));
                 }
 
                 // Bind the XHR finished callback
@@ -68,7 +74,7 @@
                 };
 
                 // Open the XHR
-                xhr.open('GET', url + '#json', true);
+                xhr.open('GET', url, true);
 
                 // Json request
                 xhr.setRequestHeader('Accept', 'application/json');
@@ -89,7 +95,7 @@
 
             return function(requestUrl, callback) {
                 if(requestsCache[requestUrl]) {
-                    callback(requestsCache[requestUrl]);
+                    callback(null, requestsCache[requestUrl]);
                 } else {
 
                     var parsed = url.parse(requestUrl),
@@ -119,10 +125,10 @@
                                   requestsCache[requestUrl] = json;
                               }
 
-                              callback(json);
+                              callback(null, json);
                             });
                         } else {
-                            throw new Error("Unexpected status code [" + response.statusCode + "]")
+                            callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl));
                         }
                     });
 
@@ -132,27 +138,45 @@
         }
     });
 
-    // --
+    /**
+     * The Api object you can manipulate, notably to perform queries in your repository.
+     * Most useful fields: bookmarks, refs, types, tags, ...
+     */
 
     prismic.fn = prismic.prototype = {
 
         constructor: prismic,
         data: null,
 
-        // Retrieve and parse the entry document
-        get: function(cb) {
+        /**
+         * Requests (with the proper handler), parses, and returns the /api document.
+         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         *
+         * @param {function} callback - Optional callback function that is called after the query is made, to which you may pass two parameters: a potential error (null if no problem), and the API object
+         * @returns {Api} - The Api object that can be manipulated
+         */
+        get: function(callback) {
             var self = this;
 
-            this.requestHandler(this.url, function(data) {
-                self.data = self.parse(data);
-                self.bookmarks = self.data.bookmarks;
-                if (cb) {
-                    cb(self, this);
+            this.requestHandler(this.url, function(error, data) {
+                if (error) {
+                    callback(error);
+                } else {
+                    self.data = self.parse(data);
+                    self.bookmarks = self.data.bookmarks;
+                    callback(null, self, this);
                 }
             });
 
         },
 
+        /**
+         * Parses and returns the /api document.
+         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         *
+         * @param {string} data - The JSON document responded on the API's endpoint
+         * @returns {Api} - The Api object that can be manipulated
+         */
         parse: function(data) {
             var refs,
                 master,
@@ -221,6 +245,10 @@
 
         },
 
+        /**
+         * Initialisation of the API object.
+         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         */
         init: function(url, accessToken, maybeRequestHandler) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&amp;' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
@@ -228,11 +256,21 @@
             return this;
         },
 
-        // For compatibility
+        /**
+         * @deprecated use form() now
+         * Returns a useable form from its id, as described in the RESTful description of the API.
+         */
         forms: function(formId) {
             return this.form(formId);
         },
 
+        /**
+         * Returns a useable form from its id, as described in the RESTful description of the API.
+         * For instance: api.form("everything") works on every repository (as "everything" exists by default)
+         * You can then chain the calls: api.form("everything").query('[[:d = at(document.id, "UkL0gMuvzYUANCpf")]]').ref(ref).submit()
+         *
+         * @returns {SearchForm} - the SearchForm that can be used.
+         */
         form: function(formId) {
             var form = this.data.forms[formId];
             if(form) {
@@ -240,10 +278,24 @@
             }
         },
 
+        /**
+         * The ID of the master ref on this prismic.io API.
+         * Do not use like this: searchForm.ref(api.master()).
+         * Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+         *
+         * @returns {string}
+         */
         master: function() {
             return this.data.master.ref;
         },
 
+        /**
+         * Returns the ref ID for a given ref's label.
+         * Do not use like this: searchForm.ref(api.ref("Future release label")).
+         * Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+         *
+         * @returns {string}
+         */
         ref: function(label) {
             for(var i=0; i&lt;this.data.refs.length; i++) {
                 if(this.data.refs[i].label == label) {
@@ -256,6 +308,10 @@
 
     prismic.fn.init.prototype = prismic.fn;
 
+    /**
+     * Embodies a submittable RESTful form as described on the API endpoint (as per RESTful standards)
+     * @constructor
+     */
     function Form(name, fields, form_method, rel, enctype, action) {
         this.name = name;
         this.fields = fields;
@@ -268,8 +324,7 @@
     Form.prototype = {};
 
     /**
-     * Creates a SearchForm objects from scratch. To create SearchForm objects
-     * that are allowed in the API, please use the API.forms() method.
+     * Embodies a SearchForm object. To create SearchForm objects that are allowed in the API, please use the API.form() method.
      * @constructor
      */
     function SearchForm(api, form, data) {
@@ -291,7 +346,7 @@
          * RESTful form in the first place (as described in the /api document); otherwise,
          * an "Unknown field" error is thrown.
          * Please prefer using dedicated methods like query(), orderings(), ...
-         * 
+         *
          * @param {string} field - The name of the field to set
          * @param {string} value - The value that gets assigned
          * @returns {SearchForm} - The SearchForm itself
@@ -317,7 +372,7 @@
          * Sets a ref to query on for this SearchForm. This is a mandatory
          * method to call before calling submit(), and api.form('everything').submit()
          * will not work.
-         * 
+         *
          * @param {Ref} ref - The Ref object defining the ref to query
          * @returns {SearchForm} - The SearchForm itself
          */
@@ -329,7 +384,7 @@
          * Sets a predicate-based query for this SearchForm. This is where you
          * paste what you compose in your prismic.io API browser.
          * You can pass an empty string, the method will simply not send that query.
-         * 
+         *
          * @param {string} query - The query to perform
          * @returns {SearchForm} - The SearchForm itself
          */
@@ -338,11 +393,43 @@
         },
 
         /**
-         * Submits the query, and calls the callback function.
-         * 
-         * @param {function} cb - Function that carries one parameter: an array of Document objects
+         * Sets a page size to query for this SearchForm. This is an optional method.
+         *
+         * @param {number} pageSize - The page size
+         * @returns {SearchForm} - The SearchForm itself
          */
-        submit: function(cb) {
+        pageSize: function(size) {
+            return this.set("pageSize", size);
+        },
+
+        /**
+         * Sets the page number to query for this SearchForm. This is an optional method.
+         *
+         * @param {number} page - The page number
+         * @returns {SearchForm} - The SearchForm itself
+         */
+        page: function(p) {
+            return this.set("page", p);
+        },
+
+        /**
+         * Sets the orderings to query for this SearchForm. This is an optional method.
+         *
+         * @param {string} orderings - The orderings
+         * @returns {SearchForm} - The SearchForm itself
+         */
+        orderings: function(orderings) {
+            return this.set("orderings", orderings);
+        },
+
+        /**
+         * Submits the query, and calls the callback function.
+         *
+         * @param {function} callback - Optional callback function that is called after the query was made,
+         * to which you may pass two parameters: a potential error (null if no problem),
+         * and a Documents object (containing all the pagination specifics + the array of Docs)
+         */
+        submit: function(callback) {
             var self = this,
                 url = this.form.action;
 
@@ -359,11 +446,11 @@
                 }
             }
 
-            this.api.requestHandler(url, function (d) {
+            this.api.requestHandler(url, function (err, documents) {
 
-                var results = d.results || d;
+                if (err) { callback(err); return; }
 
-                var docs = results.map(function (doc) {
+                var results = documents.results.map(function (doc) {
                     var fragments = {}
 
                     for(var field in doc.data[doc.type]) {
@@ -380,28 +467,61 @@
                     )
                 });
 
-                if (cb) {
-                    cb(docs || []);
-                }
+                callback(null, new Documents(
+					documents.page,
+					documents.results_per_page,
+					documents.results_size,
+					documents.total_results_size,
+					documents.total_pages,
+					documents.next_page,
+					documents.prev_page,
+					results || [])
+                );
             });
 
         }
 
     };
 
-    function getFragments(field) {
-        if (!this.fragments || !this.fragments[field]) {
+    /**
+     * An array of the fragments with the given fragment name.
+     * The array is often a single-element array, expect when the field is a multiple field.
+     */
+    function getFragments(name) {
+        if (!this.fragments || !this.fragments[name]) {
             return [];
         }
 
-        if (Array.isArray(this.fragments[field])) {
-            return this.fragments[field];
+        if (Array.isArray(this.fragments[name])) {
+            return this.fragments[name];
         } else {
-            return [this.fragments[field]];
+            return [this.fragments[name]];
         }
 
     };
 
+    /**
+     * Embodies the result of a SearchForm query as returned by the API.
+     * It includes all the fields that are useful for pagination (page, total_pages, total_results_size, ...),
+     * as well as the field "results", which is an array of Doc objects, the documents themselves.
+     * @constructor
+     */
+    function Documents(page, results_per_page, results_size, total_results_size, total_pages, next_page, prev_page, results) {
+		this.page = page;
+		this.results_per_page = results_per_page;
+		this.results_size = results_size;
+		this.total_results_size = total_results_size;
+		this.total_pages = total_pages;
+		this.next_page = next_page;
+		this.prev_page = prev_page;
+		this.results = results; // an array of Doc objects
+    }
+
+    /**
+     * Embodies a document as returned by the API.
+     * Most useful fields: id, type, tags, slug, slugs, ...
+     * @constructor
+     */
     function Doc(id, type, href, tags, slugs, fragments) {
 
         this.id = id;
@@ -409,6 +529,7 @@
         this.href = href;
         this.tags = tags;
         this.slug = slugs ? slugs[0] : "-";
+        this.slugs = slugs;
         this.fragments = fragments;
     }
 
@@ -418,23 +539,29 @@
          * of this field, it is advised that you use a dedicated method, like get StructuredText() or getDate(),
          * for instance.
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.author"
-         * @returns {object} - The json object to manipulate
+         * @param {string} name - The name of the field to get, with its type; for instance, "blog-post.author"
+         * @returns {object} - The JavaScript Fragment object to manipulate
          */
-        get: function(field) {
-            var frags = getFragments.call(this, field);
+        get: function(name) {
+            var frags = getFragments.call(this, name);
             return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
         },
 
-        getAll: function(field) {
-            return getFragments.call(this, field).map(function (fragment) {
+        /**
+         * Builds an array of all the fragments in case they are multiple.
+         *
+         * @param {string} name - The name of the multiple fragment to get, with its type; for instance, "blog-post.author"
+         * @returns {array} - An array of each JavaScript fragment object to manipulate.
+         */
+        getAll: function(name) {
+            return getFragments.call(this, name).map(function (fragment) {
                 return Global.Prismic.Fragments.initField(fragment);
             }, this);
         },
 
         /**
          * Gets the image field in the current Document object, for further manipulation.
-         * Typical use: document.getImage('blog-post.photo').asHtml(ctx.link_resolver)
+         * Typical use: document.getImage('blog-post.photo').asHtml(ctx)
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
          * @returns {Image} - The Image object to manipulate
@@ -468,7 +595,7 @@
 
         /**
          * Gets the view within the image field in the current Document object, for further manipulation.
-         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx.link_resolver)
+         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx)
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageView} - The View object to manipulate
@@ -496,7 +623,7 @@
 
         /**
          * Gets the date field in the current Document object, for further manipulation.
-         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx.link_resolver)
+         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx)
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
@@ -511,7 +638,7 @@
 
         /**
          * Gets the boolean field in the current Document object, for further manipulation.
-         * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx.link_resolver).
+         * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx).
          * This works great with a Select field. The Select values that are considered true are: 'yes', 'on', and 'true'.
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.enableComments"
@@ -524,7 +651,7 @@
 
         /**
          * Gets the text field in the current Document object, for further manipulation.
-         * Typical use: document.getText('blog-post.label').asHtml(ctx.link_resolver).
+         * Typical use: document.getText('blog-post.label').asHtml(ctx).
          * The method works with StructuredText fields, Text fields, Number fields, Select fields and Color fields.
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.label"
@@ -568,7 +695,7 @@
 
         /**
          * Gets the StructuredText field in the current Document object, for further manipulation.
-         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx.link_resolver).
+         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx).
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText field to manipulate.
@@ -583,7 +710,7 @@
 
         /**
          * Gets the Number field in the current Document object, for further manipulation.
-         * Typical use: document.getNumber('product.price').asHtml(ctx.link_resolver).
+         * Typical use: document.getNumber('product.price').asHtml(ctx).
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "product.price"
          * @returns {Number} - The Number field to manipulate.
@@ -597,18 +724,33 @@
         },
 
         /**
+         * Gets the Group field in the current Document object, for further manipulation.
+         * Typical use: document.getGroup('product.gallery').asHtml(ctx).
+         *
+         * @param {string} field - The name of the field to get, with its type; for instance, "product.gallery"
+         * @returns {Group} - The Group field to manipulate.
+         */
+        getGroup: function(field) {
+            var fragment = this.get(field);
+
+            if (fragment instanceof Global.Prismic.Fragments.Group) {
+                return fragment;
+            }
+        },
+
+        /**
          * Shortcut to get the HTML output of the field in the current document.
-         * This is the same as writing document.get(field).asHtml(linkResolver);
+         * This is the same as writing document.get(field).asHtml(ctx);
          *
          * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
-         * @param {function} linkResolver - The function to apply to resolve found links, with one parameter: the current ref
+         * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), et ctx.linkResolver()
          * @returns {string} - The HTML output
          */
-        getHtml: function(field, linkResolver) {
+        getHtml: function(field, ctx) {
             var fragment = this.get(field);
 
             if(fragment &amp;&amp; fragment.asHtml) {
-                return fragment.asHtml(linkResolver);
+                return fragment.asHtml(ctx);
             }
         },
 
@@ -630,6 +772,10 @@
 
     };
 
+    /**
+     * Embodies a prismic.io ref (a past or future point in time you can query  )
+     * @constructor
+     */
     function Ref(ref, label, isMaster) {
         this.ref = ref;
         this.label = label;
@@ -643,390 +789,6 @@
         Api: prismic
     }
 
-}(typeof exports === 'object' &amp;&amp; exports ? exports : (typeof module === "object" &amp;&amp; module &amp;&amp; typeof module.exports === "object" ? module.exports : window)));
-
-(function (Global, undefined) {
-
-    "use strict";
-
-    function Text(data) {
-        this.value = data;
-    }
-    Text.prototype = {
-        asHtml: function () {
-            return "&lt;span>" + this.value + "&lt;/span>";
-        }
-    };
-
-    function DocumentLink(data) {
-        this.value = data;
-        this.document = data.document;
-        this.isBroken = data.isBroken;
-    }
-    DocumentLink.prototype = {
-        asHtml: function () {
-            return "&lt;a>&lt;/a>";
-        }
-    };
-
-    function WebLink(data) {
-        this.value = data;
-    }
-    WebLink.prototype = {
-        asHtml: function () {
-            return "&lt;a href='"+this.value.url+"'>"+this.value.url+"&lt;/a>";
-        }
-    };
-
-    function Select(data) {
-        this.value = data;
-    }
-    Select.prototype = {
-        asHtml: function () {
-            return "&lt;span>" + this.value + "&lt;/span>";
-        }
-    };
-
-    function Color(data) {
-        this.value = data;
-    }
-    Color.prototype = {
-        asHtml: function () {
-            return "&lt;span>" + this.value + "&lt;/span>";
-        }
-    };
-
-    function Num(data) {
-        this.value = data;
-    }
-    Num.prototype = {
-        asHtml: function () {
-            return "&lt;span>" + this.value + "&lt;/span>";
-        }
-    };
-
-    function DateTime(data) {
-        this.value = new Date(data);
-    }
-
-    DateTime.prototype = {
-        asText: function (pattern) {
-            throw new Error("not implemented");
-        },
-
-        asHtml: function () {
-            return "&lt;time>" + this.value + "&lt;/time>";
-        }
-    };
-
-    function Embed(data) {
-        this.value = data;
-    }
-
-    Embed.prototype = {
-        asHtml: function () {
-            return this.oembed.html;
-        }
-    };
-
-    function ImageEl(main, views) {
-        this.main = main;
-        this.views = views || {};
-    }
-    ImageEl.prototype = {
-        getView: function (key) {
-            if (key === "main") {
-                return this.main;
-            } else {
-                return this.views[key];
-            }
-        },
-        asHtml: function () {
-            return this.main.asHtml()
-        }
-    };
-
-    function ImageView(url, width, height) {
-        this.url = url;
-        this.width = width;
-        this.height = height;
-    }
-    ImageView.prototype = {
-        ratio: function () {
-            return this.width / this.height;
-        },
-
-        asHtml: function () {
-            return "&lt;img src=" + this.url + " width=" + this.width + " height=" + this.height + ">";
-        }
-    }
-
-    function Group(tag, blocks) {
-        this.tag = tag;
-        this.blocks = blocks;
-    }
-
-
-    function StructuredText(blocks) {
-
-        this.blocks = blocks;
-
-    }
-
-    StructuredText.prototype = {
-
-        getTitle: function () {
-            for(var i=0; i&lt;this.blocks.length; i++) {
-                var block = this.blocks[i];
-                if(block.type.indexOf('heading') == 0) {
-                    return block;
-                }
-            }
-        },
-
-        getFirstParagraph: function() {
-            for(var i=0; i&lt;this.blocks.length; i++) {
-                var block = this.blocks[i];
-                if(block.type == 'paragraph') {
-                    return block;
-                }
-            }
-        },
-
-        getParagraphs: function() {
-            var paragraphs = [];
-            for(var i=0; i&lt;this.blocks.length; i++) {
-                var block = this.blocks[i];
-                if(block.type == 'paragraph') {
-                    paragraphs.push(block);
-                }
-            }
-            return paragraphs;
-        },
-
-        getParagraph: function(n) {
-            return this.getParagraphs()[n];
-        },
-
-        getFirstImage: function() {
-            for(var i=0; i&lt;this.blocks.length; i++) {
-                var block = this.blocks[i];
-                if(block.type == 'image') {
-                    return new ImageView(
-                        block.data.url,
-                        block.data.dimensions.width,
-                        block.data.dimensions.height
-                    );
-                }
-            }
-        },
-
-        asHtml: function(ctx) {
-            return StructuredTextAsHtml.call(this, this.blocks, ctx);
-        }
-
-    };
-
-    function StructuredTextAsHtml (blocks, ctx) {
-
-        var groups = [],
-            group,
-            block,
-            html = [];
-
-        if (Array.isArray(blocks)) {
-            for(var i=0; i&lt;blocks.length; i++) {
-                block = blocks[i];
-
-                if (block.type != "list-item" &amp;&amp; block.type != "o-list-item") { // it's not a type that groups
-                    group = new Group(block.type, []);
-                    groups.push(group);
-                }
-                else if (group &amp;&amp; group.tag != block.type) { // it's a new type
-                    group = new Group(block.type, []);
-                    groups.push(group);
-                }
-                // else: it's the same type as before, no touching group
-
-                group.blocks.push(block);
-            };
-
-            groups.forEach(function (group) {
-
-                if(group.tag == "heading1") {
-                    html.push('&lt;h1>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '&lt;/h1>');
-                }
-                else if(group.tag == "heading2") {
-                    html.push('&lt;h2>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '&lt;/h2>');
-                }
-                else if(group.tag == "heading3") {
-                    html.push('&lt;h3>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '&lt;/h3>');
-                }
-                else if(group.tag == "paragraph") {
-                    html.push('&lt;p>' + insertSpans(group.blocks[0].text, group.blocks[0].spans, ctx) + '&lt;/p>');
-                }
-                else if(group.tag == "image") {
-                    html.push('&lt;p>&lt;img src="' + group.blocks[0].url + '">&lt;/p>');
-                }
-                else if(group.tag == "embed") {
-                    html.push('&lt;div data-oembed="'+ group.blocks[0].embed_url
-                        + '" data-oembed-type="'+ group.blocks[0].type
-                        + '" data-oembed-provider="'+ group.blocks[0].provider_name
-                        + '">' + group.blocks[0].oembed.html+"&lt;/div>")
-                }
-                else if(group.tag == "list-item" || group.tag == "o-list-item") {
-                    html.push(group.tag == "list-item"?'&lt;ul>':"&lt;ol>");
-                    group.blocks.forEach(function(block){
-                        html.push("&lt;li>"+insertSpans(block.text, block.spans, ctx)+"&lt;/li>");
-                    });
-                    html.push(group.tag == "list-item"?'&lt;/ul>':"&lt;/ol>");
-                }
-                else throw new Error(group.tag+" not implemented");
-            });
-
-        }
-
-        return html.join('');
-
-    }
-
-    //Takes in a link of any type (Link.web or Link.document etc) and returns a uri to use inside of a link tag or such
-    //Should pass in linkResolver when support added for that
-    function linkToURI(link, ctx){
-        if(link.type == "Link.web") {
-            return link.value.url
-        }
-        else if(link.type == "Link.image") {
-            return link.value.image.url;
-        }
-        else if(link.type == "Link.document") {
-            return ctx.linkResolver(ctx, link.value.document, link.value.document.isBroken);
-        }
-        else {
-            throw new Error(link.type+" not implemented in linkToURI");
-        }
-    }
-
-    function insertSpans(text, spans, ctx) {
-        var textBits = [];
-        var tags = [];
-        var cursor = 0;
-        var html = [];
-
-        /* checking the spans are following each other, or else not doing anything */
-        spans.forEach(function(span){
-            if (span.end &lt; span.start) return text;
-            if (span.start &lt; cursor) return text;
-            cursor = span.end;
-        });
-
-        cursor = 0;
-
-        spans.forEach(function(span){
-            textBits.push(text.substring(0, span.start-cursor));
-            text = text.substring(span.start-cursor);
-            cursor = span.start;
-            textBits.push(text.substring(0, span.end-cursor));
-            text = text.substring(span.end-cursor);
-            tags.push(span);
-            cursor = span.end;
-        });
-        textBits.push(text);
-
-        tags.forEach(function(tag, index){
-            html.push(textBits.shift());
-            if(tag.type == "hyperlink"){
-                html.push('&lt;a href="'+ linkToURI(tag.data, ctx) +'">');
-                html.push(textBits.shift());
-                html.push('&lt;/a>');
-            } else {
-                html.push('&lt;'+tag.type+'>');
-                html.push(textBits.shift());
-                html.push('&lt;/'+tag.type+'>');
-            }
-        });
-        html.push(textBits.shift());
-
-        return html.join('');
-    }
-
-    function initField(field) {
-
-        var output,
-            img;
-
-        switch (field.type) {
-
-            case "Color":
-                output = new Color(field.value);
-                break;
-
-            case "Number":
-                output = new Num(field.value);
-                break;
-
-            case "Date":
-                output = new DateTime(field.value);
-                break;
-
-            case "Text":
-                output = new Text(field.value);
-                break;
-
-            case "Embed":
-                output = new Embed(field.value);
-                break;
-
-            case "Select":
-                output = new Select(field.value);
-                break;
-
-            case "Image":
-                var img = field.value.main;
-                output = new ImageEl(
-                    new ImageView(
-                        img.url,
-                        img.dimensions.width,
-                        img.dimensions.height
-                    ),
-                    field.value.views
-                );
-                break;
-
-            case "StructuredText":
-                output = new StructuredText(field.value);
-                break;
-
-            case "Link.document":
-                output = new DocumentLink(field.value);
-                break;
-
-            case "Link.web":
-                output = new WebLink(field.value);
-                break;
-
-            default:
-                console.log("Type not found:", field.type);
-                break;
-        }
-
-        return output;
-
-    }
-
-    Global.Prismic.Fragments = {
-        Image: ImageEl,
-        ImageView: ImageView,
-        Text: Text,
-        Number: Num,
-        Date: DateTime,
-        Select: Select,
-        Color: Color,
-        StructuredText: StructuredText,
-        initField: initField
-    }
-
-}(typeof exports === 'object' &amp;&amp; exports ? exports : (typeof module === "object" &amp;&amp; module &amp;&amp; typeof module.exports === "object" ? module.exports : window)));
 </code></pre>
         </article>
     </section>
@@ -1037,13 +799,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Color.html">Color</a></li><li><a href="DateTime.html">DateTime</a></li><li><a href="Doc.html">Doc</a></li><li><a href="DocumentLink.html">DocumentLink</a></li><li><a href="Documents.html">Documents</a></li><li><a href="Embed.html">Embed</a></li><li><a href="FileLink.html">FileLink</a></li><li><a href="Form.html">Form</a></li><li><a href="Group.html">Group</a></li><li><a href="ImageEl.html">ImageEl</a></li><li><a href="ImageLink.html">ImageLink</a></li><li><a href="ImageView.html">ImageView</a></li><li><a href="Num.html">Num</a></li><li><a href="Ref.html">Ref</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="Select.html">Select</a></li><li><a href="StructuredText.html">StructuredText</a></li><li><a href="Text.html">Text</a></li><li><a href="WebLink.html">WebLink</a></li></ul><h3>Global</h3><ul><li><a href="global.html#BlockGroup">BlockGroup</a></li><li><a href="global.html#getFragments">getFragments</a></li><li><a href="global.html#initField">initField</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#prismic">prismic</a></li><li><a href="global.html#StructuredTextAsHtml">StructuredTextAsHtml</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha3</a> on Wed Jan 08 2014 11:56:56 GMT-0800 (PST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Fri Apr 18 2014 16:33:12 GMT-0700 (PDT)
 </footer>
 
 <script> prettyPrint(); </script>
