@@ -4,6 +4,7 @@
 
     /**
      * Embodies a plain text fragment (beware: not a structured text)
+     * @constructor
      */
     function Text(data) {
         this.value = data;
@@ -22,6 +23,7 @@
 
     /**
      * Embodies a document link fragment (a link that is internal to a prismic.io repository)
+     * @constructor
      */
     function DocumentLink(data) {
         this.value = data;
@@ -52,6 +54,7 @@
 
     /**
      * Embodies a web link fragment
+     * @constructor
      */
     function WebLink(data) {
         this.value = data;
@@ -78,6 +81,7 @@
 
     /**
      * Embodies a file link fragment
+     * @constructor
      */
     function FileLink(data) {
         this.value = data;
@@ -104,6 +108,7 @@
 
     /**
      * Embodies an image link fragment
+     * @constructor
      */
     function ImageLink(data) {
         this.value = data;
@@ -130,6 +135,7 @@
 
     /**
      * Embodies a select fragment
+     * @constructor
      */
     function Select(data) {
         this.value = data;
@@ -148,6 +154,7 @@
 
     /**
      * Embodies a color fragment
+     * @constructor
      */
     function Color(data) {
         this.value = data;
@@ -166,6 +173,7 @@
 
     /**
      * Embodies a Number fragment
+     * @constructor
      */
     function Num(data) {
         this.value = data;
@@ -184,6 +192,7 @@
 
     /**
      * Embodies a DateTime fragment
+     * @constructor
      */
     function DateTime(data) {
         this.value = new Date(data);
@@ -206,6 +215,7 @@
 
     /**
      * Embodies an embed fragment
+     * @constructor
      */
     function Embed(data) {
         this.value = data;
@@ -225,6 +235,7 @@
 
     /**
      * Embodies an Image fragment
+     * @constructor
      */
     function ImageEl(main, views) {
         this.main = main;
@@ -257,6 +268,7 @@
 
     /**
      * Embodies an image view (an image in prismic.io can be defined with several different thumbnail sizes, each size is called a "view")
+     * @constructor
      */
     function ImageView(url, width, height) {
         this.url = url;
@@ -280,6 +292,7 @@
 
     /**
      * Embodies a fragment of type "Group" (which is a group of subfragments)
+     * @constructor
      */
     function Group(data) {
       this.value = data;
@@ -315,6 +328,7 @@
     /**
      * Embodies a group of text blocks in a structured text fragment, like a group of list items.
      * This is only used in the serialization into HTML of structured text fragments.
+     * @constructor
      */
     function BlockGroup(tag, blocks) {
         this.tag = tag;
@@ -323,6 +337,7 @@
 
     /**
      * Embodies a structured text fragment
+     * @constructor
      */
     function StructuredText(blocks) {
 

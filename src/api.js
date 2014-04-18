@@ -284,6 +284,7 @@
 
     /**
      * Embodies a submittable RESTful form as described on the API endpoint (as per RESTful standards)
+     * @constructor
      */
     function Form(name, fields, form_method, rel, enctype, action) {
         this.name = name;
@@ -477,6 +478,7 @@
      * Embodies the result of a SearchForm query as returned by the API.
      * It includes all the fields that are useful for pagination (page, total_pages, total_results_size, ...),
      * as well as the field "results", which is an array of Doc objects, the documents themselves.
+     * @constructor
      */
     function Documents(page, results_per_page, results_size, total_results_size, total_pages, next_page, prev_page, results) {
 		this.page = page;
@@ -492,6 +494,7 @@
     /**
      * Embodies a document as returned by the API.
      * Most useful fields: id, type, tags, slug, slugs, ...
+     * @constructor
      */
     function Doc(id, type, href, tags, slugs, fragments) {
 
@@ -745,6 +748,7 @@
 
     /**
      * Embodies a prismic.io ref (a past or future point in time you can query  )
+     * @constructor
      */
     function Ref(ref, label, isMaster) {
         this.ref = ref;
