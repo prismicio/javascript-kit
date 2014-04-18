@@ -5,7 +5,20 @@
   var testRepository = 'https://lesbonneschoses.prismic.io/api',
 
       // This token allow to preview future releases of this repository (nothing secret ;)
-      previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70';
+      previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70',
+
+      microRepository = 'https://micro.prismic.io/api',
+
+      ctx = {
+        api: undefined,
+        ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
+        maybeRef: 'XXXXX',
+        oauth: function() { },
+        linkResolver: function(ctx, doc, isBroken) {
+          if (isBroken) return '#broken';
+          return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
+        }
+      };
 
   module('Prismic.io', {
     setup: function() {}
@@ -234,16 +247,6 @@
   });
 
   asyncTest('Render a document to Html', 1, function() {
-    var ctx = {
-      api: undefined,
-      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
-      maybeRef: 'XXXXX',
-      oauth: function() { },
-      linkResolver: function(ctx, doc, isBroken) {
-        if (isBroken) return '#broken';
-        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
-      }
-    };
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').ref(Api.master()).submit(function(err, documents) {
@@ -268,16 +271,6 @@
   });
 
   asyncTest('StructuredTexts asHtml handles preformatted', 1, function() {
-    var ctx = {
-      api: undefined,
-      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
-      maybeRef: 'XXXXX',
-      oauth: function() { },
-      linkResolver: function(ctx, doc, isBroken) {
-        if (isBroken) return '#broken';
-        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
-      }
-    };
     Prismic.Api('https://micro.prismic.io/api', function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').query('[[:d = at(document.id, "UrDejAEAAFwMyrW9")]]').ref(Api.master()).submit(function(err, documents) {
@@ -311,16 +304,6 @@
   });
 
   asyncTest('StructuredTexts asHtml handles span Link.document', 1, function() {
-    var ctx = {
-      api: undefined,
-      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
-      maybeRef: 'XXXXX',
-      oauth: function() { },
-      linkResolver: function(ctx, doc, isBroken) {
-        if (isBroken) return '#broken';
-        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
-      }
-    };
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').query('[[:d = at(document.id, "UkL0gMuvzYUANCpo")]]').ref(Api.master()).submit(function(err, documents) {
@@ -339,16 +322,6 @@
   });
 
   asyncTest('Handles multiple fields', 1, function() {
-    var ctx = {
-      api: undefined,
-      ref: { ref: 'XXXXX', label: 'Future release', isMaster: false },
-      maybeRef: 'XXXXX',
-      oauth: function() { },
-      linkResolver: function(ctx, doc, isBroken) {
-        if (isBroken) return '#broken';
-        return "/testing_url/"+doc.id+"/"+doc.slug+( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
-      }
-    };
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').query('[[:d = at(document.id, "UkL0gMuvzYUANCpr")]]').ref(Api.master()).submit(function(err, documents) {
@@ -366,6 +339,28 @@
         if (err) { console.log(err); return; }
         equal(documents.results[0].getImageView('product.image', 'main').asHtml(), '<img src=https://prismic-io.s3.amazonaws.com/lesbonneschoses/f606ad513fcc2a73b909817119b84d6fd0d61a6d.png width=500 height=500>');
         equal(documents.results[0].getImageView('product.image', 'icon').asHtml(), '<img src=https://prismic-io.s3.amazonaws.com/lesbonneschoses/fe4f9379ee325456992d48204b8d94aeb60cc976.png width=250 height=250>');
+        start();
+      });
+    }, previewToken);
+  });
+
+  asyncTest('Block fragments are accessible, loopable, and serializable', 4, function() {
+    Prismic.Api(microRepository, function(err, Api) {
+      if (err) { console.log(err); return; }
+      Api.form('everything').query('[[:d = at(document.id, "UrDndQEAALQMyrXF")]]').ref(Api.master()).submit(function(err, documents) {
+        if (err) { console.log(err); return; }
+        // Group fragments are accessible
+        equal(documents.results[0].getGroup('docchapter.docs').toArray()[0]['linktodoc'].value.document.type, 'doc');
+        // Group fragments are loopable
+        var slugs = "";
+        for (var i = 0; i<documents.results[0].getGroup('docchapter.docs').toArray().length; i++) {
+          slugs += documents.results[0].getGroup('docchapter.docs').toArray()[i]['linktodoc'].value.document.slug + ' ';
+        }
+        equal(slugs.trim(), 'with-jquery with-bootstrap');
+        // Group fragments are serializable when asHtml is called directly on them
+        equal(documents.results[0].getGroup('docchapter.docs').asHtml(ctx), '<section data-field=\"linktodoc\"><a href=\"/testing_url/UrDofwEAALAdpbNH/with-jquery?ref=XXXXX\">/testing_url/UrDofwEAALAdpbNH/with-jquery?ref=XXXXX</a></section><section data-field=\"linktodoc\"><a href=\"/testing_url/UrDp8AEAAPUdpbNL/with-bootstrap?ref=XXXXX\">/testing_url/UrDp8AEAAPUdpbNL/with-bootstrap?ref=XXXXX</a></section>');
+        // Group fragments are serializable when as Html is called on a document
+        equal(documents.results[0].asHtml(ctx), '<section data-field=\"docchapter.title\"><h1>Using with other projects</h1></section><section data-field=\"docchapter.intro\"><p>As advertised, meta-micro knows how to stay out of the way of the rest of your application. Here are some cases of how to use it with some of the most used open-source projects in JavaScript.</p></section><section data-field=\"docchapter.priority\"><span>500</span></section><section data-field=\"docchapter.docs\"><section data-field=\"linktodoc\"><a href=\"/testing_url/UrDofwEAALAdpbNH/with-jquery?ref=XXXXX\">/testing_url/UrDofwEAALAdpbNH/with-jquery?ref=XXXXX</a></section><section data-field=\"linktodoc\"><a href=\"/testing_url/UrDp8AEAAPUdpbNL/with-bootstrap?ref=XXXXX\">/testing_url/UrDp8AEAAPUdpbNL/with-bootstrap?ref=XXXXX</a></section></section>');
         start();
       });
     }, previewToken);
