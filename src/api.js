@@ -5,6 +5,9 @@
     /**
      * The kit's main entry point; initialize your API like this: Prismic.Api(url, callback, accessToken, maybeRequestHandler)
      *
+     * @global
+     * @alias Api
+     * @constructor
      * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
      * @param {function} callback - Optional callback function that is called after the API was retrieved, to which you may pass two parameters: a potential error (null if no problem), and the API object
      * @param {string} accessToken - The optional accessToken for the OAuth2 connection
@@ -16,6 +19,7 @@
         callback && api.get(callback);
         return api;
     };
+    // note that the prismic variable is later affected as "Api" while exporting
 
     // -- Request handlers
 
@@ -112,11 +116,7 @@
         }
     });
 
-    /**
-     * The Api object you can manipulate, notably to perform queries in your repository.
-     * Most useful fields: bookmarks, refs, types, tags, ...
-     */
-
+    // Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
     prismic.fn = prismic.prototype = {
 
         constructor: prismic,
@@ -150,6 +150,7 @@
          *
          * @param {string} data - The JSON document responded on the API's endpoint
          * @returns {Api} - The Api object that can be manipulated
+         * @private
          */
         parse: function(data) {
             var refs,
@@ -222,6 +223,7 @@
         /**
          * Initialisation of the API object.
          * This is for internal use, from outside this kit, you should call Prismic.Api()
+         * @private
          */
         init: function(url, accessToken, maybeRequestHandler) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
@@ -232,7 +234,8 @@
 
         /**
          * @deprecated use form() now
-         * Returns a useable form from its id, as described in the RESTful description of the API.
+         * @param {string} formId - The id of a form, like "everything", or "products"
+         * @returns {SearchForm} - the SearchForm that can be used.
          */
         forms: function(formId) {
             return this.form(formId);
@@ -243,6 +246,7 @@
          * For instance: api.form("everything") works on every repository (as "everything" exists by default)
          * You can then chain the calls: api.form("everything").query('[[:d = at(document.id, "UkL0gMuvzYUANCpf")]]').ref(ref).submit()
          *
+         * @param {string} formId - The id of a form, like "everything", or "products"
          * @returns {SearchForm} - the SearchForm that can be used.
          */
         form: function(formId) {
@@ -268,6 +272,7 @@
          * Do not use like this: searchForm.ref(api.ref("Future release label")).
          * Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
          *
+         * @param {string} label - the ref's label
          * @returns {string}
          */
         ref: function(label) {
@@ -285,6 +290,7 @@
     /**
      * Embodies a submittable RESTful form as described on the API endpoint (as per RESTful standards)
      * @constructor
+     * @private
      */
     function Form(name, fields, form_method, rel, enctype, action) {
         this.name = name;
@@ -300,6 +306,8 @@
     /**
      * Embodies a SearchForm object. To create SearchForm objects that are allowed in the API, please use the API.form() method.
      * @constructor
+     * @global
+     * @alias SearchForm
      */
     function SearchForm(api, form, data) {
         this.api = api;
@@ -459,7 +467,8 @@
 
     /**
      * An array of the fragments with the given fragment name.
-     * The array is often a single-element array, expect when the field is a multiple field.
+     * The array is often a single-element array, expect when the fragment is a multiple fragment.
+     * @private
      */
     function getFragments(name) {
         if (!this.fragments || !this.fragments[name]) {
@@ -479,41 +488,100 @@
      * It includes all the fields that are useful for pagination (page, total_pages, total_results_size, ...),
      * as well as the field "results", which is an array of Doc objects, the documents themselves.
      * @constructor
+     * @global
      */
     function Documents(page, results_per_page, results_size, total_results_size, total_pages, next_page, prev_page, results) {
+        /**
+         * @field
+         * @description the current page number
+         */
 		this.page = page;
+        /**
+         * @field
+         * @description the number of results per page
+         */
 		this.results_per_page = results_per_page;
+        /**
+         * @field
+         * @description the size of the current page
+         */
 		this.results_size = results_size;
+        /**
+         * @field
+         * @description the total size of results across all pages
+         */
 		this.total_results_size = total_results_size;
+        /**
+         * @field
+         * @description the total number of pages
+         */
 		this.total_pages = total_pages;
+        /**
+         * @field
+         * @description the URL of the next page in the API
+         */
 		this.next_page = next_page;
+        /**
+         * @field
+         * @description the URL of the previous page in the API
+         */
 		this.prev_page = prev_page;
-		this.results = results; // an array of Doc objects
+        /**
+         * @field
+         * @description the array of the {Doc} objects
+         */
+		this.results = results;
     }
 
     /**
      * Embodies a document as returned by the API.
      * Most useful fields: id, type, tags, slug, slugs, ...
      * @constructor
+     * @global
+     * @alias Doc
      */
     function Doc(id, type, href, tags, slugs, fragments) {
 
+        /**
+         * @field
+         * @description the ID of the document
+         */
         this.id = id;
+        /**
+         * @field
+         * @description the type of the document
+         */
         this.type = type;
+        /**
+         * @field
+         * @description the URL of the document in the API
+         */
         this.href = href;
+        /**
+         * @field
+         * @description the tags of the document
+         */
         this.tags = tags;
+        /**
+         * @field
+         * @description the current slug of the document
+         */
         this.slug = slugs ? slugs[0] : "-";
+        /**
+         * @field
+         * @description all the slugs that were ever used by this document (including the current one, at the head)
+         */
         this.slugs = slugs;
         this.fragments = fragments;
     }
 
     Doc.prototype = {
         /**
-         * Gets the field in the current Document object. Since you most likely know the type
-         * of this field, it is advised that you use a dedicated method, like get StructuredText() or getDate(),
+         * Gets the fragment in the current Document object. Since you most likely know the type
+         * of this fragment, it is advised that you use a dedicated method, like get StructuredText() or getDate(),
          * for instance.
          *
-         * @param {string} name - The name of the field to get, with its type; for instance, "blog-post.author"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.author"
          * @returns {object} - The JavaScript Fragment object to manipulate
          */
         get: function(name) {
@@ -534,14 +602,14 @@
         },
 
         /**
-         * Gets the image field in the current Document object, for further manipulation.
+         * Gets the image fragment in the current Document object, for further manipulation.
          * Typical use: document.getImage('blog-post.photo').asHtml(ctx)
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
-         * @returns {Image} - The Image object to manipulate
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
+         * @returns {ImageEl} - The Image object to manipulate
          */
-        getImage: function(field) {
-            var img = this.get(field);
+        getImage: function(fragment) {
+            var img = this.get(fragment);
             if (img instanceof Global.Prismic.Fragments.Image) {
                 return img;
             }
@@ -552,8 +620,9 @@
             return null;
         },
 
-        getAllImages: function(field) {
-            var images = this.getAll(field);
+        // Useful for obsolete multiples
+        getAllImages: function(fragment) {
+            var images = this.getAll(fragment);
 
             return images.map(function (image) {
                 if (image instanceof Global.Prismic.Fragments.Image) {
@@ -568,14 +637,14 @@
 
 
         /**
-         * Gets the view within the image field in the current Document object, for further manipulation.
+         * Gets the view within the image fragment in the current Document object, for further manipulation.
          * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx)
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.photo"
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageView} - The View object to manipulate
          */
-        getImageView: function(field, view) {
-            var fragment = this.get(field);
+        getImageView: function(fragment, view) {
+            var fragment = this.get(fragment);
             if (fragment instanceof Global.Prismic.Fragments.Image) {
                 return fragment.getView(view);
             }
@@ -589,21 +658,22 @@
             return null;
         },
 
-        getAllImageViews: function(field, view) {
-            return this.getAllImages(field).map(function (image) {
+        // Useful for obsolete multiples
+        getAllImageViews: function(fragment, view) {
+            return this.getAllImages(fragment).map(function (image) {
                 return image.getView(view);
             });
         },
 
         /**
-         * Gets the date field in the current Document object, for further manipulation.
+         * Gets the date fragment in the current Document object, for further manipulation.
          * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx)
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.publicationdate"
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
          */
-        getDate: function(field) {
-            var fragment = this.get(field);
+        getDate: function(fragment) {
+            var fragment = this.get(fragment);
 
             if(fragment instanceof Global.Prismic.Fragments.Date) {
                 return fragment.value;
@@ -611,28 +681,29 @@
         },
 
         /**
-         * Gets the boolean field in the current Document object, for further manipulation.
+         * Gets a boolean value of the fragment in the current Document object, for further manipulation.
          * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx).
-         * This works great with a Select field. The Select values that are considered true are: 'yes', 'on', and 'true'.
+         * This works great with a Select fragment. The Select values that are considered true are (lowercased before matching): 'yes', 'on', and 'true'.
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.enableComments"
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
          * @returns {boolean}
          */
-        getBoolean: function(field) {
-            var fragment = this.get(field);
+        getBoolean: function(fragment) {
+            var fragment = this.get(fragment);
             return fragment.value && (fragment.value.toLowerCase() == 'yes' || fragment.value.toLowerCase() == 'on' || fragment.value.toLowerCase() == 'true');
         },
 
         /**
-         * Gets the text field in the current Document object, for further manipulation.
+         * Gets the text fragment in the current Document object, for further manipulation.
          * Typical use: document.getText('blog-post.label').asHtml(ctx).
-         * The method works with StructuredText fields, Text fields, Number fields, Select fields and Color fields.
+         * The method works with StructuredText fragments, Text fragments, Number fragments, Select fragments and Color fragments.
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.label"
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.label"
+         * @param {string} after - a suffix that will be appended to the value
          * @returns {object} - either StructuredText, or Text, or Number, or Select, or Color.
          */
-        getText: function(field, after) {
-            var fragment = this.get(field);
+        getText: function(fragmentName, after) {
+            var fragment = this.get(fragmentName);
 
             if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment.blocks.map(function(block) {
@@ -668,14 +739,14 @@
         },
 
         /**
-         * Gets the StructuredText field in the current Document object, for further manipulation.
+         * Gets the StructuredText fragment in the current Document object, for further manipulation.
          * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx).
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
-         * @returns {StructuredText} - The StructuredText field to manipulate.
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
+         * @returns {StructuredText} - The StructuredText fragment to manipulate.
          */
-        getStructuredText: function(field) {
-            var fragment = this.get(field);
+        getStructuredText: function(fragment) {
+            var fragment = this.get(fragment);
 
             if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment;
@@ -683,14 +754,14 @@
         },
 
         /**
-         * Gets the Number field in the current Document object, for further manipulation.
+         * Gets the Number fragment in the current Document object, for further manipulation.
          * Typical use: document.getNumber('product.price').asHtml(ctx).
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "product.price"
-         * @returns {Number} - The Number field to manipulate.
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.price"
+         * @returns {Number} - The Number fragment to manipulate.
          */
-        getNumber: function(field) {
-            var fragment = this.get(field);
+        getNumber: function(fragment) {
+            var fragment = this.get(fragment);
 
             if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value
@@ -698,14 +769,14 @@
         },
 
         /**
-         * Gets the Group field in the current Document object, for further manipulation.
+         * Gets the Group fragment in the current Document object, for further manipulation.
          * Typical use: document.getGroup('product.gallery').asHtml(ctx).
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "product.gallery"
-         * @returns {Group} - The Group field to manipulate.
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.gallery"
+         * @returns {Group} - The Group fragment to manipulate.
          */
-        getGroup: function(field) {
-            var fragment = this.get(field);
+        getGroup: function(fragment) {
+            var fragment = this.get(fragment);
 
             if (fragment instanceof Global.Prismic.Fragments.Group) {
                 return fragment;
@@ -713,15 +784,15 @@
         },
 
         /**
-         * Shortcut to get the HTML output of the field in the current document.
-         * This is the same as writing document.get(field).asHtml(ctx);
+         * Shortcut to get the HTML output of the fragment in the current document.
+         * This is the same as writing document.get(fragment).asHtml(ctx);
          *
-         * @param {string} field - The name of the field to get, with its type; for instance, "blog-post.body"
-         * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), et ctx.linkResolver()
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
+         * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
          * @returns {string} - The HTML output
          */
-        getHtml: function(field, ctx) {
-            var fragment = this.get(field);
+        getHtml: function(fragment, ctx) {
+            var fragment = this.get(fragment);
 
             if(fragment && fragment.asHtml) {
                 return fragment.asHtml(ctx);
@@ -729,10 +800,10 @@
         },
 
         /**
-         * Transforms the whole document as an HTML output. Each field is separated by a <section> tag,
-         * with the attribute data-field="nameoffield"
+         * Transforms the whole document as an HTML output. Each fragment is separated by a <section> tag,
+         * with the attribute data-field="nameoffragment"
          *
-         * @param {object} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), et ctx.linkResolver()
+         * @param {object} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
          * @returns {string} - The HTML output
          */
         asHtml: function(ctx) {
@@ -747,12 +818,25 @@
     };
 
     /**
-     * Embodies a prismic.io ref (a past or future point in time you can query  )
+     * Embodies a prismic.io ref (a past or future point in time you can query)
      * @constructor
+     * @global
      */
     function Ref(ref, label, isMaster) {
+        /**
+         * @field
+         * @description the ID of the ref
+         */
         this.ref = ref;
+        /**
+         * @field
+         * @description the label of the ref
+         */
         this.label = label;
+        /**
+         * @field
+         * @description is true if the ref is the master ref
+         */
         this.isMaster = isMaster;
     }
     Ref.prototype = {};

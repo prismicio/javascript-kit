@@ -4,11 +4,7 @@
 
 #### Install the kit
 
-You can find the minified latest (unstable) version of the library at:
-
-```
-https://raw.github.com/prismicio/javascript-kit/master/dist/prismic.io-1.0.9.min.js
-```
+You can find downloadable versions of the kit on our release page: [https://github.com/prismicio/javascript-kit/releases](https://github.com/prismicio/javascript-kit/releases).
 
 You can install a stable version using __npm__:
 

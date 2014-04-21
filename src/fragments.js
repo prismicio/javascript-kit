@@ -5,6 +5,8 @@
     /**
      * Embodies a plain text fragment (beware: not a structured text)
      * @constructor
+     * @global
+     * @alias Fragments:Text
      */
     function Text(data) {
         this.value = data;
@@ -24,12 +26,23 @@
     /**
      * Embodies a document link fragment (a link that is internal to a prismic.io repository)
      * @constructor
+     * @global
+     * @alias Fragments:DocumentLink
      */
     function DocumentLink(data) {
         this.value = data;
+        /**
+         * @field
+         * @description the document link's JSON object, exactly as is returned in the JSON responses (see API documentation: https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#json-responses)
+         */
         this.document = data.document;
+        /**
+         * @field
+         * @description true if the link is broken, false otherwise
+         */
         this.isBroken = data.isBroken;
     }
+
     DocumentLink.prototype = {
         /**
          * Turns the fragment into a useable HTML version of it.
@@ -55,8 +68,14 @@
     /**
      * Embodies a web link fragment
      * @constructor
+     * @global
+     * @alias Fragments:WebLink
      */
     function WebLink(data) {
+        /**
+         * @field
+         * @description the JSON object exactly as is returned in the "data" field of the JSON responses (see API documentation: https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#json-responses)
+         */
         this.value = data;
     }
     WebLink.prototype = {
@@ -82,8 +101,14 @@
     /**
      * Embodies a file link fragment
      * @constructor
+     * @global
+     * @alias Fragments:FileLink
      */
     function FileLink(data) {
+        /**
+         * @field
+         * @description the JSON object exactly as is returned in the "data" field of the JSON responses (see API documentation: https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#json-responses)
+         */
         this.value = data;
     }
     FileLink.prototype = {
@@ -109,8 +134,14 @@
     /**
      * Embodies an image link fragment
      * @constructor
+     * @global
+     * @alias Fragments:ImageLink
      */
     function ImageLink(data) {
+        /**
+         * @field
+         * @description the JSON object exactly as is returned in the "data" field of the JSON responses (see API documentation: https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#json-responses)
+         */
         this.value = data;
     }
     ImageLink.prototype = {
@@ -136,8 +167,14 @@
     /**
      * Embodies a select fragment
      * @constructor
+     * @global
+     * @alias Fragments:Select
      */
     function Select(data) {
+        /**
+         * @field
+         * @description the text value of the fragment
+         */
         this.value = data;
     }
     Select.prototype = {
@@ -155,8 +192,14 @@
     /**
      * Embodies a color fragment
      * @constructor
+     * @global
+     * @alias Fragments:Color
      */
     function Color(data) {
+        /**
+         * @field
+         * @description the text value of the fragment
+         */
         this.value = data;
     }
     Color.prototype = {
@@ -174,8 +217,14 @@
     /**
      * Embodies a Number fragment
      * @constructor
+     * @global
+     * @alias Fragments:Num
      */
     function Num(data) {
+        /**
+         * @field
+         * @description the integer value of the fragment
+         */
         this.value = data;
     }
     Num.prototype = {
@@ -193,8 +242,14 @@
     /**
      * Embodies a DateTime fragment
      * @constructor
+     * @global
+     * @alias Fragments:DateTime
      */
     function DateTime(data) {
+        /**
+         * @field
+         * @description the Date value of the fragment (as a regular JS Date object)
+         */
         this.value = new Date(data);
     }
 
@@ -216,8 +271,14 @@
     /**
      * Embodies an embed fragment
      * @constructor
+     * @global
+     * @alias Fragments:Embed
      */
     function Embed(data) {
+        /**
+         * @field
+         * @description the JSON object exactly as is returned in the "data" field of the JSON responses (see API documentation: https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#json-responses)
+         */
         this.value = data;
     }
 
@@ -236,9 +297,19 @@
     /**
      * Embodies an Image fragment
      * @constructor
+     * @global
+     * @alias Fragments:ImageEl
      */
     function ImageEl(main, views) {
+        /**
+         * @field
+         * @description the main ImageView for this image
+         */
         this.main = main;
+        /**
+         * @field
+         * @description an array of all the other ImageViews for this image
+         */
         this.views = views || {};
     }
     ImageEl.prototype = {
@@ -269,10 +340,24 @@
     /**
      * Embodies an image view (an image in prismic.io can be defined with several different thumbnail sizes, each size is called a "view")
      * @constructor
+     * @global
+     * @alias Fragments:ImageView
      */
     function ImageView(url, width, height) {
+        /**
+         * @field
+         * @description the URL of the ImageView (useable as it, in a <img> tag in HTML, for instance)
+         */
         this.url = url;
+        /**
+         * @field
+         * @description the width of the ImageView
+         */
         this.width = width;
+        /**
+         * @field
+         * @description the height of the ImageView
+         */
         this.height = height;
     }
     ImageView.prototype = {
@@ -293,6 +378,8 @@
     /**
      * Embodies a fragment of type "Group" (which is a group of subfragments)
      * @constructor
+     * @global
+     * @alias Fragments:Group
      */
     function Group(data) {
       this.value = data;
@@ -301,7 +388,7 @@
       /**
        * Turns the fragment into a useable HTML version of it.
        * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-       *
+       * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
        * @returns {string} - basic HTML code for the fragment
        */
       asHtml: function(ctx) {
@@ -318,6 +405,8 @@
       /**
        * Turns the Group fragment into an array in order to access its items (groups of fragments),
        * or to loop through them.
+       * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+       * @returns {array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
        */
        toArray: function(){
          return this.value;
@@ -329,6 +418,7 @@
      * Embodies a group of text blocks in a structured text fragment, like a group of list items.
      * This is only used in the serialization into HTML of structured text fragments.
      * @constructor
+     * @private
      */
     function BlockGroup(tag, blocks) {
         this.tag = tag;
@@ -338,6 +428,8 @@
     /**
      * Embodies a structured text fragment
      * @constructor
+     * @global
+     * @alias Fragments:StructuredText
      */
     function StructuredText(blocks) {
 
@@ -396,7 +488,7 @@
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function(ctx) {
@@ -408,6 +500,7 @@
     /**
      * Transforms a list of blocks as proper HTML.
      *
+     * @private
      * @param {array} blocks - the array of blocks to deal with
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
      * @returns {string} - the HTML output
@@ -481,6 +574,7 @@
     /**
      * Parses a block that has spans, and inserts the proper HTML code.
      *
+     * @private
      * @param {string} text - the original text of the block
      * @param {object} span - the spans as returned by the API
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
@@ -533,6 +627,7 @@
     /**
      * From a fragment's name, casts it into the proper object type (like Prismic.Fragments.StructuredText)
      *
+     * @private
      * @param {string} field - the fragment's name
      * @returns {object} - the object of the proper Fragments type.
      */
