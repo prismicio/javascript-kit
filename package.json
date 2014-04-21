@@ -2,7 +2,13 @@
   "name": "prismic.io",
   "description": "JavaScript development kit for prismic.io",
   "url": "https://github.com/prismicio/javascript-kit",
-  "keywords": ["prismic", "prismic.io", "cms", "content", "api"],
+  "keywords": [
+    "prismic",
+    "prismic.io",
+    "cms",
+    "content",
+    "api"
+  ],
   "version": "1.0.9",
   "devDependencies": {
     "grunt": "~0.4.1",
@@ -11,8 +17,12 @@
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-copy": "~0.5.0",
-    "grunt-bump":"~0.0.13"
+    "grunt-bump": "~0.0.13",
+    "grunt-jsdoc": "~0.5.4"
   },
-  "repository" : { "type" : "git", "url" : "http://github.com/prismicio/javascript-kit.git" },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/prismicio/javascript-kit.git"
+  },
   "main": "dist/prismic.io"
 }

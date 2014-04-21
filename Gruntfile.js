@@ -25,7 +25,7 @@ module.exports = function(grunt) {
     },
     
     clean: {
-      src: ['dist/prismic.io.js','dist/prismic.io.min.js']
+      src: ['dist/prismic.io.js','dist/prismic.io.min.js', 'doc']
     },
 
     concat: {
@@ -68,6 +68,15 @@ module.exports = function(grunt) {
       }
     },
 
+    jsdoc : {
+        dist : {
+            src: ['src/*.js', 'README.md'],
+            options: {
+                destination: 'doc'
+            }
+        }
+    }
+
   });
 
   // These plugins provide necessary tasks.
@@ -77,6 +86,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-bump');
+  grunt.loadNpmTasks('grunt-jsdoc');
 
   // Default task.
   grunt.registerTask('default', ['qunit', 'clean', 'concat', 'uglify']);
