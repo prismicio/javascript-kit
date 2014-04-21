@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: SearchForm</title>
+    <title>JSDoc: Class: Api</title>
     
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Class: SearchForm</h1>
+    <h1 class="page-title">Class: Api</h1>
     
     
 
@@ -27,7 +27,7 @@
     
 <header>
     <h2>
-    SearchForm
+    Api
     </h2>
     
 </header>  
@@ -39,7 +39,7 @@
     
         
 <dt>
-    <h4 class="name" id="SearchForm"><span class="type-signature"></span>new SearchForm<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Api"><span class="type-signature"></span>new Api<span class="signature">(url, callback, accessToken, maybeRequestHandler)</span><span class="type-signature"> &rarr; {<a href="Api.html">Api</a>}</span></h4>
     
     
 </dt>
@@ -47,7 +47,7 @@
     
     
     <div class="description">
-        Embodies a SearchForm object. To create SearchForm objects that are allowed in the API, please use the API.form() method.
+        The kit's main entry point; initialize your API like this: Prismic.Api(url, callback, accessToken, maybeRequestHandler)
     </div>
     
 
@@ -55,6 +55,123 @@
     
     
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">Optional callback function that is called after the API was retrieved, to which you may pass two parameters: a potential error (null if no problem), and the API object</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>accessToken</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The optional accessToken for the OAuth2 connection</td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>maybeRequestHandler</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -80,7 +197,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line312">line 312</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line17">line 17</a>
     </li></ul></dd>
     
     
@@ -101,6 +218,28 @@
     
     
     
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    - The Api object that can be manipulated
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Api.html">Api</a></span>
+
+
+	</dd>
+</dl>
+
+        
     
     
 </dd>
@@ -126,7 +265,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="orderings"><span class="type-signature"></span>orderings<span class="signature">(orderings)</span><span class="type-signature"> &rarr; {<a href="SearchForm.html">SearchForm</a>}</span></h4>
+    <h4 class="name" id="form"><span class="type-signature"></span>form<span class="signature">(formId)</span><span class="type-signature"> &rarr; {<a href="SearchForm.html">SearchForm</a>}</span></h4>
     
     
 </dt>
@@ -134,7 +273,9 @@
     
     
     <div class="description">
-        Sets the orderings to query for this SearchForm. This is an optional method.
+        Returns a useable form from its id, as described in the RESTful description of the API.
+For instance: api.form("everything") works on every repository (as "everything" exists by default)
+You can then chain the calls: api.form("everything").query('[[:d = at(document.id, "UkL0gMuvzYUANCpf")]]').ref(ref).submit()
     </div>
     
 
@@ -168,7 +309,7 @@
 	
         <tr>
             
-                <td class="name"><code>orderings</code></td>
+                <td class="name"><code>formId</code></td>
             
             
             <td class="type">
@@ -184,7 +325,7 @@
             
             
             
-            <td class="description last">The orderings</td>
+            <td class="description last">The id of a form, like "everything", or "products"</td>
         </tr>
 	
 	
@@ -215,7 +356,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line403">line 403</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line252">line 252</a>
     </li></ul></dd>
     
     
@@ -240,7 +381,7 @@
     
             
 <div class="param-desc">
-    - The SearchForm itself
+    - the SearchForm that can be used.
 </div>
 
 
@@ -265,16 +406,12 @@
         
             
 <dt>
-    <h4 class="name" id="page"><span class="type-signature"></span>page<span class="signature">(page)</span><span class="type-signature"> &rarr; {<a href="SearchForm.html">SearchForm</a>}</span></h4>
+    <h4 class="name" id="forms"><span class="type-signature"></span>forms<span class="signature">(formId)</span><span class="type-signature"> &rarr; {<a href="SearchForm.html">SearchForm</a>}</span></h4>
     
     
 </dt>
 <dd>
     
-    
-    <div class="description">
-        Sets the page number to query for this SearchForm. This is an optional method.
-    </div>
     
 
     
@@ -307,287 +444,7 @@
 	
         <tr>
             
-                <td class="name"><code>page</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">The page number</td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line393">line 393</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    - The SearchForm itself
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="SearchForm.html">SearchForm</a></span>
-
-
-	</dd>
-</dl>
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="pageSize"><span class="type-signature"></span>pageSize<span class="signature">(pageSize)</span><span class="type-signature"> &rarr; {<a href="SearchForm.html">SearchForm</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Sets a page size to query for this SearchForm. This is an optional method.
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>pageSize</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">The page size</td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line383">line 383</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    - The SearchForm itself
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="SearchForm.html">SearchForm</a></span>
-
-
-	</dd>
-</dl>
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="query"><span class="type-signature"></span>query<span class="signature">(query)</span><span class="type-signature"> &rarr; {<a href="SearchForm.html">SearchForm</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Sets a predicate-based query for this SearchForm. This is where you
-paste what you compose in your prismic.io API browser.
-You can pass an empty string, the method will simply not send that query.
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>query</code></td>
+                <td class="name"><code>formId</code></td>
             
             
             <td class="type">
@@ -603,7 +460,7 @@ You can pass an empty string, the method will simply not send that query.
             
             
             
-            <td class="description last">The query to perform</td>
+            <td class="description last">The id of a form, like "everything", or "products"</td>
         </tr>
 	
 	
@@ -622,6 +479,8 @@ You can pass an empty string, the method will simply not send that query.
     
     
     
+        <dt class="important tag-deprecated">Deprecated:</dt><dd><ul class="dummy"><li>use form() now</li><ul></dd>
+    
     
     
     
@@ -634,7 +493,7 @@ You can pass an empty string, the method will simply not send that query.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line373">line 373</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line240">line 240</a>
     </li></ul></dd>
     
     
@@ -659,7 +518,7 @@ You can pass an empty string, the method will simply not send that query.
     
             
 <div class="param-desc">
-    - The SearchForm itself
+    - the SearchForm that can be used.
 </div>
 
 
@@ -684,7 +543,7 @@ You can pass an empty string, the method will simply not send that query.
         
             
 <dt>
-    <h4 class="name" id="ref"><span class="type-signature"></span>ref<span class="signature">(ref)</span><span class="type-signature"> &rarr; {<a href="SearchForm.html">SearchForm</a>}</span></h4>
+    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(callback)</span><span class="type-signature"> &rarr; {<a href="Api.html">Api</a>}</span></h4>
     
     
 </dt>
@@ -692,313 +551,8 @@ You can pass an empty string, the method will simply not send that query.
     
     
     <div class="description">
-        Sets a ref to query on for this SearchForm. This is a mandatory
-method to call before calling submit(), and api.form('everything').submit()
-will not work.
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>ref</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Ref.html">Ref</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">The Ref object defining the ref to query</td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line361">line 361</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    - The SearchForm itself
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="SearchForm.html">SearchForm</a></span>
-
-
-	</dd>
-</dl>
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="set"><span class="type-signature"></span>set<span class="signature">(field, value)</span><span class="type-signature"> &rarr; {<a href="SearchForm.html">SearchForm</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Set an API call parameter. This will only work if field is a valid field of the
-RESTful form in the first place (as described in the /api document); otherwise,
-an "Unknown field" error is thrown.
-Please prefer using dedicated methods like query(), orderings(), ...
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>field</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">The name of the field to set</td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>value</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last">The value that gets assigned</td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line336">line 336</a>
-    </li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    - The SearchForm itself
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="SearchForm.html">SearchForm</a></span>
-
-
-	</dd>
-</dl>
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="submit"><span class="type-signature"></span>submit<span class="signature">(callback)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        Submits the query, and calls the callback function.
+        Requests (with the proper handler), parses, and returns the /api document.
+This is for internal use, from outside this kit, you should call Prismic.Api()
     </div>
     
 
@@ -1048,9 +602,7 @@ Please prefer using dedicated methods like query(), orderings(), ...
             
             
             
-            <td class="description last">Optional callback function that is called after the query was made,
-to which you may pass two parameters: a potential error (null if no problem),
-and a Documents object (containing all the pagination specifics + the array of Docs)</td>
+            <td class="description last">Optional callback function that is called after the query is made, to which you may pass two parameters: a potential error (null if no problem), and the API object</td>
         </tr>
 	
 	
@@ -1081,7 +633,7 @@ and a Documents object (containing all the pagination specifics + the array of D
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line414">line 414</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line132">line 132</a>
     </li></ul></dd>
     
     
@@ -1102,6 +654,464 @@ and a Documents object (containing all the pagination specifics + the array of D
     
     
     
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    - The Api object that can be manipulated
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Api.html">Api</a></span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="init"><span class="type-signature">&lt;private> </span>init<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Initialisation of the API object.
+This is for internal use, from outside this kit, you should call Prismic.Api()
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line228">line 228</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="master"><span class="type-signature"></span>master<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        The ID of the master ref on this prismic.io API.
+Do not use like this: searchForm.ref(api.master()).
+Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line266">line 266</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="parse"><span class="type-signature">&lt;private> </span>parse<span class="signature">(data)</span><span class="type-signature"> &rarr; {<a href="Api.html">Api</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Parses and returns the /api document.
+This is for internal use, from outside this kit, you should call Prismic.Api()
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The JSON document responded on the API's endpoint</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line155">line 155</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    - The Api object that can be manipulated
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Api.html">Api</a></span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="ref"><span class="type-signature"></span>ref<span class="signature">(label)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Returns the ref ID for a given ref's label.
+Do not use like this: searchForm.ref(api.ref("Future release label")).
+Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">the ref's label</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line278">line 278</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
+
+
+	</dd>
+</dl>
+
+        
     
     
 </dd>
