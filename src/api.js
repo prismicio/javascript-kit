@@ -769,6 +769,21 @@
         },
 
         /**
+         * Gets the Color fragment in the current Document object, for further manipulation.
+         * Typical use: document.getColor('product.color').asHtml(ctx).
+         *
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.color"
+         * @returns {Color} - The Color fragment to manipulate.
+         */
+        getColor: function(fragment) {
+            var fragment = this.get(fragment);
+
+            if (fragment instanceof Global.Prismic.Fragments.Color) {
+                return fragment.value
+            }
+        },
+
+        /**
          * Gets the Group fragment in the current Document object, for further manipulation.
          * Typical use: document.getGroup('product.gallery').asHtml(ctx).
          *
