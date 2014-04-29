@@ -545,7 +545,7 @@ with the attribute data-field="nameoffragment"
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line809">line 809</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line824">line 824</a>
     </li></ul></dd>
     
     
@@ -884,7 +884,7 @@ for instance.
     
     <div class="description">
         Gets a boolean value of the fragment in the current Document object, for further manipulation.
-Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx).
+Typical use: if(document.getBoolean('blog-post.enableComments')) { ... }
 This works great with a Select fragment. The Select values that are considered true are (lowercased before matching): 'yes', 'on', and 'true'.
     </div>
     
@@ -990,6 +990,10 @@ This works great with a Select fragment. The Select values that are considered t
     <h5>Returns:</h5>
     
             
+<div class="param-desc">
+    - The boolean value of the fragment
+</div>
+
 
 
 <dl>
@@ -999,6 +1003,146 @@ This works great with a Select fragment. The Select values that are considered t
 	<dd>
 		
 <span class="param-type">boolean</span>
+
+
+	</dd>
+</dl>
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="getColor"><span class="type-signature"></span>getColor<span class="signature">(fragment)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        Gets the Color fragment in the current Document object, for further manipulation.
+Typical use: document.getColor('product.color')
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>fragment</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last">The name of the fragment to get, with its type; for instance, "product.color"</td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line778">line 778</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    - The string value of the Color fragment.
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
 
 
 	</dd>
@@ -1242,7 +1386,7 @@ Typical use: document.getGroup('product.gallery').asHtml(ctx).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line778">line 778</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line793">line 793</a>
     </li></ul></dd>
     
     
@@ -1405,7 +1549,7 @@ This is the same as writing document.get(fragment).asHtml(ctx);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line794">line 794</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line809">line 809</a>
     </li></ul></dd>
     
     
@@ -1735,7 +1879,7 @@ Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx)
         
             
 <dt>
-    <h4 class="name" id="getNumber"><span class="type-signature"></span>getNumber<span class="signature">(fragment)</span><span class="type-signature"> &rarr; {Number}</span></h4>
+    <h4 class="name" id="getNumber"><span class="type-signature"></span>getNumber<span class="signature">(fragment)</span><span class="type-signature"> &rarr; {number}</span></h4>
     
     
 </dt>
@@ -1744,7 +1888,7 @@ Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx)
     
     <div class="description">
         Gets the Number fragment in the current Document object, for further manipulation.
-Typical use: document.getNumber('product.price').asHtml(ctx).
+Typical use: document.getNumber('product.price')
     </div>
     
 
@@ -1850,7 +1994,7 @@ Typical use: document.getNumber('product.price').asHtml(ctx).
     
             
 <div class="param-desc">
-    - The Number fragment to manipulate.
+    - The number value of the fragment.
 </div>
 
 
@@ -1861,7 +2005,7 @@ Typical use: document.getNumber('product.price').asHtml(ctx).
 	</dt>
 	<dd>
 		
-<span class="param-type">Number</span>
+<span class="param-type">number</span>
 
 
 	</dd>
@@ -2198,7 +2342,7 @@ The method works with StructuredText fragments, Text fragments, Number fragments
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Mon Apr 21 2014 14:09:58 GMT-0700 (PDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Mon Apr 28 2014 17:27:14 GMT-0700 (PDT)
 </footer>
 
 <script> prettyPrint(); </script>
