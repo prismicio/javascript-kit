@@ -29,7 +29,7 @@ Also on our [prismic.io developer's portal](https://developers.prismic.io/), on 
  * get a thorough introduction of [how to use prismic.io kits](https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#kits-and-helpers), including this one.
  * see [what else is available for Javascript](https://developers.prismic.io/technologies/UjBh28uvzeMJvE4i/javascript): starter projects, examples, ...
 
- You can also browse the [full documentation of the JS development kit](http://prismicio.github.io/javascript-kit/) (there is currently a known [issue](#10) about it)
+ You can also browse the [full documentation of the JS development kit](http://prismicio.github.io/javascript-kit/)
 
 ### Changelog
 
