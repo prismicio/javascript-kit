@@ -1343,9 +1343,9 @@
                 var block = this.blocks[i];
                 if(block.type == 'image') {
                     return new ImageView(
-                        block.data.url,
-                        block.data.dimensions.width,
-                        block.data.dimensions.height
+                        block.url,
+                        block.dimensions.width,
+                        block.dimensions.height
                     );
                 }
             }

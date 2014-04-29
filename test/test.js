@@ -314,6 +314,20 @@
     }, previewToken);
   });
 
+  asyncTest('StructuredTexts getFirstImage works', 4, function() {
+    Prismic.Api(testRepository, function(err, Api) {
+      if (err) { console.log(err); return; }
+      Api.form('everything').query('[[:d = at(document.id, "UkL0gMuvzYUANCpo")]]').ref(Api.master()).submit(function(err, documents) {
+        if (err) { console.log(err); return; }
+        equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().url, "https://prismic-io.s3.amazonaws.com/lesbonneschoses/c38f9e5a1a6c43aa7aae516c154013a2cee2bc75.jpg");
+        equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().height, 427);
+        equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().width, 640);
+        equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().asHtml(), '<img src=https://prismic-io.s3.amazonaws.com/lesbonneschoses/c38f9e5a1a6c43aa7aae516c154013a2cee2bc75.jpg width=640 height=427>');
+        start();
+      });
+    }, previewToken);
+  });
+
   asyncTest('StructuredTexts asHtml handles span Link.file', 1, function() {
     var jsonString = '{"type":"StructuredText","value":[{"type":"paragraph","text":"2012 Annual Report","spans":[{"start":0,"end":18,"type":"hyperlink","data":{"type":"Link.file","value":{"file":{"name":"2012_annual.report.pdf","kind":"document","url":"https://prismic-io.s3.amazonaws.com/annual.report.pdf","size":"1282484"}}}}]},{"type":"paragraph","text":"2012 Annual Budget","spans":[{"start":0,"end":18,"type":"hyperlink","data":{"type":"Link.file","value":{"file":{"name":"2012_smec.annual.budget.pdf","kind":"document","url":"https://prismic-io.s3.amazonaws.com/annual.budget.pdf","size":"59229"}}}}]},{"type":"paragraph","text":"2015 Vision & Strategic Plan","spans":[{"start":0,"end":28,"type":"hyperlink","data":{"type":"Link.file","value":{"file":{"name":"2015_vision.strategic.plan_.sm_.pdf","kind":"document","url":"https://prismic-io.s3.amazonaws.com/vision.strategic.plan_.sm_.pdf","size":"1969956"}}}}]}]}';
     var jsonObject = JSON.parse(jsonString);
