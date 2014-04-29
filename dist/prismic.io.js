@@ -682,11 +682,11 @@
 
         /**
          * Gets a boolean value of the fragment in the current Document object, for further manipulation.
-         * Typical use: document.getBoolean('blog-post.enableComments').asHtml(ctx).
+         * Typical use: if(document.getBoolean('blog-post.enableComments')) { ... }
          * This works great with a Select fragment. The Select values that are considered true are (lowercased before matching): 'yes', 'on', and 'true'.
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
-         * @returns {boolean}
+         * @returns {boolean} - The boolean value of the fragment
          */
         getBoolean: function(fragment) {
             var fragment = this.get(fragment);
@@ -755,16 +755,31 @@
 
         /**
          * Gets the Number fragment in the current Document object, for further manipulation.
-         * Typical use: document.getNumber('product.price').asHtml(ctx).
+         * Typical use: document.getNumber('product.price')
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.price"
-         * @returns {Number} - The Number fragment to manipulate.
+         * @returns {number} - The number value of the fragment.
          */
         getNumber: function(fragment) {
             var fragment = this.get(fragment);
 
             if (fragment instanceof Global.Prismic.Fragments.Number) {
-                return fragment.value
+                return fragment.value;
+            }
+        },
+
+        /**
+         * Gets the Color fragment in the current Document object, for further manipulation.
+         * Typical use: document.getColor('product.color')
+         *
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.color"
+         * @returns {string} - The string value of the Color fragment.
+         */
+        getColor: function(fragment) {
+            var fragment = this.get(fragment);
+
+            if (fragment instanceof Global.Prismic.Fragments.Color) {
+                return fragment.value;
             }
         },
 
