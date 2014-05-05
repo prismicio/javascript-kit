@@ -37,7 +37,7 @@ module.exports = function(grunt) {
     
     uglify: {
       options: {
-        banner: '/*! <%= pkg.name %> <%= VERSION %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+        banner: '/*!\n * <%= pkg.name %> <%= VERSION %>\n * See release notes: https://github.com/prismicio/javascript-kit/releases\n */\n'
       },
       build: {
         src: 'dist/prismic.io.js',
