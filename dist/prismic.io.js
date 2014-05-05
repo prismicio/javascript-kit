@@ -191,7 +191,8 @@
                 return new Ref(
                     r.ref,
                     r.label,
-                    r.isMasterRef
+                    r.isMasterRef,
+                    r.scheduledAt
                 );
             }) || [];
 
@@ -837,7 +838,7 @@
      * @constructor
      * @global
      */
-    function Ref(ref, label, isMaster) {
+    function Ref(ref, label, isMaster, scheduledAt) {
         /**
          * @field
          * @description the ID of the ref
@@ -853,6 +854,11 @@
          * @description is true if the ref is the master ref
          */
         this.isMaster = isMaster;
+        /**
+         * @field
+         * @description the scheduled date of the ref
+         */
+        this.scheduledAt = scheduledAt;
     }
     Ref.prototype = {};
 
