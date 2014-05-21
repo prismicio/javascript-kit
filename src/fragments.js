@@ -520,11 +520,11 @@
                     blockGroup = new BlockGroup(block.type, []);
                     blockGroups.push(blockGroup);
                 }
-                else if (blockGroup && blockGroup.tag != block.type) { // it's a new type
+                else if (!blockGroup || blockGroup.tag != block.type) { // it's a new type or no BlockGroup was set so far
                     blockGroup = new BlockGroup(block.type, []);
                     blockGroups.push(blockGroup);
                 }
-                // else: it's the same type as before, no touching group
+                // else: it's the same type as before, no touching blockGroup
 
                 blockGroup.blocks.push(block);
             };
