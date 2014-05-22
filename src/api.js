@@ -14,8 +14,8 @@
      * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
      * @returns {Api} - The Api object that can be manipulated
      */
-    var prismic = function(url, callback, accessToken, maybeRequestHandler) {
-        var api = new prismic.fn.init(url, accessToken, maybeRequestHandler);
+    var prismic = function(url, callback, accessToken, maybeRequestHandler, maybeApiCache) {
+        var api = new prismic.fn.init(url, accessToken, maybeRequestHandler, maybeApiCache);
         callback && api.get(callback);
         return api;
     };
@@ -32,13 +32,13 @@
                 // Called on success
                 var resolve = function() {
                     callback(null, JSON.parse(xhr.responseText));
-                }
+                };
 
                 // Called on error
                 var reject = function() {
                     var status = xhr.status;
                     callback(new Error("Unexpected status code [" + status + "] on URL "+url));
-                }
+                };
 
                 // Bind the XHR finished callback
                 xhr.onreadystatechange = function () {
@@ -59,7 +59,7 @@
 
                 // Send the XHR
                 xhr.send();
-            }
+            };
         }
     });
 
@@ -131,17 +131,29 @@
          */
         get: function(callback) {
             var self = this;
-
-            this.requestHandler(this.url, function(error, data) {
-                if (error) {
-                    callback(error);
-                } else {
-                    self.data = self.parse(data);
-                    self.bookmarks = self.data.bookmarks;
-                    callback(null, self, this);
+            var cacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+            this.apiCache.getOrSet(
+                cacheKey,
+                5, // ttl
+                function fetchApi (cb) {
+                    self.requestHandler(self.url, function(error, data) {
+                        if (error) {
+                            cb && cb(error);
+                        } else {
+                            cb && cb(null, self.parse(data));
+                        }
+                    });
+                },
+                function done (error, api) {
+                    if(error) {
+                        callback && callback(error);
+                    } else {
+                        self.data = api;
+                        self.bookmarks = api.bookmarks;
+                        callback && callback(null, self, this);
+                    }
                 }
-            });
-
+            );
         },
 
         /**
@@ -226,10 +238,11 @@
          * This is for internal use, from outside this kit, you should call Prismic.Api()
          * @private
          */
-        init: function(url, accessToken, maybeRequestHandler) {
+        init: function(url, accessToken, maybeRequestHandler, maybeApiCache) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
-            this.requestHandler = maybeRequestHandler || ajaxRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)")})();
+            this.requestHandler = maybeRequestHandler || ajaxRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
+            this.apiCache = maybeApiCache || new ApiCache();
             return this;
         },
 
@@ -434,10 +447,10 @@
                 if (err) { callback(err); return; }
 
                 var results = documents.results.map(function (doc) {
-                    var fragments = {}
+                    var fragments = {};
 
                     for(var field in doc.data[doc.type]) {
-                        fragments[doc.type + '.' + field] = doc.data[doc.type][field]
+                        fragments[doc.type + '.' + field] = doc.data[doc.type][field];
                     }
 
                     return new Doc(
@@ -447,7 +460,7 @@
                         doc.tags,
                         doc.slugs,
                         fragments
-                    )
+                    );
                 });
 
                 callback(null, new Documents(
@@ -496,42 +509,42 @@
          * @field
          * @description the current page number
          */
-		this.page = page;
+        this.page = page;
         /**
          * @field
          * @description the number of results per page
          */
-		this.results_per_page = results_per_page;
+        this.results_per_page = results_per_page;
         /**
          * @field
          * @description the size of the current page
          */
-		this.results_size = results_size;
+        this.results_size = results_size;
         /**
          * @field
          * @description the total size of results across all pages
          */
-		this.total_results_size = total_results_size;
+        this.total_results_size = total_results_size;
         /**
          * @field
          * @description the total number of pages
          */
-		this.total_pages = total_pages;
+        this.total_pages = total_pages;
         /**
          * @field
          * @description the URL of the next page in the API
          */
-		this.next_page = next_page;
+        this.next_page = next_page;
         /**
          * @field
          * @description the URL of the previous page in the API
          */
-		this.prev_page = prev_page;
+        this.prev_page = prev_page;
         /**
          * @field
          * @description the array of the {Doc} objects
          */
-		this.results = results;
+        this.results = results;
     }
 
     /**
@@ -616,7 +629,7 @@
             }
             if (img instanceof Global.Prismic.Fragments.StructuredText) {
                 // find first image in st.
-                return img
+                return img;
             }
             return null;
         },
@@ -825,10 +838,10 @@
         asHtml: function(ctx) {
             var htmls = [];
             for(var field in this.fragments) {
-                var fragment = this.get(field)
-                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '')
+                var fragment = this.get(field);
+                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '');
             }
-            return htmls.join('')
+            return htmls.join('');
         },
 
         /**
@@ -842,7 +855,7 @@
                 var fragment = this.get(field);
                 texts.push(fragment && fragment.asText ? fragment.asText(ctx) : '');
             }
-            return texts.join('')
+            return texts.join('');
          }
 
     };
@@ -876,10 +889,75 @@
     }
     Ref.prototype = {};
 
+    /**
+     * Api cache
+     */
+    function ApiCache() {
+        this.cache = {};
+        this.states = {};
+    }
+
+    ApiCache.prototype = {
+
+        get: function(key) {
+            var maybeEntry = this.cache[key];
+            if(maybeEntry && !this.isExpired(key) || (this.isExpired(key) && this.isInProgress(key))) {
+                return maybeEntry.data;
+            } else return null;
+        },
+
+        set: function(key, value, ttl) {
+            this.cache[key] = {
+                data: value,
+                expiredIn: ttl ? (Date.now() + (ttl * 1000)) : 0
+            };
+        },
+
+        getOrSet: function(key, ttl, fvalue, done) {
+            var found = this.get(key);
+            var self = this;
+            if(!found) {
+                this.states[key] = 'progress';
+                var value =  fvalue(function(error, value) {
+                    self.set(key, value, ttl);
+                    delete self.states[key];
+                    done && done(error, value);
+                });
+            } else {
+                done && done(null, found);
+            }
+        },
+
+        isExpired: function(key) {
+            var entry = this.cache[key];
+            if(entry) {
+                return entry.expiredIn != 0 && entry.expiredIn < Date.now();
+            } else {
+                return false;
+            }
+        },
+
+        isInProgress: function(key) {
+            return this.states[key] == 'progress';
+        },
+
+        exists: function(key) {
+            return !!this.cache[key];
+        },
+
+        remove: function(key) {
+            return delete this.cache[key];
+        },
+
+        clear: function(key) {
+            this.cache = {};
+        }
+    };
+
     // -- Export Globally
 
     Global.Prismic = {
         Api: prismic
-    }
+    };
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
