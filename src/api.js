@@ -829,7 +829,21 @@
                 htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '')
             }
             return htmls.join('')
-        }
+        },
+
+        /**
+         * Turns the document into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function(ctx) {
+            var texts = [];
+            for(var field in this.fragments) {
+                var fragment = this.get(field);
+                texts.push(fragment && fragment.asText ? fragment.asText(ctx) : '');
+            }
+            return texts.join('')
+         }
 
     };
 

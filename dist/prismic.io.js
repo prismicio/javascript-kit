@@ -829,7 +829,21 @@
                 htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '')
             }
             return htmls.join('')
-        }
+        },
+
+        /**
+         * Turns the document into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function(ctx) {
+            var texts = [];
+            for(var field in this.fragments) {
+                var fragment = this.get(field);
+                texts.push(fragment && fragment.asText ? fragment.asText(ctx) : '');
+            }
+            return texts.join('')
+         }
 
     };
 
@@ -892,7 +906,16 @@
          */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value;
+         }
     };
 
     /**
@@ -934,7 +957,16 @@
          */
         url: function (ctx) {
             return ctx.linkResolver(ctx, this.document, this.isBroken);
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function(ctx) {
+            return this.url(ctx);
+         }
     };
 
     /**
@@ -967,7 +999,16 @@
          */
         url: function() {
             return this.value.url;
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.url();
+         }
     };
 
     /**
@@ -1000,7 +1041,16 @@
          */
         url: function() {
             return this.value.file.url;
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.url();
+         }
     };
 
     /**
@@ -1033,7 +1083,16 @@
          */
         url: function() {
             return this.value.image.url;
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.url();
+         }
     };
 
     /**
@@ -1058,7 +1117,16 @@
          */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value;
+         }
     };
 
     /**
@@ -1083,7 +1151,16 @@
          */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value;
+         }
     };
 
     /**
@@ -1108,7 +1185,16 @@
          */
         asHtml: function () {
             return "<span>" + this.value + "</span>";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value.toString();
+         }
     };
 
     /**
@@ -1126,9 +1212,6 @@
     }
 
     DateTime.prototype = {
-        asText: function (pattern) {
-            throw new Error("not implemented");
-        },
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
@@ -1137,7 +1220,16 @@
          */
         asHtml: function () {
             return "<time>" + this.value + "</time>";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value.toString();
+         }
     };
 
     /**
@@ -1163,7 +1255,16 @@
          */
         asHtml: function () {
             return this.value.oembed.html;
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return "";
+         }
     };
 
     /**
@@ -1206,7 +1307,16 @@
          */
         asHtml: function () {
             return this.main.asHtml()
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return "";
+         }
     };
 
     /**
@@ -1244,7 +1354,16 @@
          */
         asHtml: function () {
             return "<img src=" + this.url + " width=" + this.width + " height=" + this.height + ">";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return "";
+         }
     }
 
     /**
@@ -1282,7 +1401,22 @@
        */
        toArray: function(){
          return this.value;
-       }
+       },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function(ctx) {
+            var output = "";
+            for (var i=0; i<this.value.length; i++) {
+              for (var fragmentName in this.value[i]) {
+                output += this.value[i][fragmentName].asText(ctx);
+              }
+            }
+            return output;
+         }
     }
 
 
@@ -1365,7 +1499,23 @@
          */
         asHtml: function(ctx) {
             return StructuredTextAsHtml.call(this, this.blocks, ctx);
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            var output = [];
+            for(var i=0; i<this.blocks.length; i++) {
+                var block = this.blocks[i];
+                if (block.text) {
+                    output.push(block.text);
+                }
+            }
+            return output.join(' ');
+         }
 
     };
 
