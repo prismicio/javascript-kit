@@ -901,7 +901,7 @@
 
         get: function(key) {
             var maybeEntry = this.cache[key];
-            if(maybeEntry && !this.isExpired(key) || (this.isExpired(key) && this.isInProgress(key))) {
+            if(maybeEntry && (!this.isExpired(key) || (this.isExpired(key) && this.isInProgress(key)))) {
                 return maybeEntry.data;
             } else return null;
         },
