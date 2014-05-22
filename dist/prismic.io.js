@@ -1349,9 +1349,9 @@
                 var block = this.blocks[i];
                 if(block.type == 'image') {
                     return new ImageView(
-                        block.data.url,
-                        block.data.dimensions.width,
-                        block.data.dimensions.height
+                        block.url,
+                        block.dimensions.width,
+                        block.dimensions.height
                     );
                 }
             }
@@ -1392,11 +1392,11 @@
                     blockGroup = new BlockGroup(block.type, []);
                     blockGroups.push(blockGroup);
                 }
-                else if (blockGroup && blockGroup.tag != block.type) { // it's a new type
+                else if (!blockGroup || blockGroup.tag != block.type) { // it's a new type or no BlockGroup was set so far
                     blockGroup = new BlockGroup(block.type, []);
                     blockGroups.push(blockGroup);
                 }
-                // else: it's the same type as before, no touching group
+                // else: it's the same type as before, no touching blockGroup
 
                 blockGroup.blocks.push(block);
             };
