@@ -9,7 +9,7 @@
      * @alias Api
      * @constructor
      * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
-     * @param {function} callback - Optional callback function that is called after the API was retrieved, to which you may pass two parameters: a potential error (null if no problem), and the API object
+     * @param {function} callback - Optional callback function that is called after the API was retrieved, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest
      * @param {string} accessToken - The optional accessToken for the OAuth2 connection
      * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
      * @returns {Api} - The Api object that can be manipulated
@@ -31,22 +31,22 @@
 
                 // Called on success
                 var resolve = function() {
-                    callback(null, JSON.parse(xhr.responseText));
+                    callback(null, JSON.parse(xhr.responseText), xhr);
                 }
 
                 // Called on error
                 var reject = function() {
                     var status = xhr.status;
-                    callback(new Error("Unexpected status code [" + status + "] on URL "+url));
+                    callback(new Error("Unexpected status code [" + status + "] on URL "+url), null, xhr);
                 }
 
                 // Bind the XHR finished callback
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4) {
                         if(xhr.status && xhr.status == 200) {
-                            resolve(xhr);
+                            resolve();
                         } else {
-                            reject(xhr);
+                            reject();
                         }
                     }
                 };
@@ -103,10 +103,10 @@
                                   requestsCache[requestUrl] = json;
                               }
 
-                              callback(null, json);
+                              callback(null, json, response);
                             });
                         } else {
-                            callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl));
+                            callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
                         }
                     });
 
@@ -126,19 +126,19 @@
          * Requests (with the proper handler), parses, and returns the /api document.
          * This is for internal use, from outside this kit, you should call Prismic.Api()
          *
-         * @param {function} callback - Optional callback function that is called after the query is made, to which you may pass two parameters: a potential error (null if no problem), and the API object
+         * @param {function} callback - Optional callback function that is called after the query is made, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest
          * @returns {Api} - The Api object that can be manipulated
          */
         get: function(callback) {
             var self = this;
 
-            this.requestHandler(this.url, function(error, data) {
+            this.requestHandler(this.url, function(error, data, xhr) {
                 if (error) {
-                    callback(error);
+                    callback(error, null, xhr);
                 } else {
                     self.data = self.parse(data);
                     self.bookmarks = self.data.bookmarks;
-                    callback(null, self, this);
+                    callback(null, self, xhr);
                 }
             });
 
@@ -409,8 +409,9 @@
          * Submits the query, and calls the callback function.
          *
          * @param {function} callback - Optional callback function that is called after the query was made,
-         * to which you may pass two parameters: a potential error (null if no problem),
-         * and a Documents object (containing all the pagination specifics + the array of Docs)
+         * to which you may pass three parameters: a potential error (null if no problem),
+         * a Documents object (containing all the pagination specifics + the array of Docs),
+         * and the XMLHttpRequest
          */
         submit: function(callback) {
             var self = this,
@@ -429,9 +430,9 @@
                 }
             }
 
-            this.api.requestHandler(url, function (err, documents) {
+            this.api.requestHandler(url, function (err, documents, xhr) {
 
-                if (err) { callback(err); return; }
+                if (err) { callback(err, null, xhr); return; }
 
                 var results = documents.results.map(function (doc) {
                     var fragments = {}
@@ -451,14 +452,14 @@
                 });
 
                 callback(null, new Documents(
-					documents.page,
-					documents.results_per_page,
-					documents.results_size,
-					documents.total_results_size,
-					documents.total_pages,
-					documents.next_page,
-					documents.prev_page,
-					results || [])
+                    documents.page,
+                    documents.results_per_page,
+                    documents.results_size,
+                    documents.total_results_size,
+                    documents.total_pages,
+                    documents.next_page,
+                    documents.prev_page,
+                    results || []), xhr
                 );
             });
 
@@ -496,42 +497,42 @@
          * @field
          * @description the current page number
          */
-		this.page = page;
+        this.page = page;
         /**
          * @field
          * @description the number of results per page
          */
-		this.results_per_page = results_per_page;
+        this.results_per_page = results_per_page;
         /**
          * @field
          * @description the size of the current page
          */
-		this.results_size = results_size;
+        this.results_size = results_size;
         /**
          * @field
          * @description the total size of results across all pages
          */
-		this.total_results_size = total_results_size;
+        this.total_results_size = total_results_size;
         /**
          * @field
          * @description the total number of pages
          */
-		this.total_pages = total_pages;
+        this.total_pages = total_pages;
         /**
          * @field
          * @description the URL of the next page in the API
          */
-		this.next_page = next_page;
+        this.next_page = next_page;
         /**
          * @field
          * @description the URL of the previous page in the API
          */
-		this.prev_page = prev_page;
+        this.prev_page = prev_page;
         /**
          * @field
          * @description the array of the {Doc} objects
          */
-		this.results = results;
+        this.results = results;
     }
 
     /**
