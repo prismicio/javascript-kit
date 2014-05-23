@@ -601,7 +601,6 @@
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];
                 if(block.type == 'image') {
-                  console.log(JSON.stringify(block));
                     return new ImageView(
                         block.url,
                         block.dimensions.width,
