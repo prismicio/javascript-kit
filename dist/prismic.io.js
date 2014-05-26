@@ -1152,7 +1152,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "<a href=\""+this.url()+"\"><img src=\""+this.url()+"\"</a>";
+            return "<a href=\""+this.url()+"\"><img src=\""+this.url()+"\" alt=\"" + this.alt + "\"></a>";
         },
         /**
          * Returns the URL of the link.
@@ -1403,7 +1403,7 @@
      * @global
      * @alias Fragments:ImageView
      */
-    function ImageView(url, width, height) {
+    function ImageView(url, width, height, alt) {
         /**
          * @field
          * @description the URL of the ImageView (useable as it, in a <img> tag in HTML, for instance)
@@ -1419,6 +1419,11 @@
          * @description the height of the ImageView
          */
         this.height = height;
+        /**
+         * @field
+         * @description the alt text for the ImageView
+         */
+        this.alt = alt;
     }
     ImageView.prototype = {
         ratio: function () {
@@ -1431,7 +1436,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "<img src=" + this.url + " width=" + this.width + " height=" + this.height + ">";
+            return "<img src=" + this.url + " width=" + this.width + " height=" + this.height + " alt=\"" + this.alt + "\">";
         },
 
         /**
@@ -1563,7 +1568,8 @@
                     return new ImageView(
                         block.url,
                         block.dimensions.width,
-                        block.dimensions.height
+                        block.dimensions.height,
+                        block.alt
                     );
                 }
             }
@@ -1647,7 +1653,7 @@
                     html.push('<pre>' + blockGroup.blocks[0].text + '</pre>');
                 }
                 else if(blockGroup.tag == "image") {
-                    html.push('<p><img src="' + blockGroup.blocks[0].url + '"></p>');
+                    html.push('<p><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
                 }
                 else if(blockGroup.tag == "embed") {
                     html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
@@ -1768,7 +1774,8 @@
                     new ImageView(
                         img.url,
                         img.dimensions.width,
-                        img.dimensions.height
+                        img.dimensions.height,
+                        img.alt
                     ),
                     {}
                 );
@@ -1777,7 +1784,8 @@
                     output.views[name] = new ImageView(
                         img.url,
                         img.dimensions.width,
-                        img.dimensions.height
+                        img.dimensions.height,
+                        img.alt
                     );
                 }
                 break;
