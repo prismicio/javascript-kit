@@ -24,7 +24,7 @@
     // -- Request handlers
 
     var ajaxRequest = (function() {
-        if(typeof XMLHttpRequest != 'undefined') {
+        if(typeof XMLHttpRequest != 'undefined' && 'withCredentials' in new XMLHttpRequest()) {
             return function(url, callback) {
 
                 var xhr = new XMLHttpRequest();
@@ -41,7 +41,7 @@
                 };
 
                 // Bind the XHR finished callback
-                xhr.onreadystatechange = function () {
+                xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
                         if(xhr.status && xhr.status == 200) {
                             resolve(xhr);
@@ -59,6 +59,41 @@
 
                 // Send the XHR
                 xhr.send();
+            };
+        }
+    });
+
+    var xdomainRequest = (function() {
+        if(typeof XDomainRequest != 'undefined') {
+            return function(url, callback) {
+
+                var xdr = new XDomainRequest();
+
+                // Called on success
+                var resolve = function() {
+                    callback(null, JSON.parse(xdr.responseText));
+                };
+
+                // Called on error
+                var reject = function() {
+                    callback(new Error("Unexpected status code on URL "+url));
+                };
+
+                // Bind the XDR finished callback
+                xdr.onload = function() {
+                    resolve(xdr);
+                };
+
+                // Bind the XDR error callback
+                xdr.onerror = function() {
+                    reject(xdr);
+                };
+
+                // Open the XHR
+                xdr.open('GET', url, true);
+
+                // Send the XHR
+                xdr.send();
             };
         }
     });
@@ -241,7 +276,7 @@
         init: function(url, accessToken, maybeRequestHandler, maybeApiCache) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
-            this.requestHandler = maybeRequestHandler || ajaxRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
+            this.requestHandler = maybeRequestHandler || ajaxRequest() || xdomainRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
             this.apiCache = maybeApiCache || new ApiCache();
             return this;
         },
