@@ -14,8 +14,8 @@
      * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
      * @returns {Api} - The Api object that can be manipulated
      */
-    var prismic = function(url, callback, accessToken, maybeRequestHandler) {
-        var api = new prismic.fn.init(url, accessToken, maybeRequestHandler);
+    var prismic = function(url, callback, accessToken, maybeRequestHandler, maybeApiCache) {
+        var api = new prismic.fn.init(url, accessToken, maybeRequestHandler, maybeApiCache);
         callback && api.get(callback);
         return api;
     };
@@ -24,7 +24,7 @@
     // -- Request handlers
 
     var ajaxRequest = (function() {
-        if(typeof XMLHttpRequest != 'undefined') {
+        if(typeof XMLHttpRequest != 'undefined' && 'withCredentials' in new XMLHttpRequest()) {
             return function(url, callback) {
 
                 var xhr = new XMLHttpRequest();
@@ -32,16 +32,16 @@
                 // Called on success
                 var resolve = function() {
                     callback(null, JSON.parse(xhr.responseText), xhr);
-                }
+                };
 
                 // Called on error
                 var reject = function() {
                     var status = xhr.status;
                     callback(new Error("Unexpected status code [" + status + "] on URL "+url), null, xhr);
-                }
+                };
 
                 // Bind the XHR finished callback
-                xhr.onreadystatechange = function () {
+                xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
                         if(xhr.status && xhr.status == 200) {
                             resolve();
@@ -59,7 +59,42 @@
 
                 // Send the XHR
                 xhr.send();
-            }
+            };
+        }
+    });
+
+    var xdomainRequest = (function() {
+        if(typeof XDomainRequest != 'undefined') {
+            return function(url, callback) {
+
+                var xdr = new XDomainRequest();
+
+                // Called on success
+                var resolve = function() {
+                    callback(null, JSON.parse(xdr.responseText), xdr);
+                };
+
+                // Called on error
+                var reject = function() {
+                    callback(new Error("Unexpected status code on URL "+url), null, xdr);
+                };
+
+                // Bind the XDR finished callback
+                xdr.onload = function() {
+                    resolve(xdr);
+                };
+
+                // Bind the XDR error callback
+                xdr.onerror = function() {
+                    reject(xdr);
+                };
+
+                // Open the XHR
+                xdr.open('GET', url, true);
+
+                // Send the XHR
+                xdr.send();
+            };
         }
     });
 
@@ -131,17 +166,30 @@
          */
         get: function(callback) {
             var self = this;
-
-            this.requestHandler(this.url, function(error, data, xhr) {
-                if (error) {
-                    callback(error, null, xhr);
-                } else {
-                    self.data = self.parse(data);
-                    self.bookmarks = self.data.bookmarks;
-                    callback(null, self, xhr);
+            var cacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+            this.apiCache.getOrSet(
+                cacheKey,
+                5, // ttl
+                function fetchApi (cb) {
+                    self.requestHandler(self.url, function(error, data, xhr) {
+                        console.log(xhr);
+                        if (error) {
+                            cb && cb(error, null, xhr);
+                        } else {
+                            cb && cb(null, self.parse(data), xhr);
+                        }
+                    });
+                },
+                function done (error, api) {
+                    if(error) {
+                        callback && callback(error);
+                    } else {
+                        self.data = api;
+                        self.bookmarks = api.bookmarks;
+                        callback && callback(null, self, this);
+                    }
                 }
-            });
-
+            );
         },
 
         /**
@@ -226,10 +274,11 @@
          * This is for internal use, from outside this kit, you should call Prismic.Api()
          * @private
          */
-        init: function(url, accessToken, maybeRequestHandler) {
+        init: function(url, accessToken, maybeRequestHandler, maybeApiCache) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
-            this.requestHandler = maybeRequestHandler || ajaxRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)")})();
+            this.requestHandler = maybeRequestHandler || ajaxRequest() || xdomainRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
+            this.apiCache = maybeApiCache || new ApiCache();
             return this;
         },
 
@@ -435,10 +484,10 @@
                 if (err) { callback(err, null, xhr); return; }
 
                 var results = documents.results.map(function (doc) {
-                    var fragments = {}
+                    var fragments = {};
 
                     for(var field in doc.data[doc.type]) {
-                        fragments[doc.type + '.' + field] = doc.data[doc.type][field]
+                        fragments[doc.type + '.' + field] = doc.data[doc.type][field];
                     }
 
                     return new Doc(
@@ -448,7 +497,7 @@
                         doc.tags,
                         doc.slugs,
                         fragments
-                    )
+                    );
                 });
 
                 callback(null, new Documents(
@@ -617,7 +666,7 @@
             }
             if (img instanceof Global.Prismic.Fragments.StructuredText) {
                 // find first image in st.
-                return img
+                return img;
             }
             return null;
         },
@@ -826,10 +875,10 @@
         asHtml: function(ctx) {
             var htmls = [];
             for(var field in this.fragments) {
-                var fragment = this.get(field)
-                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '')
+                var fragment = this.get(field);
+                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '');
             }
-            return htmls.join('')
+            return htmls.join('');
         },
 
         /**
@@ -843,7 +892,7 @@
                 var fragment = this.get(field);
                 texts.push(fragment && fragment.asText ? fragment.asText(ctx) : '');
             }
-            return texts.join('')
+            return texts.join('');
          }
 
     };
@@ -877,11 +926,76 @@
     }
     Ref.prototype = {};
 
+    /**
+     * Api cache
+     */
+    function ApiCache() {
+        this.cache = {};
+        this.states = {};
+    }
+
+    ApiCache.prototype = {
+
+        get: function(key) {
+            var maybeEntry = this.cache[key];
+            if(maybeEntry && (!this.isExpired(key) || (this.isExpired(key) && this.isInProgress(key)))) {
+                return maybeEntry.data;
+            } else return null;
+        },
+
+        set: function(key, value, ttl) {
+            this.cache[key] = {
+                data: value,
+                expiredIn: ttl ? (Date.now() + (ttl * 1000)) : 0
+            };
+        },
+
+        getOrSet: function(key, ttl, fvalue, done) {
+            var found = this.get(key);
+            var self = this;
+            if(!found) {
+                this.states[key] = 'progress';
+                var value =  fvalue(function(error, value) {
+                    self.set(key, value, ttl);
+                    delete self.states[key];
+                    done && done(error, value);
+                });
+            } else {
+                done && done(null, found);
+            }
+        },
+
+        isExpired: function(key) {
+            var entry = this.cache[key];
+            if(entry) {
+                return entry.expiredIn != 0 && entry.expiredIn < Date.now();
+            } else {
+                return false;
+            }
+        },
+
+        isInProgress: function(key) {
+            return this.states[key] == 'progress';
+        },
+
+        exists: function(key) {
+            return !!this.cache[key];
+        },
+
+        remove: function(key) {
+            return delete this.cache[key];
+        },
+
+        clear: function(key) {
+            this.cache = {};
+        }
+    };
+
     // -- Export Globally
 
     Global.Prismic = {
         Api: prismic
-    }
+    };
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
@@ -1075,7 +1189,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "<a href=\""+this.url()+"\"><img src=\""+this.url()+"\"</a>";
+            return "<a href=\""+this.url()+"\"><img src=\""+this.url()+"\" alt=\"" + this.alt + "\"></a>";
         },
         /**
          * Returns the URL of the link.
@@ -1326,7 +1440,7 @@
      * @global
      * @alias Fragments:ImageView
      */
-    function ImageView(url, width, height) {
+    function ImageView(url, width, height, alt) {
         /**
          * @field
          * @description the URL of the ImageView (useable as it, in a <img> tag in HTML, for instance)
@@ -1342,6 +1456,11 @@
          * @description the height of the ImageView
          */
         this.height = height;
+        /**
+         * @field
+         * @description the alt text for the ImageView
+         */
+        this.alt = alt;
     }
     ImageView.prototype = {
         ratio: function () {
@@ -1354,7 +1473,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "<img src=" + this.url + " width=" + this.width + " height=" + this.height + ">";
+            return "<img src=" + this.url + " width=" + this.width + " height=" + this.height + " alt=\"" + this.alt + "\">";
         },
 
         /**
@@ -1486,7 +1605,8 @@
                     return new ImageView(
                         block.url,
                         block.dimensions.width,
-                        block.dimensions.height
+                        block.dimensions.height,
+                        block.alt
                     );
                 }
             }
@@ -1570,7 +1690,7 @@
                     html.push('<pre>' + blockGroup.blocks[0].text + '</pre>');
                 }
                 else if(blockGroup.tag == "image") {
-                    html.push('<p><img src="' + blockGroup.blocks[0].url + '"></p>');
+                    html.push('<p><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
                 }
                 else if(blockGroup.tag == "embed") {
                     html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
@@ -1691,7 +1811,8 @@
                     new ImageView(
                         img.url,
                         img.dimensions.width,
-                        img.dimensions.height
+                        img.dimensions.height,
+                        img.alt
                     ),
                     {}
                 );
@@ -1700,7 +1821,8 @@
                     output.views[name] = new ImageView(
                         img.url,
                         img.dimensions.width,
-                        img.dimensions.height
+                        img.dimensions.height,
+                        img.alt
                     );
                 }
                 break;

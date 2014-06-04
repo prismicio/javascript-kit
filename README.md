@@ -29,7 +29,25 @@ Also on our [prismic.io developer's portal](https://developers.prismic.io/), on 
  * get a thorough introduction of [how to use prismic.io kits](https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#kits-and-helpers), including this one.
  * see [what else is available for Javascript](https://developers.prismic.io/technologies/UjBh28uvzeMJvE4i/javascript): starter projects, examples, ...
 
- You can also browse the [full documentation of the JS development kit](http://prismicio.github.io/javascript-kit/)
+### Using the kit
+
+#### Kit's detailed documentation
+
+To get a detailed documentation of the JavaScript kit's variables and methods, please check out the [prismic.io JS kit's documentation](http://prismicio.github.io/javascript-kit/).
+
+#### Specific JS kit syntax
+
+The ["Kits and helpers" section of our API documentation](https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#kits-and-helpers) is largely based on the JS kit, so there are not many differences:
+ * The `submit()` function takes a callback, which expects two parameters: a potential error, and the object of class `Documents` you can use.
+ * For security reasons, non-type-dependent fragments actually get written `document.getId()`, `document.getSlug()`, ... rather than `document.id`, `document.slug`, ...
+ * This is not a difference but a confirmation: `asHtml()` expects a `ctx` object that has a `linkResolver` closure and `maybeRef` string as its attributes.
+
+Knowing all that, here is typical code written with the JavaScript kit:
+
+ * A typical API object instantiation looks like this: `Prismic.Api(url, callback)`
+ * A typical querying looks like this: `api.form('everything').query('[[:d = at(document.type, "product")]]').ref(ref).submit(callback)`
+ * A typical fragment manipulation looks like this: `doc.getImageView('article.image', 'icon').getUrl()`
+ * A typical fragment serialization to HTML looks like this: `doc.getStructuredText('article.body').asHtml(ctx)`
 
 ### Changelog
 
