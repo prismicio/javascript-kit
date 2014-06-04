@@ -9,7 +9,7 @@
      * @alias Api
      * @constructor
      * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
-     * @param {function} callback - Optional callback function that is called after the API was retrieved, to which you may pass two parameters: a potential error (null if no problem), and the API object
+     * @param {function} callback - Optional callback function that is called after the API was retrieved, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest
      * @param {string} accessToken - The optional accessToken for the OAuth2 connection
      * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
      * @returns {Api} - The Api object that can be manipulated
@@ -31,22 +31,22 @@
 
                 // Called on success
                 var resolve = function() {
-                    callback(null, JSON.parse(xhr.responseText));
+                    callback(null, JSON.parse(xhr.responseText), xhr);
                 };
 
                 // Called on error
                 var reject = function() {
                     var status = xhr.status;
-                    callback(new Error("Unexpected status code [" + status + "] on URL "+url));
+                    callback(new Error("Unexpected status code [" + status + "] on URL "+url), null, xhr);
                 };
 
                 // Bind the XHR finished callback
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
                         if(xhr.status && xhr.status == 200) {
-                            resolve(xhr);
+                            resolve();
                         } else {
-                            reject(xhr);
+                            reject();
                         }
                     }
                 };
@@ -71,12 +71,12 @@
 
                 // Called on success
                 var resolve = function() {
-                    callback(null, JSON.parse(xdr.responseText));
+                    callback(null, JSON.parse(xdr.responseText), xdr);
                 };
 
                 // Called on error
                 var reject = function() {
-                    callback(new Error("Unexpected status code on URL "+url));
+                    callback(new Error("Unexpected status code on URL "+url), null, xdr);
                 };
 
                 // Bind the XDR finished callback
@@ -138,10 +138,10 @@
                                   requestsCache[requestUrl] = json;
                               }
 
-                              callback(null, json);
+                              callback(null, json, response);
                             });
                         } else {
-                            callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl));
+                            callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
                         }
                     });
 
@@ -161,7 +161,7 @@
          * Requests (with the proper handler), parses, and returns the /api document.
          * This is for internal use, from outside this kit, you should call Prismic.Api()
          *
-         * @param {function} callback - Optional callback function that is called after the query is made, to which you may pass two parameters: a potential error (null if no problem), and the API object
+         * @param {function} callback - Optional callback function that is called after the query is made, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest
          * @returns {Api} - The Api object that can be manipulated
          */
         get: function(callback) {
@@ -171,21 +171,21 @@
                 cacheKey,
                 5, // ttl
                 function fetchApi (cb) {
-                    self.requestHandler(self.url, function(error, data) {
+                    self.requestHandler(self.url, function(error, data, xhr) {
                         if (error) {
-                            cb && cb(error);
+                            cb && cb(error, null, xhr);
                         } else {
-                            cb && cb(null, self.parse(data));
+                            cb && cb(null, self.parse(data), xhr);
                         }
                     });
                 },
-                function done (error, api) {
+                function done (error, api, xhr) {
                     if(error) {
-                        callback && callback(error);
+                        callback && callback(error, null, xhr);
                     } else {
                         self.data = api;
                         self.bookmarks = api.bookmarks;
-                        callback && callback(null, self, this);
+                        callback && callback(null, self, xhr);
                     }
                 }
             );
@@ -457,8 +457,9 @@
          * Submits the query, and calls the callback function.
          *
          * @param {function} callback - Optional callback function that is called after the query was made,
-         * to which you may pass two parameters: a potential error (null if no problem),
-         * and a Documents object (containing all the pagination specifics + the array of Docs)
+         * to which you may pass three parameters: a potential error (null if no problem),
+         * a Documents object (containing all the pagination specifics + the array of Docs),
+         * and the XMLHttpRequest
          */
         submit: function(callback) {
             var self = this,
@@ -477,9 +478,9 @@
                 }
             }
 
-            this.api.requestHandler(url, function (err, documents) {
+            this.api.requestHandler(url, function (err, documents, xhr) {
 
-                if (err) { callback(err); return; }
+                if (err) { callback(err, null, xhr); return; }
 
                 var results = documents.results.map(function (doc) {
                     var fragments = {};
@@ -499,14 +500,14 @@
                 });
 
                 callback(null, new Documents(
-					documents.page,
-					documents.results_per_page,
-					documents.results_size,
-					documents.total_results_size,
-					documents.total_pages,
-					documents.next_page,
-					documents.prev_page,
-					results || [])
+                    documents.page,
+                    documents.results_per_page,
+                    documents.results_size,
+                    documents.total_results_size,
+                    documents.total_pages,
+                    documents.next_page,
+                    documents.prev_page,
+                    results || []), xhr
                 );
             });
 
@@ -953,10 +954,10 @@
             var self = this;
             if(!found) {
                 this.states[key] = 'progress';
-                var value =  fvalue(function(error, value) {
+                var value =  fvalue(function(error, value, xhr) {
                     self.set(key, value, ttl);
                     delete self.states[key];
-                    done && done(error, value);
+                    done && done(error, value, xhr);
                 });
             } else {
                 done && done(null, found);
