@@ -92,8 +92,11 @@
                 // Open the XHR
                 xdr.open('GET', url, true);
 
-                // Send the XHR
-                xdr.send();
+                // Prevents IE from timing out the request
+                setTimeout(function() {
+                    // Send the XHR
+                    xdr.send();
+                }, 0);
             };
         }
     });

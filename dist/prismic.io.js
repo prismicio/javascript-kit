@@ -92,8 +92,11 @@
                 // Open the XHR
                 xdr.open('GET', url, true);
 
-                // Send the XHR
-                xdr.send();
+                // Prevents IE from timing out the request
+                setTimeout(function() {
+                    // Send the XHR
+                    xdr.send();
+                }, 0);
             };
         }
     });
@@ -172,7 +175,6 @@
                 5, // ttl
                 function fetchApi (cb) {
                     self.requestHandler(self.url, function(error, data, xhr) {
-                        console.log(xhr);
                         if (error) {
                             cb && cb(error, null, xhr);
                         } else {
@@ -180,13 +182,13 @@
                         }
                     });
                 },
-                function done (error, api) {
+                function done (error, api, xhr) {
                     if(error) {
-                        callback && callback(error);
+                        callback && callback(error, null, xhr);
                     } else {
                         self.data = api;
                         self.bookmarks = api.bookmarks;
-                        callback && callback(null, self, this);
+                        callback && callback(null, self, xhr);
                     }
                 }
             );
@@ -955,10 +957,10 @@
             var self = this;
             if(!found) {
                 this.states[key] = 'progress';
-                var value =  fvalue(function(error, value) {
+                var value =  fvalue(function(error, value, xhr) {
                     self.set(key, value, ttl);
                     delete self.states[key];
-                    done && done(error, value);
+                    done && done(error, value, xhr);
                 });
             } else {
                 done && done(null, found);
