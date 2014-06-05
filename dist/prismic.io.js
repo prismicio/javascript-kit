@@ -75,8 +75,8 @@
                 };
 
                 // Called on error
-                var reject = function(msg) {
-                    callback(new Error(msg), null, xdr);
+                var reject = function() {
+                    callback(new Error("Unexpected status code on URL "+url), null, xdr);
                 };
 
                 // Bind the XDR finished callback
@@ -86,21 +86,13 @@
 
                 // Bind the XDR error callback
                 xdr.onerror = function() {
-                    reject("Unexpected status code on URL "+url);
+                    reject(xdr);
                 };
 
                 // Open the XHR
                 xdr.open('GET', url, true);
 
-                // Bind the XDR timeout callback
-                xdr.ontimeout = function () { 
-                    reject("Request timeout");
-                };
-
-                // Empty callback. IE sometimes abort the reqeust if
-                // this is not present
-                xdr.onprogress = function () { };
-
+                // Send the XHR
                 xdr.send();
             };
         }
@@ -180,6 +172,7 @@
                 5, // ttl
                 function fetchApi (cb) {
                     self.requestHandler(self.url, function(error, data, xhr) {
+                        console.log(xhr);
                         if (error) {
                             cb && cb(error, null, xhr);
                         } else {
@@ -187,13 +180,13 @@
                         }
                     });
                 },
-                function done (error, api, xhr) {
+                function done (error, api) {
                     if(error) {
-                        callback && callback(error, null, xhr);
+                        callback && callback(error);
                     } else {
                         self.data = api;
                         self.bookmarks = api.bookmarks;
-                        callback && callback(null, self, xhr);
+                        callback && callback(null, self, this);
                     }
                 }
             );
@@ -962,10 +955,10 @@
             var self = this;
             if(!found) {
                 this.states[key] = 'progress';
-                var value =  fvalue(function(error, value, xhr) {
+                var value =  fvalue(function(error, value) {
                     self.set(key, value, ttl);
                     delete self.states[key];
-                    done && done(error, value, xhr);
+                    done && done(error, value);
                 });
             } else {
                 done && done(null, found);
