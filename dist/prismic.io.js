@@ -75,8 +75,8 @@
                 };
 
                 // Called on error
-                var reject = function() {
-                    callback(new Error("Unexpected status code on URL "+url), null, xdr);
+                var reject = function(msg) {
+                    callback(new Error(msg), null, xdr);
                 };
 
                 // Bind the XDR finished callback
@@ -86,17 +86,22 @@
 
                 // Bind the XDR error callback
                 xdr.onerror = function() {
-                    reject(xdr);
+                    reject("Unexpected status code on URL "+url);
                 };
 
                 // Open the XHR
                 xdr.open('GET', url, true);
 
-                // Prevents IE from timing out the request
-                setTimeout(function() {
-                    // Send the XHR
-                    xdr.send();
-                }, 0);
+                // Bind the XDR timeout callback
+                xdr.ontimeout = function () { 
+                    reject("Request timeout");
+                };
+
+                // Empty callback. IE sometimes abort the reqeust if
+                // this is not present
+                xdr.onprogress = function () { };
+
+                xdr.send();
             };
         }
     });
