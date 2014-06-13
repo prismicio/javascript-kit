@@ -88,12 +88,14 @@
                 xdr.onerror = function() {
                     reject("Unexpected status code on URL "+url);
                 };
-
+                //IE compatibility, all callbacks need to be defined
+                xdr.ontimeout = function () { };
+                xdr.onprogress = function () { };
                 // Open the XHR
                 xdr.open('GET', url, true);
 
                 // Bind the XDR timeout callback
-                xdr.ontimeout = function () { 
+                xdr.ontimeout = function () {
                     reject("Request timeout");
                 };
 
