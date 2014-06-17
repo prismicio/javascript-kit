@@ -247,7 +247,8 @@
                     r.ref,
                     r.label,
                     r.isMasterRef,
-                    r.scheduledAt
+                    r.scheduledAt,
+                    r.id
                 );
             }) || [];
 
@@ -909,7 +910,7 @@
      * @constructor
      * @global
      */
-    function Ref(ref, label, isMaster, scheduledAt) {
+    function Ref(ref, label, isMaster, scheduledAt, id) {
         /**
          * @field
          * @description the ID of the ref
@@ -930,6 +931,11 @@
          * @description the scheduled date of the ref
          */
         this.scheduledAt = scheduledAt;
+        /**
+         * @field
+         * @description the name of the ref
+         */
+        this.id = id;
     }
     Ref.prototype = {};
 
