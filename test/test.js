@@ -87,6 +87,19 @@
     });
   });
 
+  asyncTest('Get linked documents', 2, function() {
+    Prismic.Api("https://micro.prismic.io/api", function(err, Api) {
+      if (err) { console.log(err); return; }
+      Api.form('everything').query('[[:d = any(document.type, ["doc","docchapter"])]]').ref(Api.master()).submit(function(err, response) {
+        if (err) { console.log(err); return; }
+        var document = response.results[0];
+        equal(document.linkedDocuments.length, 1);
+        equal(document.linkedDocuments[0].id, 'U0w8OwEAACoAQEvB');
+        start();
+      });
+    });
+  });
+
   asyncTest('Submit the `everything` form with an ordering', 2, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }

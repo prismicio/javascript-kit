@@ -93,7 +93,7 @@
                 xdr.open('GET', url, true);
 
                 // Bind the XDR timeout callback
-                xdr.ontimeout = function () { 
+                xdr.ontimeout = function () {
                     reject("Request timeout");
                 };
 
@@ -492,8 +492,15 @@
                 if (err) { callback(err, null, xhr); return; }
 
                 var results = documents.results.map(function (doc) {
-                    var fragments = {};
 
+                    var linkedDocuments = [];
+                    if(doc.linked_documents) {
+                        linkedDocuments = doc.linked_documents.map(function(linkedDoc) {
+                            return new LinkedDocument(linkedDoc['id'], linkedDoc['type'], linkedDoc['tags']);
+                        });
+                    }
+
+                    var fragments = {};
                     for(var field in doc.data[doc.type]) {
                         fragments[doc.type + '.' + field] = doc.data[doc.type][field];
                     }
@@ -504,6 +511,7 @@
                         doc.href,
                         doc.tags,
                         doc.slugs,
+                        linkedDocuments,
                         fragments
                     );
                 });
@@ -592,6 +600,12 @@
         this.results = results;
     }
 
+    function LinkedDocument(id, type, tags) {
+        this.id = id;
+        this.type = type;
+        this.tags = tags;
+    }
+
     /**
      * Embodies a document as returned by the API.
      * Most useful fields: id, type, tags, slug, slugs, ...
@@ -599,7 +613,7 @@
      * @global
      * @alias Doc
      */
-    function Doc(id, type, href, tags, slugs, fragments) {
+    function Doc(id, type, href, tags, slugs, linkedDocuments, fragments) {
 
         /**
          * @field
@@ -631,6 +645,7 @@
          * @description all the slugs that were ever used by this document (including the current one, at the head)
          */
         this.slugs = slugs;
+        this.linkedDocuments = linkedDocuments;
         this.fragments = fragments;
     }
 
