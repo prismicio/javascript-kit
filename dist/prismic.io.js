@@ -467,7 +467,7 @@
          *
          * @param {function} callback - Optional callback function that is called after the query was made,
          * to which you may pass three parameters: a potential error (null if no problem),
-         * a Documents object (containing all the pagination specifics + the array of Docs),
+         * a Response object (containing all the pagination specifics + the array of Docs),
          * and the XMLHttpRequest
          */
         submit: function(callback) {
@@ -508,7 +508,7 @@
                     );
                 });
 
-                callback(null, new Documents(
+                callback(null, new Response(
                     documents.page,
                     documents.results_per_page,
                     documents.results_size,
@@ -543,13 +543,13 @@
     };
 
     /**
-     * Embodies the result of a SearchForm query as returned by the API.
+     * Embodies the response of a SearchForm query as returned by the API.
      * It includes all the fields that are useful for pagination (page, total_pages, total_results_size, ...),
      * as well as the field "results", which is an array of Doc objects, the documents themselves.
      * @constructor
      * @global
      */
-    function Documents(page, results_per_page, results_size, total_results_size, total_pages, next_page, prev_page, results) {
+    function Response(page, results_per_page, results_size, total_results_size, total_pages, next_page, prev_page, results) {
         /**
          * @field
          * @description the current page number
