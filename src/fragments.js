@@ -728,15 +728,6 @@
         var cursor = 0;
         var html = [];
 
-        /* checking the spans are following each other, or else not doing anything */
-        spans.forEach(function(span){
-            if (span.end < span.start) return text;
-            if (span.start < cursor) return text;
-            cursor = span.end;
-        });
-
-        cursor = 0;
-
         spans.forEach(function(span){
             textBits.push(text.substring(0, span.start-cursor));
             text = text.substring(span.start-cursor);
