@@ -496,7 +496,7 @@
                     var linkedDocuments = [];
                     if(doc.linked_documents) {
                         linkedDocuments = doc.linked_documents.map(function(linkedDoc) {
-                            return new LinkedDocument(linkedDoc['id'], linkedDoc['type'], linkedDoc['tags']);
+                            return new LinkedDocument(linkedDoc['id'], linkedDoc['slug'], linkedDoc['type'], linkedDoc['tags']);
                         });
                     }
 
@@ -600,8 +600,9 @@
         this.results = results;
     }
 
-    function LinkedDocument(id, type, tags) {
+    function LinkedDocument(id, slug, type, tags) {
         this.id = id;
+        this.slug = slug;
         this.type = type;
         this.tags = tags;
     }
