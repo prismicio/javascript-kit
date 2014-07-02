@@ -312,12 +312,12 @@
     };
 
     /**
-     * Embodies a DateTime fragment
+     * Embodies a Date fragment
      * @constructor
      * @global
      * @alias Fragments:DateTime
      */
-    function DateTime(data) {
+    function DateFragment(data) {
         /**
          * @field
          * @description the Date value of the fragment (as a regular JS Date object)
@@ -325,7 +325,7 @@
         this.value = new Date(data);
     }
 
-    DateTime.prototype = {
+    DateFragment.prototype = {
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
@@ -780,7 +780,7 @@
                 break;
 
             case "Date":
-                output = new DateTime(field.value);
+                output = new DateFragment(field.value);
                 break;
 
             case "Text":
@@ -865,7 +865,7 @@
         ImageView: ImageView,
         Text: Text,
         Number: Num,
-        Date: DateTime,
+        Date: DateFragment,
         Select: Select,
         Color: Color,
         StructuredText: StructuredText,
