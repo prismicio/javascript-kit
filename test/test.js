@@ -398,6 +398,14 @@
     }, previewToken);
   });
 
+  test('GeoPoints are well retrieved', function() {
+    var geoPoint = Prismic.Fragments.initField({ "type": "GeoPoint", "value": { "latitude": 48.877108, "longitude": 2.3338790 } });
+    equal(geoPoint.latitude, 48.877108);
+    equal(geoPoint.longitude, 2.3338790);
+    equal(geoPoint.asHtml(), '<div class="geopoint"><span class="latitude">48.877108</span><span class="longitude">2.333879</span></div>');
+    equal(geoPoint.asText(), '48.877108,2.333879');
+  });
+
   asyncTest('Block fragments are accessible, loopable, and serializable', 4, function() {
     Prismic.Api(microRepository, function(err, Api) {
       if (err) { console.log(err); return; }

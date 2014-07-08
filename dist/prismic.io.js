@@ -505,6 +505,25 @@
                         fragments[doc.type + '.' + field] = doc.data[doc.type][field];
                     }
 
+                    /* Removing incorrect spans from StructuredText fragments */
+                    // This should be removed when the issue is fixed in the API
+                    for(var fragmentKey in fragments) {
+                        var fragment = fragments[fragmentKey];
+                        if (fragment.type === 'StructuredText') {
+                            for (var blockKey in fragment.value) {
+                                var block = fragment.value[blockKey];
+                                var newSpanArray = [];
+                                for (var spanKey in block.spans) {
+                                    var span = block.spans[spanKey];
+                                    if (span.start < span.end) {
+                                        newSpanArray.push(span);
+                                    }
+                                }
+                                block['spans'] = newSpanArray;
+                            }
+                        }
+                    }
+
                     return new Doc(
                         doc.id,
                         doc.type,
@@ -1515,6 +1534,47 @@
          }
     }
 
+
+
+    /**
+     * Embodies a geo point (a geolocation)
+     * @constructor
+     * @global
+     * @alias Fragments:GeoPoint
+     */
+    function GeoPoint(latitude, longitude) {
+        /**
+         * @field
+         * @description the latitude of the geo point
+         */
+        this.latitude = latitude;
+        /**
+         * @field
+         * @description the longitude of the geo point
+         */
+        this.longitude = longitude;
+    }
+    GeoPoint.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function () {
+            return '<div class="geopoint"><span class="latitude">'+this.latitude+'</span><span class="longitude">'+this.longitude+'</span></div>';
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.latitude + "," + this.longitude;
+         }
+    }
+
     /**
      * Embodies a fragment of type "Group" (which is a group of subfragments)
      * @constructor
@@ -1758,15 +1818,6 @@
         var cursor = 0;
         var html = [];
 
-        /* checking the spans are following each other, or else not doing anything */
-        spans.forEach(function(span){
-            if (span.end < span.start) return text;
-            if (span.start < cursor) return text;
-            cursor = span.end;
-        });
-
-        cursor = 0;
-
         spans.forEach(function(span){
             textBits.push(text.substring(0, span.start-cursor));
             text = text.substring(span.start-cursor);
@@ -1876,6 +1927,10 @@
                 output = new ImageLink(field.value);
                 break;
 
+            case "GeoPoint":
+                output = new GeoPoint(field.value.latitude, field.value.longitude);
+                break;
+
             case "Group":
                 var groups_array = [];
                 // for each array of groups
@@ -1912,6 +1967,7 @@
         DocumentLink: DocumentLink,
         ImageLink: ImageLink,
         FileLink: FileLink,
+        GeoPoint: GeoPoint,
         Group: Group,
         initField: initField
     }
