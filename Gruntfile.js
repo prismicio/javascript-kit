@@ -21,9 +21,11 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     qunit: {
-      files: ['test/**/*.html']
+      local: ['./test/**/*.html'],
+      int: { options: { urls: ['http://localhost:8888/test/test.html'] }},
+      unit: { options: { urls: ['http://localhost:8888/test/unit.html'] }}
     },
-    
+
     clean: {
       src: ['dist/prismic.io.js','dist/prismic.io.min.js', 'doc']
     },
@@ -34,7 +36,7 @@ module.exports = function(grunt) {
         dest: 'dist/prismic.io.js'
       }
     },
-    
+
     uglify: {
       options: {
         banner: '/*!\n * <%= pkg.name %> <%= VERSION %>\n * See release notes: https://github.com/prismicio/javascript-kit/releases\n */\n'
@@ -75,6 +77,20 @@ module.exports = function(grunt) {
                 destination: 'doc'
             }
         }
+    },
+
+    connect: {
+      options: {
+        hostname: 'localhost',
+        port: 8888,
+        base: '.',
+      },
+      testAuto: {},
+      test: {
+        options: {
+          keepalive: true
+        }
+      }
     }
 
   });
@@ -85,6 +101,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-bump');
   grunt.loadNpmTasks('grunt-jsdoc');
 
@@ -96,5 +113,14 @@ module.exports = function(grunt) {
 
   // copying the minified file to freeze it as this version on the master (can not be done before bump)
   grunt.registerTask('copy', ['copy']);
+
+  // Launch a local test server and run the tests on it
+  // or keep the server running so you can debug on your browser
+  grunt.registerTask('test', ['connect:testAuto', 'qunit:int', 'qunit:unit']);
+
+  grunt.registerTask('test:local', ['qunit:local']);
+  grunt.registerTask('test:int', ['connect:testAuto', 'qunit:int']);
+  grunt.registerTask('test:unit', ['connect:testAuto', 'qunit:unit']);
+  grunt.registerTask('test:browser', ['connect:test']);
 
 };
