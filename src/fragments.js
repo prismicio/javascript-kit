@@ -716,7 +716,6 @@
     /**
      * Parses a block that has spans, and inserts the proper HTML code.
      *
-     * @private
      * @param {string} text - the original text of the block
      * @param {object} span - the spans as returned by the API
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
