@@ -723,36 +723,67 @@
      * @returns {string} - the HTML output
      */
     function insertSpans(text, spans, ctx) {
-        var textBits = [];
-        var tags = [];
-        var cursor = 0;
-        var html = [];
+        function getTag(span, isStart) {
+            if (span.type === 'hyperlink') {
+                // FIXME
+                // Right now, span.type == 'hyperlink'
+                // and sometimes span.data is something like {document: Document, isBroken: false}
+                // it should be something like {type: 'Link.document', value: {document: Document, isBroken: false}}
+                // so obviously, you cannot cast span.data to a Fragment using initField
+                // Need a way to do that though... I don't why this is happening from the API
+                var fragment = initField(span.data);
 
-        spans.forEach(function(span){
-            textBits.push(text.substring(0, span.start-cursor));
-            text = text.substring(span.start-cursor);
-            cursor = span.start;
-            textBits.push(text.substring(0, span.end-cursor));
-            text = text.substring(span.end-cursor);
-            tags.push(span);
-            cursor = span.end;
-        });
-        textBits.push(text);
+                // Try to patch the bug described previously
+                if (!fragment && span.data && span.data.document) {
+                  fragment = initField({
+                    type: 'Link.document',
+                    value: span.data
+                  });
+                }
 
-        tags.forEach(function(tag, index){
-            html.push(textBits.shift());
-            if(tag.type == "hyperlink"){
-                // Since the content of tag.data is similar to a link fragment, we can initialize it just like a fragment.
-                html.push('<a href="'+ initField(tag.data).url(ctx) +'">');
-                html.push(textBits.shift());
-                html.push('</a>');
+                return fragment && (isStart ? '<a href="'+ fragment.url(ctx) +'">' : '</a>');
             } else {
-                html.push('<'+tag.type+'>');
-                html.push(textBits.shift());
-                html.push('</'+tag.type+'>');
+                return '<' + (isStart ? '': '/') + span.type + '>'
             }
+        }
+
+        // Ultimate optimization!
+        // You know... doing nothing when there is nothing to be done
+        if (!spans || !spans.length) {
+            return text;
+        }
+
+        var positions = [];
+        var tagsStart = {};
+        var tagsEnd = {};
+
+        spans.forEach(function (span) {
+            if (!tagsStart[span.start]) { tagsStart[span.start] = []; }
+            if (!tagsEnd[span.end]) { tagsEnd[span.end] = []; }
+
+            tagsStart[span.start].push(getTag(span, true));
+            tagsEnd[span.end].unshift(getTag(span, false));
+
+            positions.push(span.start, span.end);
         });
-        html.push(textBits.shift());
+
+        positions = positions.filter(function (elem, index, self) {
+            return self.indexOf(elem) === index;
+        }).sort(function(a, b) {
+            return a - b;
+        });
+
+        var html = [];
+        var cursor = 0;
+
+        positions.forEach(function (pos) {
+            html.push(text.substring(cursor, pos));
+            html = html.concat(tagsEnd[pos] || []);
+            html = html.concat(tagsStart[pos] || []);
+            cursor = pos;
+        });
+
+        html.push(text.substring(cursor));
 
         return html.join('');
     }
@@ -874,7 +905,8 @@
         ImageLink: ImageLink,
         FileLink: FileLink,
         Group: Group,
-        initField: initField
+        initField: initField,
+        insertSpans: insertSpans
     }
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
