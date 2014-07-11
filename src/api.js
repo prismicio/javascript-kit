@@ -223,10 +223,8 @@
                     f = data.forms[i];
 
                     if(this.accessToken) {
-                        f.fields['accessToken'] = {
-                            type: 'string',
-                            default: this.accessToken
-                        };
+                        f.fields['accessToken']['type'] = 'string';
+                        f.fields['accessToken']['default'] = this.accessToken;
                     }
 
                     form = new Form(
@@ -373,8 +371,8 @@
         this.data = data || {};
 
         for(var field in form.fields) {
-            if(form.fields[field].default) {
-                this.data[field] = [form.fields[field].default];
+            if(form.fields[field]['default']) {
+                this.data[field] = [form.fields[field]['default']];
             }
         }
     };
