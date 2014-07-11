@@ -223,6 +223,7 @@
                     f = data.forms[i];
 
                     if(this.accessToken) {
+                        f.fields['accessToken'] = {};
                         f.fields['accessToken']['type'] = 'string';
                         f.fields['accessToken']['default'] = this.accessToken;
                     }
