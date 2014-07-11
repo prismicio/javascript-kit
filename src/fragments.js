@@ -724,23 +724,13 @@
     function insertSpans(text, spans, ctx) {
         function getTag(span, isStart) {
             if (span.type === 'hyperlink') {
-                // FIXME
-                // Right now, span.type == 'hyperlink'
-                // and sometimes span.data is something like {document: Document, isBroken: false}
-                // it should be something like {type: 'Link.document', value: {document: Document, isBroken: false}}
-                // so obviously, you cannot cast span.data to a Fragment using initField
-                // Need a way to do that though... I don't why this is happening from the API
                 var fragment = initField(span.data);
-
-                // Try to patch the bug described previously
-                if (!fragment && span.data && span.data.document) {
-                  fragment = initField({
-                    type: 'Link.document',
-                    value: span.data
-                  });
+                if (fragment) {
+                  return (isStart ? '<a href="'+ fragment.url(ctx) +'">' : '</a>');
+                } else {
+                  console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                  return '';
                 }
-
-                return fragment && (isStart ? '<a href="'+ fragment.url(ctx) +'">' : '</a>');
             } else {
                 return '<' + (isStart ? '': '/') + span.type + '>'
             }
