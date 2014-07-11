@@ -69,9 +69,15 @@ npm install
 
 #### Test
 
-Please write tests in [test/test.js](test/test.js) for any bugfix or new feature, following the [very simple QUnit syntax](http://qunitjs.com/).
+Please write tests in [test/test.js](test/test.js) for any bugfix or new feature, following the [very simple QUnit syntax](http://qunitjs.com/), if you need to test with a real Prismic.io repository. Otherwise use [test/unit.js](test/unit.js) for unit testing features.
 
-Execute the tests either by opening [test/test.html](test/test.html) in a browser, or by running ```grunt qunit```.
+Execute the tests either by opening [test/test.html](test/test.html) or [test/unit.html](test/unit.html) in a browser, or by using Grunt:
+
+* ```grunt test``` will run all the tests and display the result on your shell
+* ```grunt test:int``` will run all integration tests (the ones from [test/test.html](test/test.html))
+* ```grunt test:unit``` will run all unit tests (the ones from [test/unit.html](test/unit.html))
+* ```grunt test:browser``` will start a local server at [http://localhost:8888](http://localhost:8888) so that you can run the tests on your browser
+* ```grunt test:local``` will test the local files without starting any server
 
 If you find existing code that is not optimally tested and wish to make it better, we really appreciate it; but you should document it on its own branch and its own pull request.
 

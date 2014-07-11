@@ -716,43 +716,63 @@
     /**
      * Parses a block that has spans, and inserts the proper HTML code.
      *
-     * @private
      * @param {string} text - the original text of the block
      * @param {object} span - the spans as returned by the API
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
      * @returns {string} - the HTML output
      */
     function insertSpans(text, spans, ctx) {
-        var textBits = [];
-        var tags = [];
-        var cursor = 0;
-        var html = [];
-
-        spans.forEach(function(span){
-            textBits.push(text.substring(0, span.start-cursor));
-            text = text.substring(span.start-cursor);
-            cursor = span.start;
-            textBits.push(text.substring(0, span.end-cursor));
-            text = text.substring(span.end-cursor);
-            tags.push(span);
-            cursor = span.end;
-        });
-        textBits.push(text);
-
-        tags.forEach(function(tag, index){
-            html.push(textBits.shift());
-            if(tag.type == "hyperlink"){
-                // Since the content of tag.data is similar to a link fragment, we can initialize it just like a fragment.
-                html.push('<a href="'+ initField(tag.data).url(ctx) +'">');
-                html.push(textBits.shift());
-                html.push('</a>');
+        function getTag(span, isStart) {
+            if (span.type === 'hyperlink') {
+                var fragment = initField(span.data);
+                if (fragment) {
+                  return (isStart ? '<a href="'+ fragment.url(ctx) +'">' : '</a>');
+                } else {
+                  console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                  return '';
+                }
             } else {
-                html.push('<'+tag.type+'>');
-                html.push(textBits.shift());
-                html.push('</'+tag.type+'>');
+                return '<' + (isStart ? '': '/') + span.type + '>'
             }
+        }
+
+        // Ultimate optimization!
+        // You know... doing nothing when there is nothing to be done
+        if (!spans || !spans.length) {
+            return text;
+        }
+
+        var positions = [];
+        var tagsStart = {};
+        var tagsEnd = {};
+
+        spans.forEach(function (span) {
+            if (!tagsStart[span.start]) { tagsStart[span.start] = []; }
+            if (!tagsEnd[span.end]) { tagsEnd[span.end] = []; }
+
+            tagsStart[span.start].push(getTag(span, true));
+            tagsEnd[span.end].unshift(getTag(span, false));
+
+            positions.push(span.start, span.end);
         });
-        html.push(textBits.shift());
+
+        positions = positions.filter(function (elem, index, self) {
+            return self.indexOf(elem) === index;
+        }).sort(function(a, b) {
+            return a - b;
+        });
+
+        var html = [];
+        var cursor = 0;
+
+        positions.forEach(function (pos) {
+            html.push(text.substring(cursor, pos));
+            html = html.concat(tagsEnd[pos] || []);
+            html = html.concat(tagsStart[pos] || []);
+            cursor = pos;
+        });
+
+        html.push(text.substring(cursor));
 
         return html.join('');
     }
@@ -874,7 +894,8 @@
         ImageLink: ImageLink,
         FileLink: FileLink,
         Group: Group,
-        initField: initField
+        initField: initField,
+        insertSpans: insertSpans
     }
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
