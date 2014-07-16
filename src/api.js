@@ -887,7 +887,7 @@
             var fragment = this.get(fragment);
 
             if (fragment instanceof Global.Prismic.Fragments.Group) {
-                return fragment;
+                return fragment.value;
             }
         },
 
