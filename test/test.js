@@ -4,7 +4,6 @@
 
   var testRepository = 'https://lesbonneschoses.prismic.io/api',
 
-      // This token allow to preview future releases of this repository (nothing secret ;)
       previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70',
 
       microRepository = 'https://micro.prismic.io/api',
@@ -396,6 +395,18 @@
         start();
       });
     }, previewToken);
+  });
+
+  asyncTest('GeoPoint is retrieved', 1, function() {
+    Prismic.Api(microRepository, function(err, Api) {
+      if (err) { console.log(err); return; }
+      Api.form('everything').query('[[:d = at(document.id, "U9pjvjQAADAAehbf")]]').ref(Api.master()).submit(function(err, documents) {
+        if (err) { console.log(err); return; }
+        var html = '<div class="geopoint"><span class="latitude">48.87687670000001</span><span class="longitude">2.3338801999999825</span></div>';
+        equal(documents.results[0].getGeoPoint('contributor.location').asHtml(), html);
+        start();
+      });
+    });
   });
 
   asyncTest('Block fragments are accessible, loopable, and serializable', 4, function() {

@@ -876,6 +876,20 @@
             }
         },
 
+        /* Gets the GeoPoint fragment in the current Document object, for further manipulation.
+         * Typical use: document.getGeoPoint('blog-post.location').asHtml(ctx)
+         *
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.location"
+         * @returns {GeoPoint} - The GeoPoint object to manipulate
+         */
+        getGeoPoint: function(fragment) {
+            var fragment = this.get(fragment);
+
+            if(fragment instanceof Global.Prismic.Fragments.GeoPoint) {
+                return fragment;
+            }
+        },
+
         /**
          * Gets the Group fragment in the current Document object, for further manipulation.
          * Typical use: document.getGroup('product.gallery').asHtml(ctx).

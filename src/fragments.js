@@ -278,6 +278,46 @@
     };
 
     /**
+     * Embodies a geopoint
+     * @constructor
+     * @global
+     * @alias Fragments:GeoPoint
+     */
+    function GeoPoint(latitude, longitude) {
+        /**
+         * @field
+         * @description the latitude of the geo point
+         */
+        this.latitude = latitude;
+        /**
+         * @field
+         * @description the longitude of the geo point
+         */
+        this.longitude = longitude;
+    }
+
+    GeoPoint.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function () {
+            return '<div class="geopoint"><span class="latitude">' + this.latitude + '</span><span class="longitude">' + this.longitude + '</span></div>';
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+        asText: function() {
+            return '(' + this.latitude + "," + this.longitude + ')';
+        }
+    }
+
+    /**
      * Embodies a Number fragment
      * @constructor
      * @global
@@ -811,6 +851,10 @@
                 output = new Embed(field.value);
                 break;
 
+            case "GeoPoint":
+                output = new GeoPoint(field.value.latitude, field.value.longitude);
+                break;
+
             case "Select":
                 output = new Select(field.value);
                 break;
@@ -894,6 +938,7 @@
         ImageLink: ImageLink,
         FileLink: FileLink,
         Group: Group,
+        GeoPoint: GeoPoint,
         initField: initField,
         insertSpans: insertSpans
     }
