@@ -315,7 +315,7 @@
         asText: function() {
             return '(' + this.latitude + "," + this.longitude + ')';
         }
-    }
+    };
 
     /**
      * Embodies a Number fragment
@@ -523,7 +523,7 @@
          asText: function() {
             return "";
          }
-    }
+    };
 
     /**
      * Embodies a fragment of type "Group" (which is a group of subfragments)
@@ -576,7 +576,7 @@
             }
             return output;
          }
-    }
+    };
 
 
     /**
@@ -709,7 +709,7 @@
                 // else: it's the same type as before, no touching blockGroup
 
                 blockGroup.blocks.push(block);
-            };
+            }
 
             blockGroups.forEach(function (blockGroup) {
 
@@ -826,8 +826,7 @@
      */
     function initField(field) {
 
-        var output,
-            img;
+        var output, img;
 
         switch (field.type) {
 
@@ -860,7 +859,7 @@
                 break;
 
             case "Image":
-                var img = field.value.main;
+                img = field.value.main;
                 output = new ImageEl(
                     new ImageView(
                         img.url,
@@ -871,7 +870,7 @@
                     {}
                 );
                 for (var name in field.value.views) {
-                    var img = field.value.views[name];
+                    img = field.value.views[name];
                     output.views[name] = new ImageView(
                         img.url,
                         img.dimensions.width,
