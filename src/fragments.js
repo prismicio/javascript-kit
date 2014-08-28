@@ -352,12 +352,12 @@
     };
 
     /**
-     * Embodies a DateTime fragment
+     * Embodies a Date fragment
      * @constructor
      * @global
-     * @alias Fragments:DateTime
+     * @alias Fragments:Date
      */
-    function DateTime(data) {
+    function DateFragment(data) {
         /**
          * @field
          * @description the Date value of the fragment (as a regular JS Date object)
@@ -365,7 +365,44 @@
         this.value = new Date(data);
     }
 
-    DateTime.prototype = {
+    DateFragment.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function () {
+            return "<time>" + this.value + "</time>";
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value.toString();
+         }
+    };
+
+    /**
+     * Embodies a Timestamp fragment
+     * @constructor
+     * @global
+     * @alias Fragments:Timestamp
+     */
+    function Timestamp(data) {
+        /**
+         * @field
+         * @description the Date value of the fragment (as a regular JS Date object)
+         */
+        // Adding ":" in the locale if needed, so JS considers it ISO8601-compliant
+        var correctIso8601Date = (data.length == 24) ? data.substring(0, 22) + ':' + data.substring(22, 24) : data;
+        this.value = new Date(correctIso8601Date);
+    }
+
+    Timestamp.prototype = {
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
@@ -844,7 +881,11 @@
                 break;
 
             case "Date":
-                output = new DateTime(field.value);
+                output = new DateFragment(field.value);
+                break;
+
+            case "Timestamp":
+                output = new Timestamp(field.value);
                 break;
 
             case "Text":
@@ -933,7 +974,8 @@
         ImageView: ImageView,
         Text: Text,
         Number: Num,
-        Date: DateTime,
+        Date: DateFragment,
+        Timestamp: Timestamp,
         Select: Select,
         Color: Color,
         StructuredText: StructuredText,

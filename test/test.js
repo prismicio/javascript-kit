@@ -385,6 +385,23 @@
     }, previewToken);
   });
 
+  test('Dates are well retrieved', function() {
+    var timestampHtml = Prismic.Fragments.initField({"type" : "Date", "value" : "2014-04-01"}).asHtml();
+    equal(
+      (new RegExp('<time>... ... \\d\\d 2014 \\d\\d:00:00 GMT[-+]\\d\\d00 \\(.+\\)</time>')).test(timestampHtml),
+      true
+    );
+  });
+
+  test('Timestamps are well retrieved', function() {
+    var timestampHtml = Prismic.Fragments.initField({"type" : "Timestamp", "value" : "2014-06-18T15:30:00+0000"}).asHtml();
+    equal(
+      (new RegExp('<time>... ... \\d\\d 2014 \\d\\d:30:00 GMT[-+]\\d\\d00 \\(.+\\)</time>')).test(timestampHtml),
+      true,
+      timestampHtml
+    );
+  });
+
   asyncTest('ImageViews are well retrieved', 2, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
