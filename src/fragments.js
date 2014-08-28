@@ -585,9 +585,10 @@
      * @constructor
      * @private
      */
-    function BlockGroup(tag, blocks) {
+    function BlockGroup(tag, blocks, label) {
         this.tag = tag;
         this.blocks = blocks;
+        this.label = label;
     }
 
     /**
@@ -699,11 +700,11 @@
                 block = blocks[i];
 
                 if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
-                    blockGroup = new BlockGroup(block.type, []);
+                    blockGroup = new BlockGroup(block.type, [], block.label);
                     blockGroups.push(blockGroup);
                 }
                 else if (!blockGroup || blockGroup.tag != block.type) { // it's a new type or no BlockGroup was set so far
-                    blockGroup = new BlockGroup(block.type, []);
+                    blockGroup = new BlockGroup(block.type, [], block.label);
                     blockGroups.push(blockGroup);
                 }
                 // else: it's the same type as before, no touching blockGroup
@@ -711,30 +712,32 @@
                 blockGroup.blocks.push(block);
             }
 
-            blockGroups.forEach(function (blockGroup) {
+            var TAG_NAMES = {
+                "heading1": "h1",
+                "heading2": "h2",
+                "heading3": "h3",
+                "paragraph": "p"
+            };
 
-                if(blockGroup.tag == "heading1") {
-                    html.push('<h1>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h1>');
-                }
-                else if(blockGroup.tag == "heading2") {
-                    html.push('<h2>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h2>');
-                }
-                else if(blockGroup.tag == "heading3") {
-                    html.push('<h3>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h3>');
-                }
-                else if(blockGroup.tag == "paragraph") {
-                    html.push('<p>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</p>');
+            blockGroups.forEach(function (blockGroup) {
+                var classCode = blockGroup.label ? ' class ="' + blockGroup.label + '"' : '';
+                if (TAG_NAMES[blockGroup.tag]) {
+                    var name = TAG_NAMES[blockGroup.tag];
+                    html.push('<' + name + classCode + '>'
+                      + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx)
+                      + '</' + name + '>');
                 }
                 else if(blockGroup.tag == "preformatted") {
-                    html.push('<pre>' + blockGroup.blocks[0].text + '</pre>');
+                    html.push('<pre' + classCode + '>' + blockGroup.blocks[0].text + '</pre>');
                 }
                 else if(blockGroup.tag == "image") {
-                    html.push('<p><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
+                    html.push('<p' + classCode + '><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
                 }
                 else if(blockGroup.tag == "embed") {
                     html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
                         + '" data-oembed-type="'+ blockGroup.blocks[0].type
                         + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
+                        + classCode
                         + '">' + blockGroup.blocks[0].oembed.html+"</div>")
                 }
                 else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
@@ -757,7 +760,7 @@
      * Parses a block that has spans, and inserts the proper HTML code.
      *
      * @param {string} text - the original text of the block
-     * @param {object} span - the spans as returned by the API
+     * @param {object} spans - the spans as returned by the API
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
      * @returns {string} - the HTML output
      */
@@ -766,14 +769,16 @@
             if (span.type === 'hyperlink') {
                 var fragment = initField(span.data);
                 if (fragment) {
-                  return (isStart ? '<a href="'+ fragment.url(ctx) +'">' : '</a>');
+                    return (isStart ? '<a href="' + fragment.url(ctx) + '">' : '</a>');
                 } else {
-                  console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
-                  return '';
+                    console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                    return '';
                 }
-            } else {
-                return '<' + (isStart ? '': '/') + span.type + '>'
             }
+            if (span.type === 'label') {
+                return (isStart ? '<span class="' + span.data.label + '">' : '</span>');
+            }
+            return '<' + (isStart ? '': '/') + span.type + '>'
         }
 
         // Ultimate optimization!

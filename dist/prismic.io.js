@@ -876,6 +876,20 @@
             }
         },
 
+        /* Gets the GeoPoint fragment in the current Document object, for further manipulation.
+         * Typical use: document.getGeoPoint('blog-post.location').asHtml(ctx)
+         *
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.location"
+         * @returns {GeoPoint} - The GeoPoint object to manipulate
+         */
+        getGeoPoint: function(fragment) {
+            var fragment = this.get(fragment);
+
+            if(fragment instanceof Global.Prismic.Fragments.GeoPoint) {
+                return fragment;
+            }
+        },
+
         /**
          * Gets the Group fragment in the current Document object, for further manipulation.
          * Typical use: document.getGroup('product.gallery').asHtml(ctx).
@@ -1326,6 +1340,46 @@
     };
 
     /**
+     * Embodies a geopoint
+     * @constructor
+     * @global
+     * @alias Fragments:GeoPoint
+     */
+    function GeoPoint(latitude, longitude) {
+        /**
+         * @field
+         * @description the latitude of the geo point
+         */
+        this.latitude = latitude;
+        /**
+         * @field
+         * @description the longitude of the geo point
+         */
+        this.longitude = longitude;
+    }
+
+    GeoPoint.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function () {
+            return '<div class="geopoint"><span class="latitude">' + this.latitude + '</span><span class="longitude">' + this.longitude + '</span></div>';
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+        asText: function() {
+            return '(' + this.latitude + "," + this.longitude + ')';
+        }
+    };
+
+    /**
      * Embodies a Number fragment
      * @constructor
      * @global
@@ -1531,7 +1585,7 @@
          asText: function() {
             return "";
          }
-    }
+    };
 
     /**
      * Embodies a fragment of type "Group" (which is a group of subfragments)
@@ -1584,7 +1638,7 @@
             }
             return output;
          }
-    }
+    };
 
 
     /**
@@ -1593,9 +1647,10 @@
      * @constructor
      * @private
      */
-    function BlockGroup(tag, blocks) {
+    function BlockGroup(tag, blocks, label) {
         this.tag = tag;
         this.blocks = blocks;
+        this.label = label;
     }
 
     /**
@@ -1707,42 +1762,44 @@
                 block = blocks[i];
 
                 if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
-                    blockGroup = new BlockGroup(block.type, []);
+                    blockGroup = new BlockGroup(block.type, [], block.label);
                     blockGroups.push(blockGroup);
                 }
                 else if (!blockGroup || blockGroup.tag != block.type) { // it's a new type or no BlockGroup was set so far
-                    blockGroup = new BlockGroup(block.type, []);
+                    blockGroup = new BlockGroup(block.type, [], block.label);
                     blockGroups.push(blockGroup);
                 }
                 // else: it's the same type as before, no touching blockGroup
 
                 blockGroup.blocks.push(block);
+            }
+
+            var TAG_NAMES = {
+                "heading1": "h1",
+                "heading2": "h2",
+                "heading3": "h3",
+                "paragraph": "p"
             };
 
             blockGroups.forEach(function (blockGroup) {
-
-                if(blockGroup.tag == "heading1") {
-                    html.push('<h1>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h1>');
-                }
-                else if(blockGroup.tag == "heading2") {
-                    html.push('<h2>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h2>');
-                }
-                else if(blockGroup.tag == "heading3") {
-                    html.push('<h3>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</h3>');
-                }
-                else if(blockGroup.tag == "paragraph") {
-                    html.push('<p>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '</p>');
+                var classCode = blockGroup.label ? ' class ="' + blockGroup.label + '"' : '';
+                if (TAG_NAMES[blockGroup.tag]) {
+                    var name = TAG_NAMES[blockGroup.tag];
+                    html.push('<' + name + classCode + '>'
+                      + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx)
+                      + '</' + name + '>');
                 }
                 else if(blockGroup.tag == "preformatted") {
-                    html.push('<pre>' + blockGroup.blocks[0].text + '</pre>');
+                    html.push('<pre' + classCode + '>' + blockGroup.blocks[0].text + '</pre>');
                 }
                 else if(blockGroup.tag == "image") {
-                    html.push('<p><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
+                    html.push('<p' + classCode + '><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
                 }
                 else if(blockGroup.tag == "embed") {
                     html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
                         + '" data-oembed-type="'+ blockGroup.blocks[0].type
                         + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
+                        + classCode
                         + '">' + blockGroup.blocks[0].oembed.html+"</div>")
                 }
                 else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
@@ -1764,43 +1821,65 @@
     /**
      * Parses a block that has spans, and inserts the proper HTML code.
      *
-     * @private
      * @param {string} text - the original text of the block
-     * @param {object} span - the spans as returned by the API
+     * @param {object} spans - the spans as returned by the API
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
      * @returns {string} - the HTML output
      */
     function insertSpans(text, spans, ctx) {
-        var textBits = [];
-        var tags = [];
-        var cursor = 0;
-        var html = [];
-
-        spans.forEach(function(span){
-            textBits.push(text.substring(0, span.start-cursor));
-            text = text.substring(span.start-cursor);
-            cursor = span.start;
-            textBits.push(text.substring(0, span.end-cursor));
-            text = text.substring(span.end-cursor);
-            tags.push(span);
-            cursor = span.end;
-        });
-        textBits.push(text);
-
-        tags.forEach(function(tag, index){
-            html.push(textBits.shift());
-            if(tag.type == "hyperlink"){
-                // Since the content of tag.data is similar to a link fragment, we can initialize it just like a fragment.
-                html.push('<a href="'+ initField(tag.data).url(ctx) +'">');
-                html.push(textBits.shift());
-                html.push('</a>');
-            } else {
-                html.push('<'+tag.type+'>');
-                html.push(textBits.shift());
-                html.push('</'+tag.type+'>');
+        function getTag(span, isStart) {
+            if (span.type === 'hyperlink') {
+                var fragment = initField(span.data);
+                if (fragment) {
+                    return (isStart ? '<a href="' + fragment.url(ctx) + '">' : '</a>');
+                } else {
+                    console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                    return '';
+                }
             }
+            if (span.type === 'label') {
+                return (isStart ? '<span class="' + span.data.label + '">' : '</span>');
+            }
+            return '<' + (isStart ? '': '/') + span.type + '>'
+        }
+
+        // Ultimate optimization!
+        // You know... doing nothing when there is nothing to be done
+        if (!spans || !spans.length) {
+            return text;
+        }
+
+        var positions = [];
+        var tagsStart = {};
+        var tagsEnd = {};
+
+        spans.forEach(function (span) {
+            if (!tagsStart[span.start]) { tagsStart[span.start] = []; }
+            if (!tagsEnd[span.end]) { tagsEnd[span.end] = []; }
+
+            tagsStart[span.start].push(getTag(span, true));
+            tagsEnd[span.end].unshift(getTag(span, false));
+
+            positions.push(span.start, span.end);
         });
-        html.push(textBits.shift());
+
+        positions = positions.filter(function (elem, index, self) {
+            return self.indexOf(elem) === index;
+        }).sort(function(a, b) {
+            return a - b;
+        });
+
+        var html = [];
+        var cursor = 0;
+
+        positions.forEach(function (pos) {
+            html.push(text.substring(cursor, pos));
+            html = html.concat(tagsEnd[pos] || []);
+            html = html.concat(tagsStart[pos] || []);
+            cursor = pos;
+        });
+
+        html.push(text.substring(cursor));
 
         return html.join('');
     }
@@ -1814,8 +1893,7 @@
      */
     function initField(field) {
 
-        var output,
-            img;
+        var output, img;
 
         switch (field.type) {
 
@@ -1839,12 +1917,16 @@
                 output = new Embed(field.value);
                 break;
 
+            case "GeoPoint":
+                output = new GeoPoint(field.value.latitude, field.value.longitude);
+                break;
+
             case "Select":
                 output = new Select(field.value);
                 break;
 
             case "Image":
-                var img = field.value.main;
+                img = field.value.main;
                 output = new ImageEl(
                     new ImageView(
                         img.url,
@@ -1855,7 +1937,7 @@
                     {}
                 );
                 for (var name in field.value.views) {
-                    var img = field.value.views[name];
+                    img = field.value.views[name];
                     output.views[name] = new ImageView(
                         img.url,
                         img.dimensions.width,
@@ -1922,7 +2004,9 @@
         ImageLink: ImageLink,
         FileLink: FileLink,
         Group: Group,
-        initField: initField
+        GeoPoint: GeoPoint,
+        initField: initField,
+        insertSpans: insertSpans
     }
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
