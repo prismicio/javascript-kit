@@ -1,5 +1,7 @@
 ## JavaScript development kit for prismic.io
 
+[![Build Status](https://api.travis-ci.org/prismicio/javascript-kit.png)](https://travis-ci.org/prismicio/javascript-kit)
+
 ### Getting started
 
 #### Install the kit
