@@ -25,5 +25,8 @@
     "type": "git",
     "url": "http://github.com/prismicio/javascript-kit.git"
   },
-  "main": "dist/prismic.io"
+  "main": "dist/prismic.io",
+  "scripts:": {
+    "test": "grunt test"
+  }
 }
