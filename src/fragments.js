@@ -759,25 +759,31 @@
                 "paragraph": "p"
             };
 
+            var classCode = function(classes) {
+                if (classes.length == 0) return "";
+                return ' class="' + classes.join(" ") + '"';
+            };
+
             blockGroups.forEach(function (blockGroup) {
-                var classCode = blockGroup.label ? ' class ="' + blockGroup.label + '"' : '';
+                var classes = blockGroup.label ? [blockGroup.label] : [];
                 if (TAG_NAMES[blockGroup.tag]) {
                     var name = TAG_NAMES[blockGroup.tag];
-                    html.push('<' + name + classCode + '>'
+                    html.push('<' + name + classCode(classes) + '>'
                       + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx)
                       + '</' + name + '>');
                 }
                 else if(blockGroup.tag == "preformatted") {
-                    html.push('<pre' + classCode + '>' + blockGroup.blocks[0].text + '</pre>');
+                    html.push('<pre' + classCode(classes) + '>' + blockGroup.blocks[0].text + '</pre>');
                 }
                 else if(blockGroup.tag == "image") {
-                    html.push('<p' + classCode + '><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
+                    classes.push("block-img");
+                    html.push('<p' + classCode(classes) + '><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
                 }
                 else if(blockGroup.tag == "embed") {
                     html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
                         + '" data-oembed-type="'+ blockGroup.blocks[0].type
                         + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
-                        + classCode
+                        + classCode(classes)
                         + '">' + blockGroup.blocks[0].oembed.html+"</div>")
                 }
                 else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
