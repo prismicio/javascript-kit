@@ -617,18 +617,6 @@
 
 
     /**
-     * Embodies a group of text blocks in a structured text fragment, like a group of list items.
-     * This is only used in the serialization into HTML of structured text fragments.
-     * @constructor
-     * @private
-     */
-    function BlockGroup(tag, blocks, label) {
-        this.tag = tag;
-        this.blocks = blocks;
-        this.label = label;
-    }
-
-    /**
      * Embodies a structured text fragment
      * @constructor
      * @global
@@ -734,71 +722,49 @@
             html = [];
 
         if (Array.isArray(blocks)) {
+
             for(var i=0; i<blocks.length; i++) {
                 block = blocks[i];
 
-                if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
-                    blockGroup = new BlockGroup(block.type, [], block.label);
+                if (block.type != "list-item" && block.type != "o-list-item") {
+                    // it's not a type that groups
+                    blockGroups.push(block);
+                } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
+                    // it's a new type or no BlockGroup was set so far
+                    blockGroup = {
+                        type: "group-" + block.type,
+                        blocks: [block]
+                    };
                     blockGroups.push(blockGroup);
+                } else {
+                    // it's the same type as before, no touching blockGroup
+                    blockGroup.blocks.push(block);
                 }
-                else if (!blockGroup || blockGroup.tag != block.type) { // it's a new type or no BlockGroup was set so far
-                    blockGroup = new BlockGroup(block.type, [], block.label);
-                    blockGroups.push(blockGroup);
-                }
-                // else: it's the same type as before, no touching blockGroup
-
-                blockGroup.blocks.push(block);
             }
 
-            var TAG_NAMES = {
-                "heading1": "h1",
-                "heading2": "h2",
-                "heading3": "h3",
-                "heading4": "h4",
-                "heading5": "h5",
-                "heading6": "h6",
-                "paragraph": "p"
-            };
-
-            var classCode = function(classes) {
-                if (classes.length == 0) return "";
-                return ' class="' + classes.join(" ") + '"';
+            var blockContent = function(block) {
+                var content = "";
+                if (block.blocks) {
+                    block.blocks.forEach(function (block2) {
+                        var block2Html = null;
+                        if (ctx && ctx.serializer) {
+                            block2Html = ctx.serializer(blockGroup, blockContent(blockGroup))
+                        }
+                        content = content + (block2Html || defaultSerializer(block2, blockContent(block2)));
+                    });
+                } else {
+                    content = insertSpans(block.text, block.spans, ctx);
+                }
+                return content;
             };
 
             blockGroups.forEach(function (blockGroup) {
-                var classes = blockGroup.label ? [blockGroup.label] : [];
-                var customHTML = (ctx && ctx.serializer) ? ctx.serializer(blockGroup) : null;
-                if (customHTML != null) {
-                    html.push(customHTML);
-                } else if (TAG_NAMES[blockGroup.tag]) {
-                    var name = TAG_NAMES[blockGroup.tag];
-                    html.push('<' + name + classCode(classes) + '>'
-                      + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx)
-                      + '</' + name + '>');
+                var blockHtml = null;
+                if (ctx && ctx.serializer) {
+                    blockHtml = ctx.serializer(blockGroup, blockContent(blockGroup))
                 }
-                else if(blockGroup.tag == "preformatted") {
-                    html.push('<pre' + classCode(classes) + '>' + blockGroup.blocks[0].text + '</pre>');
-                }
-                else if(blockGroup.tag == "image") {
-                    classes.push("block-img");
-                    html.push('<p' + classCode(classes) + '><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
-                }
-                else if(blockGroup.tag == "embed") {
-                    html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
-                        + '" data-oembed-type="'+ blockGroup.blocks[0].type
-                        + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
-                        + classCode(classes)
-                        + '">' + blockGroup.blocks[0].oembed.html+"</div>")
-                }
-                else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
-                    html.push(blockGroup.tag == "list-item"?'<ul>':"<ol>");
-                    blockGroup.blocks.forEach(function(block){
-                        html.push("<li>"+insertSpans(block.text, block.spans, ctx)+"</li>");
-                    });
-                    html.push(blockGroup.tag == "list-item"?'</ul>':"</ol>");
-                }
-                else throw new Error(blockGroup.tag+" not implemented");
-            });
+                html.push(blockHtml || defaultSerializer(blockGroup, blockContent(blockGroup)));
+           });
 
         }
 
@@ -974,12 +940,52 @@
                 break;
 
             default:
-                console.log("Fragment type not supported: ", field.type);
+                console && console.log && console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
         return output;
 
+    }
+
+    // Function called if the user didn't pass a serializer of if it didn't match for the requested element
+    function defaultSerializer(element, content) {
+
+      var TAG_NAMES = {
+        "heading1": "h1",
+        "heading2": "h2",
+        "heading3": "h3",
+        "heading4": "h4",
+        "heading5": "h5",
+        "heading6": "h6",
+        "paragraph": "p",
+        "preformatted": "pre",
+        "list-item": "li",
+        "o-list-item": "li",
+        "group-list-item": "ul",
+        "group-o-list-item": "ol"
+      };
+
+      if (TAG_NAMES[element.type]) {
+        var name = TAG_NAMES[element.type];
+        var classCode = element.label ? (' class="' + element.label + '"') : '';
+        return '<' + name + classCode + '>' + content + '</' + name + '>';
+      }
+
+      if (element.type == "image") {
+        var label = element.label ? (" " + element.label) : "";
+        return '<p class="block-img' + label + '"><img src="' + element.url + '" alt="' + element.alt + '"></p>';
+      }
+
+      if (element.type == "embed") {
+        return '<div data-oembed="'+ element.embed_url
+                + '" data-oembed-type="'+ element.type
+                + '" data-oembed-provider="'+ element.provider_name
+                + (element.label ? ('" class="' + label) : '')
+                + '">' + element.oembed.html+"</div>";
+      }
+
+      throw new Error(element.type + " not implemented");
     }
 
     Global.Prismic.Fragments = {

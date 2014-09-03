@@ -363,9 +363,9 @@
           maybeRef: ctx.maybeRef,
           oauth: ctx.oauth,
           linkResolver: ctx.linkResolver,
-          serializer: function (blockGroup) {
-            if (blockGroup.tag == "image") {
-              return '<img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '">';
+          serializer: function (element, content) {
+            if (element.type == "image") {
+              return '<img src="' + element.url + '" alt="' + element.alt + '">';
             }
             return null;
           }
