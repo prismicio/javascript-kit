@@ -1016,7 +1016,7 @@
         return '<span class="' + span.label + '">' + content + '</span>';
       }
 
-      throw new Error(element.type + " not implemented");
+      return "<!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;
     }
 
     Global.Prismic.Fragments = {
