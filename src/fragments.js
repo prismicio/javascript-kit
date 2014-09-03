@@ -811,7 +811,7 @@
                         html += innerHtml;
                     } else {
                         // Add the content to the parent tag
-                        stack[stack.length].text += innerHtml;
+                        stack[stack.length - 1].text += innerHtml;
                     }
                 });
             }
