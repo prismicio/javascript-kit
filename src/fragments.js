@@ -746,11 +746,7 @@
                 var content = "";
                 if (block.blocks) {
                     block.blocks.forEach(function (block2) {
-                        var block2Html = null;
-                        if (ctx && ctx.serializer) {
-                            block2Html = ctx.serializer(blockGroup, blockContent(blockGroup))
-                        }
-                        content = content + (block2Html || defaultSerializer(block2, blockContent(block2)));
+                        content = content + serialize(block2, blockContent(block2), ctx);
                     });
                 } else {
                     content = insertSpans(block.text, block.spans, ctx);
@@ -759,11 +755,7 @@
             };
 
             blockGroups.forEach(function (blockGroup) {
-                var blockHtml = null;
-                if (ctx && ctx.serializer) {
-                    blockHtml = ctx.serializer(blockGroup, blockContent(blockGroup))
-                }
-                html.push(blockHtml || defaultSerializer(blockGroup, blockContent(blockGroup)));
+                html.push(serialize(blockGroup, blockContent(blockGroup), ctx));
            });
 
         }
@@ -781,24 +773,6 @@
      * @returns {string} - the HTML output
      */
     function insertSpans(text, spans, ctx) {
-        function getTag(span, isStart) {
-            if (span.type === 'hyperlink') {
-                var fragment = initField(span.data);
-                if (fragment) {
-                    return (isStart ? '<a href="' + fragment.url(ctx) + '">' : '</a>');
-                } else {
-                    console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
-                    return '';
-                }
-            }
-            if (span.type === 'label') {
-                return (isStart ? '<span class="' + span.data.label + '">' : '</span>');
-            }
-            return '<' + (isStart ? '': '/') + span.type + '>'
-        }
-
-        // Ultimate optimization!
-        // You know... doing nothing when there is nothing to be done
         if (!spans || !spans.length) {
             return text;
         }
@@ -811,8 +785,8 @@
             if (!tagsStart[span.start]) { tagsStart[span.start] = []; }
             if (!tagsEnd[span.end]) { tagsEnd[span.end] = []; }
 
-            tagsStart[span.start].push(getTag(span, true));
-            tagsEnd[span.end].unshift(getTag(span, false));
+            tagsStart[span.start].push(span);
+            tagsEnd[span.end].unshift(span);
 
             positions.push(span.start, span.end);
         });
@@ -823,19 +797,58 @@
             return a - b;
         });
 
-        var html = [];
-        var cursor = 0;
+        var c;
+        var html = "";
+        var stack = [];
+        for (var pos = 0, len = text.length + 1; pos < len; pos++) { // Looping to length + 1 to catch closing tags
+            if (tagsEnd[pos]) {
+                tagsEnd[pos].forEach(function () {
+                    // Close a tag
+                    var tag = stack.pop();
+                    var innerHtml = serialize(tag.span, tag.text, ctx);
+                    if (stack.length == 0) {
+                        // The tag was top level
+                        html += innerHtml;
+                    } else {
+                        // Add the content to the parent tag
+                        stack[stack.length].text += innerHtml;
+                    }
+                });
+            }
+            if (tagsStart[pos]) {
+                tagsStart[pos].forEach(function (span) {
+                    // Open a tag
+                    var url = null;
+                    if (span.type == "hyperlink") {
+                        var fragment = initField(span.data);
+                        if (fragment) {
+                            url = fragment.url(ctx);
+                        } else {
+                            console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                            return '';
+                        }
+                        span.url = url;
+                    }
+                    var elt = {
+                        span: span,
+                        text: ""
+                    };
+                    stack.push(elt);
+                });
+            }
+            if (pos < text.length) {
+                c = text[pos];
+                if (stack.length == 0) {
+                    // Top-level text
+                    html += c;
+                } else {
+                    // Inner text of a span
+                    stack[stack.length - 1].text += c;
+                }
+            }
+        }
 
-        positions.forEach(function (pos) {
-            html.push(text.substring(cursor, pos));
-            html = html.concat(tagsEnd[pos] || []);
-            html = html.concat(tagsStart[pos] || []);
-            cursor = pos;
-        });
-
-        html.push(text.substring(cursor));
-
-        return html.join('');
+        return html;
     }
 
     /**
@@ -948,6 +961,14 @@
 
     }
 
+    function serialize(element, content, ctx) {
+        var custom = null;
+        if (ctx && ctx.serializer) {
+            custom = ctx.serializer(element, content)
+        }
+        return custom || defaultSerializer(element, content);
+    }
+
     // Function called if the user didn't pass a serializer of if it didn't match for the requested element
     function defaultSerializer(element, content) {
 
@@ -963,7 +984,9 @@
         "list-item": "li",
         "o-list-item": "li",
         "group-list-item": "ul",
-        "group-o-list-item": "ol"
+        "group-o-list-item": "ol",
+        "strong": "strong",
+        "em": "em"
       };
 
       if (TAG_NAMES[element.type]) {
@@ -983,6 +1006,14 @@
                 + '" data-oembed-provider="'+ element.provider_name
                 + (element.label ? ('" class="' + label) : '')
                 + '">' + element.oembed.html+"</div>";
+      }
+
+      if (element.type === 'hyperlink') {
+        return '<a href="' + element.url + '">' + content + '</a>';
+      }
+
+      if (element.type === 'span') {
+        return '<span class="' + span.label + '">' + content + '</span>';
       }
 
       throw new Error(element.type + " not implemented");
