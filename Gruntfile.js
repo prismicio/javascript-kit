@@ -83,7 +83,7 @@ module.exports = function(grunt) {
       options: {
         hostname: 'localhost',
         port: 8888,
-        base: '.',
+        base: '.'
       },
       testAuto: {},
       test: {

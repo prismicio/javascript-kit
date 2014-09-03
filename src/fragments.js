@@ -617,18 +617,6 @@
 
 
     /**
-     * Embodies a group of text blocks in a structured text fragment, like a group of list items.
-     * This is only used in the serialization into HTML of structured text fragments.
-     * @constructor
-     * @private
-     */
-    function BlockGroup(tag, blocks, label) {
-        this.tag = tag;
-        this.blocks = blocks;
-        this.label = label;
-    }
-
-    /**
      * Embodies a structured text fragment
      * @constructor
      * @global
@@ -692,7 +680,8 @@
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function
+         *      (please read prismic.io online documentation about this) and optionally a serializer
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function(ctx) {
@@ -733,68 +722,41 @@
             html = [];
 
         if (Array.isArray(blocks)) {
+
             for(var i=0; i<blocks.length; i++) {
                 block = blocks[i];
 
-                if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
-                    blockGroup = new BlockGroup(block.type, [], block.label);
+                if (block.type != "list-item" && block.type != "o-list-item") {
+                    // it's not a type that groups
+                    blockGroups.push(block);
+                } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
+                    // it's a new type or no BlockGroup was set so far
+                    blockGroup = {
+                        type: "group-" + block.type,
+                        blocks: [block]
+                    };
                     blockGroups.push(blockGroup);
+                } else {
+                    // it's the same type as before, no touching blockGroup
+                    blockGroup.blocks.push(block);
                 }
-                else if (!blockGroup || blockGroup.tag != block.type) { // it's a new type or no BlockGroup was set so far
-                    blockGroup = new BlockGroup(block.type, [], block.label);
-                    blockGroups.push(blockGroup);
-                }
-                // else: it's the same type as before, no touching blockGroup
-
-                blockGroup.blocks.push(block);
             }
 
-            var TAG_NAMES = {
-                "heading1": "h1",
-                "heading2": "h2",
-                "heading3": "h3",
-                "heading4": "h4",
-                "heading5": "h5",
-                "heading6": "h6",
-                "paragraph": "p"
-            };
-
-            var classCode = function(classes) {
-                if (classes.length == 0) return "";
-                return ' class="' + classes.join(" ") + '"';
+            var blockContent = function(block) {
+                var content = "";
+                if (block.blocks) {
+                    block.blocks.forEach(function (block2) {
+                        content = content + serialize(block2, blockContent(block2), ctx);
+                    });
+                } else {
+                    content = insertSpans(block.text, block.spans, ctx);
+                }
+                return content;
             };
 
             blockGroups.forEach(function (blockGroup) {
-                var classes = blockGroup.label ? [blockGroup.label] : [];
-                if (TAG_NAMES[blockGroup.tag]) {
-                    var name = TAG_NAMES[blockGroup.tag];
-                    html.push('<' + name + classCode(classes) + '>'
-                      + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx)
-                      + '</' + name + '>');
-                }
-                else if(blockGroup.tag == "preformatted") {
-                    html.push('<pre' + classCode(classes) + '>' + blockGroup.blocks[0].text + '</pre>');
-                }
-                else if(blockGroup.tag == "image") {
-                    classes.push("block-img");
-                    html.push('<p' + classCode(classes) + '><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
-                }
-                else if(blockGroup.tag == "embed") {
-                    html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
-                        + '" data-oembed-type="'+ blockGroup.blocks[0].type
-                        + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
-                        + classCode(classes)
-                        + '">' + blockGroup.blocks[0].oembed.html+"</div>")
-                }
-                else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
-                    html.push(blockGroup.tag == "list-item"?'<ul>':"<ol>");
-                    blockGroup.blocks.forEach(function(block){
-                        html.push("<li>"+insertSpans(block.text, block.spans, ctx)+"</li>");
-                    });
-                    html.push(blockGroup.tag == "list-item"?'</ul>':"</ol>");
-                }
-                else throw new Error(blockGroup.tag+" not implemented");
-            });
+                html.push(serialize(blockGroup, blockContent(blockGroup), ctx));
+           });
 
         }
 
@@ -811,24 +773,6 @@
      * @returns {string} - the HTML output
      */
     function insertSpans(text, spans, ctx) {
-        function getTag(span, isStart) {
-            if (span.type === 'hyperlink') {
-                var fragment = initField(span.data);
-                if (fragment) {
-                    return (isStart ? '<a href="' + fragment.url(ctx) + '">' : '</a>');
-                } else {
-                    console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
-                    return '';
-                }
-            }
-            if (span.type === 'label') {
-                return (isStart ? '<span class="' + span.data.label + '">' : '</span>');
-            }
-            return '<' + (isStart ? '': '/') + span.type + '>'
-        }
-
-        // Ultimate optimization!
-        // You know... doing nothing when there is nothing to be done
         if (!spans || !spans.length) {
             return text;
         }
@@ -841,8 +785,8 @@
             if (!tagsStart[span.start]) { tagsStart[span.start] = []; }
             if (!tagsEnd[span.end]) { tagsEnd[span.end] = []; }
 
-            tagsStart[span.start].push(getTag(span, true));
-            tagsEnd[span.end].unshift(getTag(span, false));
+            tagsStart[span.start].push(span);
+            tagsEnd[span.end].unshift(span);
 
             positions.push(span.start, span.end);
         });
@@ -853,19 +797,58 @@
             return a - b;
         });
 
-        var html = [];
-        var cursor = 0;
+        var c;
+        var html = "";
+        var stack = [];
+        for (var pos = 0, len = text.length + 1; pos < len; pos++) { // Looping to length + 1 to catch closing tags
+            if (tagsEnd[pos]) {
+                tagsEnd[pos].forEach(function () {
+                    // Close a tag
+                    var tag = stack.pop();
+                    var innerHtml = serialize(tag.span, tag.text, ctx);
+                    if (stack.length == 0) {
+                        // The tag was top level
+                        html += innerHtml;
+                    } else {
+                        // Add the content to the parent tag
+                        stack[stack.length].text += innerHtml;
+                    }
+                });
+            }
+            if (tagsStart[pos]) {
+                tagsStart[pos].forEach(function (span) {
+                    // Open a tag
+                    var url = null;
+                    if (span.type == "hyperlink") {
+                        var fragment = initField(span.data);
+                        if (fragment) {
+                            url = fragment.url(ctx);
+                        } else {
+                            console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                            return '';
+                        }
+                        span.url = url;
+                    }
+                    var elt = {
+                        span: span,
+                        text: ""
+                    };
+                    stack.push(elt);
+                });
+            }
+            if (pos < text.length) {
+                c = text[pos];
+                if (stack.length == 0) {
+                    // Top-level text
+                    html += c;
+                } else {
+                    // Inner text of a span
+                    stack[stack.length - 1].text += c;
+                }
+            }
+        }
 
-        positions.forEach(function (pos) {
-            html.push(text.substring(cursor, pos));
-            html = html.concat(tagsEnd[pos] || []);
-            html = html.concat(tagsStart[pos] || []);
-            cursor = pos;
-        });
-
-        html.push(text.substring(cursor));
-
-        return html.join('');
+        return html;
     }
 
     /**
@@ -970,12 +953,70 @@
                 break;
 
             default:
-                console.log("Fragment type not supported: ", field.type);
+                console && console.log && console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
         return output;
 
+    }
+
+    function serialize(element, content, ctx) {
+        var custom = null;
+        if (ctx && ctx.serializer) {
+            custom = ctx.serializer(element, content)
+        }
+        return custom || defaultSerializer(element, content);
+    }
+
+    // Function called if the user didn't pass a serializer of if it didn't match for the requested element
+    function defaultSerializer(element, content) {
+
+      var TAG_NAMES = {
+        "heading1": "h1",
+        "heading2": "h2",
+        "heading3": "h3",
+        "heading4": "h4",
+        "heading5": "h5",
+        "heading6": "h6",
+        "paragraph": "p",
+        "preformatted": "pre",
+        "list-item": "li",
+        "o-list-item": "li",
+        "group-list-item": "ul",
+        "group-o-list-item": "ol",
+        "strong": "strong",
+        "em": "em"
+      };
+
+      if (TAG_NAMES[element.type]) {
+        var name = TAG_NAMES[element.type];
+        var classCode = element.label ? (' class="' + element.label + '"') : '';
+        return '<' + name + classCode + '>' + content + '</' + name + '>';
+      }
+
+      if (element.type == "image") {
+        var label = element.label ? (" " + element.label) : "";
+        return '<p class="block-img' + label + '"><img src="' + element.url + '" alt="' + element.alt + '"></p>';
+      }
+
+      if (element.type == "embed") {
+        return '<div data-oembed="'+ element.embed_url
+                + '" data-oembed-type="'+ element.type
+                + '" data-oembed-provider="'+ element.provider_name
+                + (element.label ? ('" class="' + label) : '')
+                + '">' + element.oembed.html+"</div>";
+      }
+
+      if (element.type === 'hyperlink') {
+        return '<a href="' + element.url + '">' + content + '</a>';
+      }
+
+      if (element.type === 'span') {
+        return '<span class="' + span.label + '">' + content + '</span>';
+      }
+
+      throw new Error(element.type + " not implemented");
     }
 
     Global.Prismic.Fragments = {
