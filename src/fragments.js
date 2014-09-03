@@ -692,7 +692,8 @@
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function
+         *      (please read prismic.io online documentation about this) and optionally a serializer
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function(ctx) {
@@ -766,7 +767,10 @@
 
             blockGroups.forEach(function (blockGroup) {
                 var classes = blockGroup.label ? [blockGroup.label] : [];
-                if (TAG_NAMES[blockGroup.tag]) {
+                var customHTML = (ctx && ctx.serializer) ? ctx.serializer(blockGroup) : null;
+                if (customHTML != null) {
+                    html.push(customHTML);
+                } else if (TAG_NAMES[blockGroup.tag]) {
                     var name = TAG_NAMES[blockGroup.tag];
                     html.push('<' + name + classCode(classes) + '>'
                       + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx)

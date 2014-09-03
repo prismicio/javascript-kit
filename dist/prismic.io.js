@@ -1755,10 +1755,11 @@
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
          * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @params {function} serializer - optional function that takes a block and returns an HTML string. Return null to fallback to default implementation.
          * @returns {string} - basic HTML code for the fragment
          */
-        asHtml: function(ctx) {
-            return StructuredTextAsHtml.call(this, this.blocks, ctx);
+        asHtml: function(ctx, serializer) {
+            return StructuredTextAsHtml.call(this, this.blocks, ctx, serializer);
         },
 
         /**
@@ -1787,7 +1788,7 @@
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
      * @returns {string} - the HTML output
      */
-    function StructuredTextAsHtml (blocks, ctx) {
+    function StructuredTextAsHtml (blocks, ctx, serializer) {
 
         var blockGroups = [],
             blockGroup,
@@ -1815,28 +1816,40 @@
                 "heading1": "h1",
                 "heading2": "h2",
                 "heading3": "h3",
+                "heading4": "h4",
+                "heading5": "h5",
+                "heading6": "h6",
                 "paragraph": "p"
             };
 
+            var classCode = function(classes) {
+                if (classes.length == 0) return "";
+                return ' class="' + classes.join(" ") + '"';
+            };
+
             blockGroups.forEach(function (blockGroup) {
-                var classCode = blockGroup.label ? ' class ="' + blockGroup.label + '"' : '';
-                if (TAG_NAMES[blockGroup.tag]) {
+                var classes = blockGroup.label ? [blockGroup.label] : [];
+                var customHTML = serializer ? serializer(blockGroup) : null;
+                if (customHTML != null) {
+                    html.push(customHTML);
+                } else if (TAG_NAMES[blockGroup.tag]) {
                     var name = TAG_NAMES[blockGroup.tag];
-                    html.push('<' + name + classCode + '>'
+                    html.push('<' + name + classCode(classes) + '>'
                       + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx)
                       + '</' + name + '>');
                 }
                 else if(blockGroup.tag == "preformatted") {
-                    html.push('<pre' + classCode + '>' + blockGroup.blocks[0].text + '</pre>');
+                    html.push('<pre' + classCode(classes) + '>' + blockGroup.blocks[0].text + '</pre>');
                 }
                 else if(blockGroup.tag == "image") {
-                    html.push('<p' + classCode + '><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
+                    classes.push("block-img");
+                    html.push('<p' + classCode(classes) + '><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
                 }
                 else if(blockGroup.tag == "embed") {
                     html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
                         + '" data-oembed-type="'+ blockGroup.blocks[0].type
                         + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
-                        + classCode
+                        + classCode(classes)
                         + '">' + blockGroup.blocks[0].oembed.html+"</div>")
                 }
                 else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
