@@ -87,9 +87,22 @@
   });
 
   asyncTest('Get linked documents', 2, function() {
-    Prismic.Api("https://micro.prismic.io/api", function(err, Api) {
+    Prismic.Api(microRepository, function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').query('[[:d = any(document.type, ["doc","docchapter"])]]').ref(Api.master()).submit(function(err, response) {
+        if (err) { console.log(err); return; }
+        var document = response.results[0];
+        equal(document.linkedDocuments.length, 1);
+        equal(document.linkedDocuments[0].id, 'U0w8OwEAACoAQEvB');
+        start();
+      });
+    });
+  });
+
+  asyncTest('Use an Array to query', 2, function() {
+    Prismic.Api(microRepository, function(err, Api) {
+      if (err) { console.log(err); return; }
+      Api.form('everything').query(["any", "document.type", ["doc", "docchapter"]]).ref(Api.master()).submit(function(err, response) {
         if (err) { console.log(err); return; }
         var document = response.results[0];
         equal(document.linkedDocuments.length, 1);
@@ -179,7 +192,7 @@
   asyncTest('Submit the `everything` form with a predicate', 1, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
-      Api.form('everything').ref(Api.master()).query('[[:d = at(document.type, "product")]]').submit(function(err, documents) {
+      Api.form('everything').ref(Api.master()).query(["at", "document.type", "product"]).submit(function(err, documents) {
         if (err) { console.log(err); return; }
         equal(documents.results.length, 16);
         start();
@@ -193,6 +206,33 @@
       Api.form('everything').ref(Api.master()).query('[[:d = at(document.type, "youhou")]]').submit(function(err, documents) {
         if (err) { console.log(err); return; }
         equal(documents.results.length, 0);
+        start();
+      });
+    });
+  });
+
+  asyncTest('Similarity search', 1, function() {
+    Prismic.Api(testRepository, function(err, Api) {
+      if (err) { console.log(err); return; }
+      Api.form('everything').ref(Api.master()).query(["similar", "U9pjvjQAADAAehbf", 10]).submit(function(err, documents) {
+        if (err) { console.log(err); return; }
+        equal(documents.results.length, 0);
+        start();
+      });
+    });
+  });
+
+  asyncTest('Multiple predicates', 1, function() {
+    Prismic.Api(microRepository, function(err, Api) {
+      if (err) { console.log(err); return; }
+      Api.form('everything').ref(Api.master()).query(
+        [
+          ["at", "document.type", "article"],
+          ["fulltext", "my.article.title", "meta"]
+        ]
+      ).submit(function(err, documents) {
+        if (err) { console.log(err); return; }
+        equal(documents.results.length, 1);
         start();
       });
     });

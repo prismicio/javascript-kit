@@ -380,7 +380,7 @@
                 this.data[field] = [form.fields[field]['default']];
             }
         }
-    };
+    }
 
     SearchForm.prototype = {
 
@@ -432,7 +432,33 @@
          * @returns {SearchForm} - The SearchForm itself
          */
         query: function(query) {
-            return this.set("q", query);
+            if (typeof query === 'string') {
+                return this.set("q", query);
+            } else {
+                var predicates = (typeof query[0] === 'string')
+                            ? [query]
+                            : query;
+                var stringQueries = [];
+                predicates.forEach(function (predicate) {
+                    var firstArg = (predicate[1].indexOf("my.") == 0 || predicate[1].indexOf("document.") == 0)
+                        ? predicate[1]
+                        : '"' + predicate[1] + '"';
+                    stringQueries.push("[:d = " + predicate[0] + "(" + firstArg + ", " + (function() {
+                        return predicate.slice(2).map(function(p) {
+                            if (typeof p === 'string') {
+                                return '"' + p + '"';
+                            } else if(Array.isArray(p)) {
+                                return "[" + p.map(function(e) {
+                                    return '"' + e + '"';
+                                }).join(',') + "]";
+                            } else {
+                                return p;
+                            }
+                        }).join(',');
+                    })() + ")]");
+                });
+                return this.query("[" + stringQueries.join("") + "]");
+            }
         },
 
         /**
@@ -570,7 +596,7 @@
             return [this.fragments[name]];
         }
 
-    };
+    }
 
     /**
      * Embodies the response of a SearchForm query as returned by the API.
