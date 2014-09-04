@@ -166,6 +166,31 @@
     // Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
     prismic.fn = prismic.prototype = {
 
+        // Predicates: usable as the first element of a query array.
+        AT: "at",
+        ANY: "any",
+        EVERYTHING: "everything",
+        SIMILAR: "similar",
+        FULLTEXT: "fulltext",
+        NUMBER: {
+            GT: "number.gt",
+            LT: "number.lt"
+        },
+        DATE: {
+            // Other date operators are available: see the documentation.
+            AFTER: "date.after",
+            BEFORE: "date.before",
+            BETWEEN: "date.between"
+        },
+
+        // Fragment: usable as the second element of a query array on most predicates (except SIMILAR).
+        // You can also use "my.*" for your custom fields.
+        DOCUMENT: {
+            ID: "document.id",
+            TYPE: "document.type",
+            TAGS: "document.tags"
+        },
+
         constructor: prismic,
         data: null,
 
@@ -766,8 +791,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageView} - The View object to manipulate
          */
-        getImageView: function(fragment, view) {
-            var fragment = this.get(fragment);
+        getImageView: function(name, view) {
+            var fragment = this.get(name);
             if (fragment instanceof Global.Prismic.Fragments.Image) {
                 return fragment.getView(view);
             }
@@ -782,8 +807,8 @@
         },
 
         // Useful for obsolete multiples
-        getAllImageViews: function(fragment, view) {
-            return this.getAllImages(fragment).map(function (image) {
+        getAllImageViews: function(name, view) {
+            return this.getAllImages(name).map(function (image) {
                 return image.getView(view);
             });
         },
@@ -795,8 +820,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
          */
-        getDate: function(fragment) {
-            var fragment = this.get(fragment);
+        getDate: function(name) {
+            var fragment = this.get(name);
 
             if(fragment instanceof Global.Prismic.Fragments.Date) {
                 return fragment.value;
@@ -811,8 +836,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
          * @returns {boolean} - The boolean value of the fragment
          */
-        getBoolean: function(fragment) {
-            var fragment = this.get(fragment);
+        getBoolean: function(name) {
+            var fragment = this.get(name);
             return fragment.value && (fragment.value.toLowerCase() == 'yes' || fragment.value.toLowerCase() == 'on' || fragment.value.toLowerCase() == 'true');
         },
 
@@ -821,12 +846,12 @@
          * Typical use: document.getText('blog-post.label').asHtml(ctx).
          * The method works with StructuredText fragments, Text fragments, Number fragments, Select fragments and Color fragments.
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.label"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.label"
          * @param {string} after - a suffix that will be appended to the value
          * @returns {object} - either StructuredText, or Text, or Number, or Select, or Color.
          */
-        getText: function(fragmentName, after) {
-            var fragment = this.get(fragmentName);
+        getText: function(name, after) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment.blocks.map(function(block) {
@@ -868,8 +893,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText fragment to manipulate.
          */
-        getStructuredText: function(fragment) {
-            var fragment = this.get(fragment);
+        getStructuredText: function(name) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment;
@@ -880,11 +905,11 @@
          * Gets the Number fragment in the current Document object, for further manipulation.
          * Typical use: document.getNumber('product.price')
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.price"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "product.price"
          * @returns {number} - The number value of the fragment.
          */
-        getNumber: function(fragment) {
-            var fragment = this.get(fragment);
+        getNumber: function(name) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value;
@@ -898,8 +923,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.color"
          * @returns {string} - The string value of the Color fragment.
          */
-        getColor: function(fragment) {
-            var fragment = this.get(fragment);
+        getColor: function(name) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.Color) {
                 return fragment.value;
@@ -909,11 +934,11 @@
         /* Gets the GeoPoint fragment in the current Document object, for further manipulation.
          * Typical use: document.getGeoPoint('blog-post.location').asHtml(ctx)
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.location"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.location"
          * @returns {GeoPoint} - The GeoPoint object to manipulate
          */
-        getGeoPoint: function(fragment) {
-            var fragment = this.get(fragment);
+        getGeoPoint: function(name) {
+            var fragment = this.get(name);
 
             if(fragment instanceof Global.Prismic.Fragments.GeoPoint) {
                 return fragment;
@@ -924,11 +949,11 @@
          * Gets the Group fragment in the current Document object, for further manipulation.
          * Typical use: document.getGroup('product.gallery').asHtml(ctx).
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.gallery"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
          * @returns {Group} - The Group fragment to manipulate.
          */
-        getGroup: function(fragment) {
-            var fragment = this.get(fragment);
+        getGroup: function(name) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.Group) {
                 return fragment;
@@ -939,12 +964,12 @@
          * Shortcut to get the HTML output of the fragment in the current document.
          * This is the same as writing document.get(fragment).asHtml(ctx);
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.body"
          * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
          * @returns {string} - The HTML output
          */
-        getHtml: function(fragment, ctx) {
-            var fragment = this.get(fragment);
+        getHtml: function(name, ctx) {
+            var fragment = this.get(name);
 
             if(fragment && fragment.asHtml) {
                 return fragment.asHtml(ctx);

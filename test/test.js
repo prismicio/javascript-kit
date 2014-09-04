@@ -211,6 +211,18 @@
     });
   });
 
+  asyncTest('Group fragments', 1, function() {
+    Prismic.Api(microRepository, function(err, Api) {
+      if (err) { console.log(err); return; }
+      Api.form('everything').ref(Api.master()).query(["at", "document.id", "UrOaNwEAAM2OpbPy"]).submit(function(err, documents) {
+        if (err) { console.log(err); return; }
+        var links = documents.results[0].getGroup("contributor.links");
+        equal(links.toArray().length, 2);
+        start();
+      });
+    });
+  });
+
   asyncTest('Similarity search', 1, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
