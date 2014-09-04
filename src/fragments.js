@@ -681,11 +681,57 @@
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
          * @params {object} ctx - mandatory ctx object, with a useable linkResolver function
-         *      (please read prismic.io online documentation about this) and optionally a serializer
+         *      (please read prismic.io online documentation about this)
+         * @params {function} htmlSerializer optional HTML serializer to customize the output
          * @returns {string} - basic HTML code for the fragment
          */
-        asHtml: function(ctx) {
-            return StructuredTextAsHtml.call(this, this.blocks, ctx);
+        asHtml: function(ctx, htmlSerializer) {
+            var blockGroups = [],
+                blockGroup,
+                block,
+                html = [];
+
+            if (Array.isArray(this.blocks)) {
+
+                for(var i=0; i < this.blocks.length; i++) {
+                    block = this.blocks[i];
+
+                    if (block.type != "list-item" && block.type != "o-list-item") {
+                        // it's not a type that groups
+                        blockGroups.push(block);
+                    } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
+                        // it's a new type or no BlockGroup was set so far
+                        blockGroup = {
+                            type: "group-" + block.type,
+                            blocks: [block]
+                        };
+                        blockGroups.push(blockGroup);
+                    } else {
+                        // it's the same type as before, no touching blockGroup
+                        blockGroup.blocks.push(block);
+                    }
+                }
+
+                var blockContent = function(block) {
+                    var content = "";
+                    if (block.blocks) {
+                        block.blocks.forEach(function (block2) {
+                            content = content + serialize(block2, blockContent(block2), htmlSerializer);
+                        });
+                    } else {
+                        content = insertSpans(block.text, block.spans, ctx, htmlSerializer);
+                    }
+                    return content;
+                };
+
+                blockGroups.forEach(function (blockGroup) {
+                    html.push(serialize(blockGroup, blockContent(blockGroup), htmlSerializer));
+                });
+
+            }
+
+            return html.join('');
+
         },
 
         /**
@@ -706,63 +752,6 @@
 
     };
 
-    /**
-     * Transforms a list of blocks as proper HTML.
-     *
-     * @private
-     * @param {array} blocks - the array of blocks to deal with
-     * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
-     * @returns {string} - the HTML output
-     */
-    function StructuredTextAsHtml (blocks, ctx) {
-
-        var blockGroups = [],
-            blockGroup,
-            block,
-            html = [];
-
-        if (Array.isArray(blocks)) {
-
-            for(var i=0; i<blocks.length; i++) {
-                block = blocks[i];
-
-                if (block.type != "list-item" && block.type != "o-list-item") {
-                    // it's not a type that groups
-                    blockGroups.push(block);
-                } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
-                    // it's a new type or no BlockGroup was set so far
-                    blockGroup = {
-                        type: "group-" + block.type,
-                        blocks: [block]
-                    };
-                    blockGroups.push(blockGroup);
-                } else {
-                    // it's the same type as before, no touching blockGroup
-                    blockGroup.blocks.push(block);
-                }
-            }
-
-            var blockContent = function(block) {
-                var content = "";
-                if (block.blocks) {
-                    block.blocks.forEach(function (block2) {
-                        content = content + serialize(block2, blockContent(block2), ctx);
-                    });
-                } else {
-                    content = insertSpans(block.text, block.spans, ctx);
-                }
-                return content;
-            };
-
-            blockGroups.forEach(function (blockGroup) {
-                html.push(serialize(blockGroup, blockContent(blockGroup), ctx));
-           });
-
-        }
-
-        return html.join('');
-
-    }
 
     /**
      * Parses a block that has spans, and inserts the proper HTML code.
@@ -770,9 +759,10 @@
      * @param {string} text - the original text of the block
      * @param {object} spans - the spans as returned by the API
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
+     * @param {function} htmlSerializer - optional serializer
      * @returns {string} - the HTML output
      */
-    function insertSpans(text, spans, ctx) {
+    function insertSpans(text, spans, ctx, htmlSerializer) {
         if (!spans || !spans.length) {
             return text;
         }
@@ -805,7 +795,7 @@
                 tagsEnd[pos].forEach(function () {
                     // Close a tag
                     var tag = stack.pop();
-                    var innerHtml = serialize(tag.span, tag.text, ctx);
+                    var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
                     if (stack.length == 0) {
                         // The tag was top level
                         html += innerHtml;
@@ -961,62 +951,61 @@
 
     }
 
-    function serialize(element, content, ctx) {
-        var custom = null;
-        if (ctx && ctx.serializer) {
-            custom = ctx.serializer(element, content)
+    function serialize(element, content, htmlSerializer) {
+        // Return the user customized output (if available)
+        if (htmlSerializer) {
+            var custom = htmlSerializer(element, content);
+            if (custom) {
+                return custom;
+            }
         }
-        return custom || defaultSerializer(element, content);
-    }
 
-    // Function called if the user didn't pass a serializer of if it didn't match for the requested element
-    function defaultSerializer(element, content) {
+        // Fall back to the default HTML output
+        var TAG_NAMES = {
+            "heading1": "h1",
+            "heading2": "h2",
+            "heading3": "h3",
+            "heading4": "h4",
+            "heading5": "h5",
+            "heading6": "h6",
+            "paragraph": "p",
+            "preformatted": "pre",
+            "list-item": "li",
+            "o-list-item": "li",
+            "group-list-item": "ul",
+            "group-o-list-item": "ol",
+            "strong": "strong",
+            "em": "em"
+        };
 
-      var TAG_NAMES = {
-        "heading1": "h1",
-        "heading2": "h2",
-        "heading3": "h3",
-        "heading4": "h4",
-        "heading5": "h5",
-        "heading6": "h6",
-        "paragraph": "p",
-        "preformatted": "pre",
-        "list-item": "li",
-        "o-list-item": "li",
-        "group-list-item": "ul",
-        "group-o-list-item": "ol",
-        "strong": "strong",
-        "em": "em"
-      };
+        if (TAG_NAMES[element.type]) {
+            var name = TAG_NAMES[element.type];
+            var classCode = element.label ? (' class="' + element.label + '"') : '';
+            return '<' + name + classCode + '>' + content + '</' + name + '>';
+        }
 
-      if (TAG_NAMES[element.type]) {
-        var name = TAG_NAMES[element.type];
-        var classCode = element.label ? (' class="' + element.label + '"') : '';
-        return '<' + name + classCode + '>' + content + '</' + name + '>';
-      }
+        if (element.type == "image") {
+            var label = element.label ? (" " + element.label) : "";
+            return '<p class="block-img' + label + '"><img src="' + element.url + '" alt="' + element.alt + '"></p>';
+        }
 
-      if (element.type == "image") {
-        var label = element.label ? (" " + element.label) : "";
-        return '<p class="block-img' + label + '"><img src="' + element.url + '" alt="' + element.alt + '"></p>';
-      }
-
-      if (element.type == "embed") {
-        return '<div data-oembed="'+ element.embed_url
+        if (element.type == "embed") {
+            return '<div data-oembed="'+ element.embed_url
                 + '" data-oembed-type="'+ element.type
                 + '" data-oembed-provider="'+ element.provider_name
                 + (element.label ? ('" class="' + label) : '')
                 + '">' + element.oembed.html+"</div>";
-      }
+        }
 
-      if (element.type === 'hyperlink') {
-        return '<a href="' + element.url + '">' + content + '</a>';
-      }
+        if (element.type === 'hyperlink') {
+            return '<a href="' + element.url + '">' + content + '</a>';
+        }
 
-      if (element.type === 'span') {
-        return '<span class="' + span.label + '">' + content + '</span>';
-      }
+        if (element.type === 'span') {
+            return '<span class="' + span.label + '">' + content + '</span>';
+        }
 
-      return "<!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;
+        return "<!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;
     }
 
     Global.Prismic.Fragments = {
