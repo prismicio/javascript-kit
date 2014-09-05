@@ -112,7 +112,8 @@
                 http = require('http'),
                 https = require('https'),
                 url = require('url'),
-                querystring = require('querystring');
+                querystring = require('querystring'),
+                pjson = require('../package.json');
 
             return function(requestUrl, callback) {
                 if(requestsCache[requestUrl]) {
@@ -125,7 +126,10 @@
                             hostname: parsed.hostname,
                             path: parsed.path,
                             query: parsed.query,
-                            headers: { 'Accept': 'application/json' }
+                            headers: {
+                                'Accept': 'application/json',
+                                'User-Agent': 'Prismic-javascript-kit/' + pjson.version + " NodeJS/" + process.version
+                            }
                         };
 
                     h.get(options, function(response) {
