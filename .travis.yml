@@ -1,7 +1,14 @@
 language: node_js
 node_js:
-  - "0.10"
+- '0.10'
 before_install: npm install -g grunt-cli
 install: npm install
 script: grunt test
-
+deploy:
+  provider: npm
+  email: eloisant@gmail.com
+  api_key:
+    secure: C3fXXtk20vLty7/0+ORC0HaKHRGNdSYy8eLt2UZkXKDiBsPBfMyO3MrNASJhWgpZcjNJJBgkWmgOU/g12VrEH6CJ8BicIkOVlhLERPfCc2OfTZGyzZCBx7p1/mu0/FJ0veP5VKYvOIDyJMkwypY0KEN4MJ3RJSfjbTfRsC02SEI=
+  on:
+    tags: true
+    repo: prismicio/javascript-kit
