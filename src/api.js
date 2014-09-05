@@ -223,9 +223,9 @@
                     f = data.forms[i];
 
                     if(this.accessToken) {
-                        f.fields['accessToken'] = {};
-                        f.fields['accessToken']['type'] = 'string';
-                        f.fields['accessToken']['default'] = this.accessToken;
+                        f.fields['access_token'] = {};
+                        f.fields['access_token']['type'] = 'string';
+                        f.fields['access_token']['default'] = this.accessToken;
                     }
 
                     form = new Form(
