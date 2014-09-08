@@ -696,6 +696,12 @@
                 for(var i=0; i < this.blocks.length; i++) {
                     block = this.blocks[i];
 
+                    // Resolve image links
+                    if (block.type == "image" && block.linkTo) {
+                        var link = initField(block.linkTo);
+                        block.linkUrl = link.url(ctx);
+                    }
+
                     if (block.type != "list-item" && block.type != "o-list-item") {
                         // it's not a type that groups
                         blockGroups.push(block);
@@ -986,7 +992,10 @@
 
         if (element.type == "image") {
             var label = element.label ? (" " + element.label) : "";
-            return '<p class="block-img' + label + '"><img src="' + element.url + '" alt="' + element.alt + '"></p>';
+            var imgTag = '<img src="' + element.url + '" alt="' + element.alt + '">';
+            return '<p class="block-img' + label + '">'
+                + (element.linkUrl ? ('<a href="' + element.linkUrl + '">' + imgTag + '</a>') : imgTag)
+                + '</p>';
         }
 
         if (element.type == "embed") {
