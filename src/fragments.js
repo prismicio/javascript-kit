@@ -773,7 +773,6 @@
             return text;
         }
 
-        var positions = [];
         var tagsStart = {};
         var tagsEnd = {};
 
@@ -783,14 +782,6 @@
 
             tagsStart[span.start].push(span);
             tagsEnd[span.end].unshift(span);
-
-            positions.push(span.start, span.end);
-        });
-
-        positions = positions.filter(function (elem, index, self) {
-            return self.indexOf(elem) === index;
-        }).sort(function(a, b) {
-            return a - b;
         });
 
         var c;
@@ -812,7 +803,10 @@
                 });
             }
             if (tagsStart[pos]) {
-                tagsStart[pos].forEach(function (span) {
+                // Sort bigger tags first to ensure the right tag hierarchy
+                tagsStart[pos].sort(function (a, b) {
+                    return (b.end - b.start) > (a.end - b.start);
+                }).forEach(function (span) {
                     // Open a tag
                     var url = null;
                     if (span.type == "hyperlink") {

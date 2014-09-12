@@ -352,6 +352,36 @@
     }, previewToken);
   });
 
+  test('HTML content (2 spans on the same text - one bigger 1)', 1, function() {
+    var text  = 'abcdefghijklmnopqrstuvwxyz';
+    var spans = [{
+        "type": "em",
+        "start": 2,
+        "end": 6
+    }, {
+        "type": "strong",
+        "start": 2,
+        "end": 4
+    }];
+    var html = Prismic.Fragments.insertSpans(text, spans, {});
+    equal(html, 'ab<em><strong>cd</strong>ef</em>ghijklmnopqrstuvwxyz');
+  });
+
+  test('HTML content (2 spans on the same text - one bigger 2)', 1, function() {
+    var text  = 'abcdefghijklmnopqrstuvwxyz';
+    var spans = [{
+        "type": "em",
+        "start": 2,
+        "end": 4
+    }, {
+        "type": "strong",
+        "start": 2,
+        "end": 6
+    }];
+    var html = Prismic.Fragments.insertSpans(text, spans, {});
+    equal(html, 'ab<strong><em>cd</em>ef</strong>ghijklmnopqrstuvwxyz');
+  });
+
   asyncTest('StructuredTexts asHtml with custom serializer', 1, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
