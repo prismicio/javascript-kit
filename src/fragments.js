@@ -805,8 +805,9 @@
             if (tagsStart[pos]) {
                 // Sort bigger tags first to ensure the right tag hierarchy
                 tagsStart[pos].sort(function (a, b) {
-                    return (b.end - b.start) > (a.end - b.start);
-                }).forEach(function (span) {
+                    return (b.end - b.start) - (a.end - a.start);
+                });
+                tagsStart[pos].forEach(function (span) {
                     // Open a tag
                     var url = null;
                     if (span.type == "hyperlink") {
