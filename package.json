@@ -9,7 +9,7 @@
     "content",
     "api"
   ],
-  "version": "1.0.14",
+  "version": "1.0.15",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-clean": "~0.5.0",
