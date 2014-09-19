@@ -112,7 +112,8 @@
                 http = require('http'),
                 https = require('https'),
                 url = require('url'),
-                querystring = require('querystring');
+                querystring = require('querystring'),
+                pjson = require('../package.json');
 
             return function(requestUrl, callback) {
                 if(requestsCache[requestUrl]) {
@@ -125,7 +126,10 @@
                             hostname: parsed.hostname,
                             path: parsed.path,
                             query: parsed.query,
-                            headers: { 'Accept': 'application/json' }
+                            headers: {
+                                'Accept': 'application/json',
+                                'User-Agent': 'Prismic-javascript-kit/' + pjson.version + " NodeJS/" + process.version
+                            }
                         };
 
                     h.get(options, function(response) {
@@ -161,6 +165,31 @@
 
     // Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
     prismic.fn = prismic.prototype = {
+
+        // Predicates: usable as the first element of a query array.
+        AT: "at",
+        ANY: "any",
+        EVERYTHING: "everything",
+        SIMILAR: "similar",
+        FULLTEXT: "fulltext",
+        NUMBER: {
+            GT: "number.gt",
+            LT: "number.lt"
+        },
+        DATE: {
+            // Other date operators are available: see the documentation.
+            AFTER: "date.after",
+            BEFORE: "date.before",
+            BETWEEN: "date.between"
+        },
+
+        // Fragment: usable as the second element of a query array on most predicates (except SIMILAR).
+        // You can also use "my.*" for your custom fields.
+        DOCUMENT: {
+            ID: "document.id",
+            TYPE: "document.type",
+            TAGS: "document.tags"
+        },
 
         constructor: prismic,
         data: null,
@@ -223,9 +252,9 @@
                     f = data.forms[i];
 
                     if(this.accessToken) {
-                        f.fields['accessToken'] = {};
-                        f.fields['accessToken']['type'] = 'string';
-                        f.fields['accessToken']['default'] = this.accessToken;
+                        f.fields['access_token'] = {};
+                        f.fields['access_token']['type'] = 'string';
+                        f.fields['access_token']['default'] = this.accessToken;
                     }
 
                     form = new Form(
@@ -376,7 +405,7 @@
                 this.data[field] = [form.fields[field]['default']];
             }
         }
-    };
+    }
 
     SearchForm.prototype = {
 
@@ -428,7 +457,33 @@
          * @returns {SearchForm} - The SearchForm itself
          */
         query: function(query) {
-            return this.set("q", query);
+            if (typeof query === 'string') {
+                return this.set("q", query);
+            } else {
+                var predicates = (typeof query[0] === 'string')
+                            ? [query]
+                            : query;
+                var stringQueries = [];
+                predicates.forEach(function (predicate) {
+                    var firstArg = (predicate[1].indexOf("my.") == 0 || predicate[1].indexOf("document.") == 0)
+                        ? predicate[1]
+                        : '"' + predicate[1] + '"';
+                    stringQueries.push("[:d = " + predicate[0] + "(" + firstArg + ", " + (function() {
+                        return predicate.slice(2).map(function(p) {
+                            if (typeof p === 'string') {
+                                return '"' + p + '"';
+                            } else if(Array.isArray(p)) {
+                                return "[" + p.map(function(e) {
+                                    return '"' + e + '"';
+                                }).join(',') + "]";
+                            } else {
+                                return p;
+                            }
+                        }).join(',');
+                    })() + ")]");
+                });
+                return this.query("[" + stringQueries.join("") + "]");
+            }
         },
 
         /**
@@ -566,7 +621,7 @@
             return [this.fragments[name]];
         }
 
-    };
+    }
 
     /**
      * Embodies the response of a SearchForm query as returned by the API.
@@ -736,8 +791,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageView} - The View object to manipulate
          */
-        getImageView: function(fragment, view) {
-            var fragment = this.get(fragment);
+        getImageView: function(name, view) {
+            var fragment = this.get(name);
             if (fragment instanceof Global.Prismic.Fragments.Image) {
                 return fragment.getView(view);
             }
@@ -752,8 +807,8 @@
         },
 
         // Useful for obsolete multiples
-        getAllImageViews: function(fragment, view) {
-            return this.getAllImages(fragment).map(function (image) {
+        getAllImageViews: function(name, view) {
+            return this.getAllImages(name).map(function (image) {
                 return image.getView(view);
             });
         },
@@ -765,8 +820,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
          */
-        getDate: function(fragment) {
-            var fragment = this.get(fragment);
+        getDate: function(name) {
+            var fragment = this.get(name);
 
             if(fragment instanceof Global.Prismic.Fragments.Date) {
                 return fragment.value;
@@ -781,8 +836,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
          * @returns {boolean} - The boolean value of the fragment
          */
-        getBoolean: function(fragment) {
-            var fragment = this.get(fragment);
+        getBoolean: function(name) {
+            var fragment = this.get(name);
             return fragment.value && (fragment.value.toLowerCase() == 'yes' || fragment.value.toLowerCase() == 'on' || fragment.value.toLowerCase() == 'true');
         },
 
@@ -791,12 +846,12 @@
          * Typical use: document.getText('blog-post.label').asHtml(ctx).
          * The method works with StructuredText fragments, Text fragments, Number fragments, Select fragments and Color fragments.
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.label"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.label"
          * @param {string} after - a suffix that will be appended to the value
          * @returns {object} - either StructuredText, or Text, or Number, or Select, or Color.
          */
-        getText: function(fragmentName, after) {
-            var fragment = this.get(fragmentName);
+        getText: function(name, after) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment.blocks.map(function(block) {
@@ -838,8 +893,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText fragment to manipulate.
          */
-        getStructuredText: function(fragment) {
-            var fragment = this.get(fragment);
+        getStructuredText: function(name) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment;
@@ -850,11 +905,11 @@
          * Gets the Number fragment in the current Document object, for further manipulation.
          * Typical use: document.getNumber('product.price')
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.price"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "product.price"
          * @returns {number} - The number value of the fragment.
          */
-        getNumber: function(fragment) {
-            var fragment = this.get(fragment);
+        getNumber: function(name) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value;
@@ -868,8 +923,8 @@
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.color"
          * @returns {string} - The string value of the Color fragment.
          */
-        getColor: function(fragment) {
-            var fragment = this.get(fragment);
+        getColor: function(name) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.Color) {
                 return fragment.value;
@@ -879,11 +934,11 @@
         /* Gets the GeoPoint fragment in the current Document object, for further manipulation.
          * Typical use: document.getGeoPoint('blog-post.location').asHtml(ctx)
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.location"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.location"
          * @returns {GeoPoint} - The GeoPoint object to manipulate
          */
-        getGeoPoint: function(fragment) {
-            var fragment = this.get(fragment);
+        getGeoPoint: function(name) {
+            var fragment = this.get(name);
 
             if(fragment instanceof Global.Prismic.Fragments.GeoPoint) {
                 return fragment;
@@ -894,11 +949,11 @@
          * Gets the Group fragment in the current Document object, for further manipulation.
          * Typical use: document.getGroup('product.gallery').asHtml(ctx).
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.gallery"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
          * @returns {Group} - The Group fragment to manipulate.
          */
-        getGroup: function(fragment) {
-            var fragment = this.get(fragment);
+        getGroup: function(name) {
+            var fragment = this.get(name);
 
             if (fragment instanceof Global.Prismic.Fragments.Group) {
                 return fragment;
@@ -909,12 +964,12 @@
          * Shortcut to get the HTML output of the fragment in the current document.
          * This is the same as writing document.get(fragment).asHtml(ctx);
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.body"
          * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
          * @returns {string} - The HTML output
          */
-        getHtml: function(fragment, ctx) {
-            var fragment = this.get(fragment);
+        getHtml: function(name, ctx) {
+            var fragment = this.get(name);
 
             if(fragment && fragment.asHtml) {
                 return fragment.asHtml(ctx);
@@ -1679,18 +1734,6 @@
 
 
     /**
-     * Embodies a group of text blocks in a structured text fragment, like a group of list items.
-     * This is only used in the serialization into HTML of structured text fragments.
-     * @constructor
-     * @private
-     */
-    function BlockGroup(tag, blocks, label) {
-        this.tag = tag;
-        this.blocks = blocks;
-        this.label = label;
-    }
-
-    /**
      * Embodies a structured text fragment
      * @constructor
      * @global
@@ -1754,12 +1797,64 @@
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
-         * @params {function} serializer - optional function that takes a block and returns an HTML string. Return null to fallback to default implementation.
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function
+         *      (please read prismic.io online documentation about this)
+         * @params {function} htmlSerializer optional HTML serializer to customize the output
          * @returns {string} - basic HTML code for the fragment
          */
-        asHtml: function(ctx, serializer) {
-            return StructuredTextAsHtml.call(this, this.blocks, ctx, serializer);
+        asHtml: function(ctx, htmlSerializer) {
+            var blockGroups = [],
+                blockGroup,
+                block,
+                html = [];
+
+            if (Array.isArray(this.blocks)) {
+
+                for(var i=0; i < this.blocks.length; i++) {
+                    block = this.blocks[i];
+
+                    // Resolve image links
+                    if (block.type == "image" && block.linkTo) {
+                        var link = initField(block.linkTo);
+                        block.linkUrl = link.url(ctx);
+                    }
+
+                    if (block.type != "list-item" && block.type != "o-list-item") {
+                        // it's not a type that groups
+                        blockGroups.push(block);
+                    } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
+                        // it's a new type or no BlockGroup was set so far
+                        blockGroup = {
+                            type: "group-" + block.type,
+                            blocks: [block]
+                        };
+                        blockGroups.push(blockGroup);
+                    } else {
+                        // it's the same type as before, no touching blockGroup
+                        blockGroup.blocks.push(block);
+                    }
+                }
+
+                var blockContent = function(block) {
+                    var content = "";
+                    if (block.blocks) {
+                        block.blocks.forEach(function (block2) {
+                            content = content + serialize(block2, blockContent(block2), htmlSerializer);
+                        });
+                    } else {
+                        content = insertSpans(block.text, block.spans, ctx, htmlSerializer);
+                    }
+                    return content;
+                };
+
+                blockGroups.forEach(function (blockGroup) {
+                    html.push(serialize(blockGroup, blockContent(blockGroup), htmlSerializer));
+                });
+
+            }
+
+            return html.join('');
+
         },
 
         /**
@@ -1780,93 +1875,6 @@
 
     };
 
-    /**
-     * Transforms a list of blocks as proper HTML.
-     *
-     * @private
-     * @param {array} blocks - the array of blocks to deal with
-     * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
-     * @returns {string} - the HTML output
-     */
-    function StructuredTextAsHtml (blocks, ctx, serializer) {
-
-        var blockGroups = [],
-            blockGroup,
-            block,
-            html = [];
-
-        if (Array.isArray(blocks)) {
-            for(var i=0; i<blocks.length; i++) {
-                block = blocks[i];
-
-                if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
-                    blockGroup = new BlockGroup(block.type, [], block.label);
-                    blockGroups.push(blockGroup);
-                }
-                else if (!blockGroup || blockGroup.tag != block.type) { // it's a new type or no BlockGroup was set so far
-                    blockGroup = new BlockGroup(block.type, [], block.label);
-                    blockGroups.push(blockGroup);
-                }
-                // else: it's the same type as before, no touching blockGroup
-
-                blockGroup.blocks.push(block);
-            }
-
-            var TAG_NAMES = {
-                "heading1": "h1",
-                "heading2": "h2",
-                "heading3": "h3",
-                "heading4": "h4",
-                "heading5": "h5",
-                "heading6": "h6",
-                "paragraph": "p"
-            };
-
-            var classCode = function(classes) {
-                if (classes.length == 0) return "";
-                return ' class="' + classes.join(" ") + '"';
-            };
-
-            blockGroups.forEach(function (blockGroup) {
-                var classes = blockGroup.label ? [blockGroup.label] : [];
-                var customHTML = serializer ? serializer(blockGroup) : null;
-                if (customHTML != null) {
-                    html.push(customHTML);
-                } else if (TAG_NAMES[blockGroup.tag]) {
-                    var name = TAG_NAMES[blockGroup.tag];
-                    html.push('<' + name + classCode(classes) + '>'
-                      + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx)
-                      + '</' + name + '>');
-                }
-                else if(blockGroup.tag == "preformatted") {
-                    html.push('<pre' + classCode(classes) + '>' + blockGroup.blocks[0].text + '</pre>');
-                }
-                else if(blockGroup.tag == "image") {
-                    classes.push("block-img");
-                    html.push('<p' + classCode(classes) + '><img src="' + blockGroup.blocks[0].url + '" alt="' + blockGroup.blocks[0].alt + '"></p>');
-                }
-                else if(blockGroup.tag == "embed") {
-                    html.push('<div data-oembed="'+ blockGroup.blocks[0].embed_url
-                        + '" data-oembed-type="'+ blockGroup.blocks[0].type
-                        + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
-                        + classCode(classes)
-                        + '">' + blockGroup.blocks[0].oembed.html+"</div>")
-                }
-                else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
-                    html.push(blockGroup.tag == "list-item"?'<ul>':"<ol>");
-                    blockGroup.blocks.forEach(function(block){
-                        html.push("<li>"+insertSpans(block.text, block.spans, ctx)+"</li>");
-                    });
-                    html.push(blockGroup.tag == "list-item"?'</ul>':"</ol>");
-                }
-                else throw new Error(blockGroup.tag+" not implemented");
-            });
-
-        }
-
-        return html.join('');
-
-    }
 
     /**
      * Parses a block that has spans, and inserts the proper HTML code.
@@ -1874,32 +1882,14 @@
      * @param {string} text - the original text of the block
      * @param {object} spans - the spans as returned by the API
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
+     * @param {function} htmlSerializer - optional serializer
      * @returns {string} - the HTML output
      */
-    function insertSpans(text, spans, ctx) {
-        function getTag(span, isStart) {
-            if (span.type === 'hyperlink') {
-                var fragment = initField(span.data);
-                if (fragment) {
-                    return (isStart ? '<a href="' + fragment.url(ctx) + '">' : '</a>');
-                } else {
-                    console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
-                    return '';
-                }
-            }
-            if (span.type === 'label') {
-                return (isStart ? '<span class="' + span.data.label + '">' : '</span>');
-            }
-            return '<' + (isStart ? '': '/') + span.type + '>'
-        }
-
-        // Ultimate optimization!
-        // You know... doing nothing when there is nothing to be done
+    function insertSpans(text, spans, ctx, htmlSerializer) {
         if (!spans || !spans.length) {
             return text;
         }
 
-        var positions = [];
         var tagsStart = {};
         var tagsEnd = {};
 
@@ -1907,31 +1897,66 @@
             if (!tagsStart[span.start]) { tagsStart[span.start] = []; }
             if (!tagsEnd[span.end]) { tagsEnd[span.end] = []; }
 
-            tagsStart[span.start].push(getTag(span, true));
-            tagsEnd[span.end].unshift(getTag(span, false));
-
-            positions.push(span.start, span.end);
+            tagsStart[span.start].push(span);
+            tagsEnd[span.end].unshift(span);
         });
 
-        positions = positions.filter(function (elem, index, self) {
-            return self.indexOf(elem) === index;
-        }).sort(function(a, b) {
-            return a - b;
-        });
+        var c;
+        var html = "";
+        var stack = [];
+        for (var pos = 0, len = text.length + 1; pos < len; pos++) { // Looping to length + 1 to catch closing tags
+            if (tagsEnd[pos]) {
+                tagsEnd[pos].forEach(function () {
+                    // Close a tag
+                    var tag = stack.pop();
+                    var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
+                    if (stack.length == 0) {
+                        // The tag was top level
+                        html += innerHtml;
+                    } else {
+                        // Add the content to the parent tag
+                        stack[stack.length - 1].text += innerHtml;
+                    }
+                });
+            }
+            if (tagsStart[pos]) {
+                // Sort bigger tags first to ensure the right tag hierarchy
+                tagsStart[pos].sort(function (a, b) {
+                    return (b.end - b.start) - (a.end - a.start);
+                });
+                tagsStart[pos].forEach(function (span) {
+                    // Open a tag
+                    var url = null;
+                    if (span.type == "hyperlink") {
+                        var fragment = initField(span.data);
+                        if (fragment) {
+                            url = fragment.url(ctx);
+                        } else {
+                            console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                            return '';
+                        }
+                        span.url = url;
+                    }
+                    var elt = {
+                        span: span,
+                        text: ""
+                    };
+                    stack.push(elt);
+                });
+            }
+            if (pos < text.length) {
+                c = text[pos];
+                if (stack.length == 0) {
+                    // Top-level text
+                    html += c;
+                } else {
+                    // Inner text of a span
+                    stack[stack.length - 1].text += c;
+                }
+            }
+        }
 
-        var html = [];
-        var cursor = 0;
-
-        positions.forEach(function (pos) {
-            html.push(text.substring(cursor, pos));
-            html = html.concat(tagsEnd[pos] || []);
-            html = html.concat(tagsStart[pos] || []);
-            cursor = pos;
-        });
-
-        html.push(text.substring(cursor));
-
-        return html.join('');
+        return html;
     }
 
     /**
@@ -2036,12 +2061,72 @@
                 break;
 
             default:
-                console.log("Fragment type not supported: ", field.type);
+                console && console.log && console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
         return output;
 
+    }
+
+    function serialize(element, content, htmlSerializer) {
+        // Return the user customized output (if available)
+        if (htmlSerializer) {
+            var custom = htmlSerializer(element, content);
+            if (custom) {
+                return custom;
+            }
+        }
+
+        // Fall back to the default HTML output
+        var TAG_NAMES = {
+            "heading1": "h1",
+            "heading2": "h2",
+            "heading3": "h3",
+            "heading4": "h4",
+            "heading5": "h5",
+            "heading6": "h6",
+            "paragraph": "p",
+            "preformatted": "pre",
+            "list-item": "li",
+            "o-list-item": "li",
+            "group-list-item": "ul",
+            "group-o-list-item": "ol",
+            "strong": "strong",
+            "em": "em"
+        };
+
+        if (TAG_NAMES[element.type]) {
+            var name = TAG_NAMES[element.type];
+            var classCode = element.label ? (' class="' + element.label + '"') : '';
+            return '<' + name + classCode + '>' + content + '</' + name + '>';
+        }
+
+        if (element.type == "image") {
+            var label = element.label ? (" " + element.label) : "";
+            var imgTag = '<img src="' + element.url + '" alt="' + element.alt + '">';
+            return '<p class="block-img' + label + '">'
+                + (element.linkUrl ? ('<a href="' + element.linkUrl + '">' + imgTag + '</a>') : imgTag)
+                + '</p>';
+        }
+
+        if (element.type == "embed") {
+            return '<div data-oembed="'+ element.embed_url
+                + '" data-oembed-type="'+ element.type
+                + '" data-oembed-provider="'+ element.provider_name
+                + (element.label ? ('" class="' + label) : '')
+                + '">' + element.oembed.html+"</div>";
+        }
+
+        if (element.type === 'hyperlink') {
+            return '<a href="' + element.url + '">' + content + '</a>';
+        }
+
+        if (element.type === 'span') {
+            return '<span class="' + span.label + '">' + content + '</span>';
+        }
+
+        return "<!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;
     }
 
     Global.Prismic.Fragments = {
