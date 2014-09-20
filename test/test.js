@@ -365,7 +365,9 @@
       if (err) { console.log(err); return; }
       Api.form('everything').query('[[:d = at(document.id, "UrDejAEAAFwMyrW9")]]').ref(Api.master()).submit(function(err, documents) {
         if (err) { console.log(err); return; }
-        equal(documents.results[0].getStructuredText('doc.content').asHtml(ctx), '<p>Meta-micro gets installed pretty much like any javascript library:</p><ol><li><a href=\"/testing_url/U0w8OwEAACoAQEvB/download-meta-micro?ref=XXXXX\">download</a> the .js file: get the minified one, unless the framework you\'re using minifies your .js files automatically.</li><li>add a link towards the file in your webpage\'s head.</li></ol><p>The link might look like this, anywhere inside your head tag:</p><pre><script type=\"text/javascript\" src=\"meta-micro.min.js\"></script></pre><p>You\'re all set!</p>');
+        equal(
+          documents.results[0].getStructuredText('doc.content').asHtml(ctx),
+          '<p>Meta-micro gets installed pretty much like any javascript library:</p><ol><li><a href=\"/testing_url/U0w8OwEAACoAQEvB/download-meta-micro?ref=XXXXX\">download</a> the .js file: get the minified one, unless the framework you\'re using minifies your .js files automatically.</li><li>add a link towards the file in your webpage\'s head.</li></ol><p>The link might look like this, anywhere inside your head tag:</p><pre>&lt;script type=\"text/javascript\" src=\"meta-micro.min.js\"&gt;&lt;/script&gt;</pre><p>You\'re all set!</p>');
         start();
       });
     });
@@ -475,7 +477,7 @@
   asyncTest('StructuredTexts asHtml handles span Link.file', 1, function() {
     var jsonString = '{"type":"StructuredText","value":[{"type":"paragraph","text":"2012 Annual Report","spans":[{"start":0,"end":18,"type":"hyperlink","data":{"type":"Link.file","value":{"file":{"name":"2012_annual.report.pdf","kind":"document","url":"https://prismic-io.s3.amazonaws.com/annual.report.pdf","size":"1282484"}}}}]},{"type":"paragraph","text":"2012 Annual Budget","spans":[{"start":0,"end":18,"type":"hyperlink","data":{"type":"Link.file","value":{"file":{"name":"2012_smec.annual.budget.pdf","kind":"document","url":"https://prismic-io.s3.amazonaws.com/annual.budget.pdf","size":"59229"}}}}]},{"type":"paragraph","text":"2015 Vision & Strategic Plan","spans":[{"start":0,"end":28,"type":"hyperlink","data":{"type":"Link.file","value":{"file":{"name":"2015_vision.strategic.plan_.sm_.pdf","kind":"document","url":"https://prismic-io.s3.amazonaws.com/vision.strategic.plan_.sm_.pdf","size":"1969956"}}}}]}]}';
     var jsonObject = JSON.parse(jsonString);
-    equal(Prismic.Fragments.initField(jsonObject).asHtml(), '<p><a href=\"https://prismic-io.s3.amazonaws.com/annual.report.pdf\">2012 Annual Report</a></p><p><a href=\"https://prismic-io.s3.amazonaws.com/annual.budget.pdf\">2012 Annual Budget</a></p><p><a href=\"https://prismic-io.s3.amazonaws.com/vision.strategic.plan_.sm_.pdf\">2015 Vision & Strategic Plan</a></p>');
+    equal(Prismic.Fragments.initField(jsonObject).asHtml(), '<p><a href=\"https://prismic-io.s3.amazonaws.com/annual.report.pdf\">2012 Annual Report</a></p><p><a href=\"https://prismic-io.s3.amazonaws.com/annual.budget.pdf\">2012 Annual Budget</a></p><p><a href=\"https://prismic-io.s3.amazonaws.com/vision.strategic.plan_.sm_.pdf\">2015 Vision &amp; Strategic Plan</a></p>');
     start();
   });
 

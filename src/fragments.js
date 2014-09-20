@@ -759,7 +759,7 @@
     };
 
     function htmlEscape(input) {
-        return input.replace(/&/, "&amp;").replace(/</, "&lt;").replace(/>/, "&gt;");
+        return input && input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
     /**
