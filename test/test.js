@@ -479,6 +479,17 @@
     start();
   });
 
+  asyncTest('Proper escaping in asHtml', 1, function() {
+    var jsonString = "{ \"type\": \"StructuredText\", \"value\": [ { \"type\": \"paragraph\", \"text\": \"<not a real tag>\", \"spans\": [] } ]}";
+    var jsonObject = JSON.parse(jsonString);
+    var text = Prismic.Fragments.initField(jsonObject);
+    equal(
+      text.asHtml(),
+      "<p>&lt;not a real tag&gt;</p>"
+    );
+    start();
+  });
+
   asyncTest('Handles multiple fields', 1, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }

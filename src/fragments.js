@@ -758,6 +758,9 @@
 
     };
 
+    function htmlEscape(input) {
+        return input.replace(/&/, "&amp;").replace(/</, "&lt;").replace(/>/, "&gt;");
+    }
 
     /**
      * Parses a block that has spans, and inserts the proper HTML code.
@@ -770,7 +773,7 @@
      */
     function insertSpans(text, spans, ctx, htmlSerializer) {
         if (!spans || !spans.length) {
-            return text;
+            return htmlEscape(text);
         }
 
         var tagsStart = {};
@@ -831,10 +834,10 @@
                 c = text[pos];
                 if (stack.length == 0) {
                     // Top-level text
-                    html += c;
+                    html += htmlEscape(c);
                 } else {
                     // Inner text of a span
-                    stack[stack.length - 1].text += c;
+                    stack[stack.length - 1].text += htmlEscape(c);
                 }
             }
         }
