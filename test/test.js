@@ -527,6 +527,13 @@
     equal(text.asHtml(ctx), '<p>Here is some introductory text.</p><p>The following image is linked.</p><p class=\"block-img\"><a href=\"http://google.com/\"><img src=\"http://fpoimg.com/129x260\" alt=\"\"></a></p><p><strong>More important stuff</strong></p><p>The next is linked to a valid document:</p><p class=\"block-img\"><a href=\"/testing_url/UxCQFFFFFFFaaYAH/something-fantastic?ref=XXXXX\"><img src=\"http://fpoimg.com/400x400\" alt=\"\"></a></p><p>The next is linked to a broken document:</p><p class=\"block-img\"><a href=\"#broken\"><img src=\"http://fpoimg.com/250x250\" alt=\"\"></a></p><p>One more image, this one is not linked:</p><p class=\"block-img\"><img src=\"http://fpoimg.com/199x300\" alt=\"\"></p>');
   });
 
+  test('List items are correctly grouped', function() {
+    var jsonString = '{ "type":"StructuredText", "value":[ { "spans":[], "text":"Here is some introductory text.", "type":"paragraph" }, { "spans":[], "text":"first item", "type":"list-item" }, { "spans":[], "text":"second item", "type":"list-item" },  { "spans":[], "text":"The following image is linked.", "type":"paragraph" }, { "spans":[], "text":"first item 2", "type":"list-item" }, { "spans":[], "text":"second item 2", "type":"list-item" }  ] }';
+      var jsonObject = JSON.parse(jsonString);
+      var text = Prismic.Fragments.initField(jsonObject);
+      equal(text.asHtml(ctx), '<p>Here is some introductory text.</p><ul><li>first item</li><li>second item</li></ul><p>The following image is linked.</p><ul><li>first item 2</li><li>second item 2</li></ul>');
+  });
+
   asyncTest('ImageViews are well retrieved', 2, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }

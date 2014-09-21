@@ -690,7 +690,6 @@
                 blockGroup,
                 block,
                 html = [];
-
             if (Array.isArray(this.blocks)) {
 
                 for(var i=0; i < this.blocks.length; i++) {
@@ -702,9 +701,10 @@
                         block.linkUrl = link.url(ctx);
                     }
 
-                    if (block.type != "list-item" && block.type != "o-list-item") {
+                    if (block.type !== "list-item" && block.type !== "o-list-item") {
                         // it's not a type that groups
                         blockGroups.push(block);
+                        blockGroup = null;
                     } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
                         // it's a new type or no BlockGroup was set so far
                         blockGroup = {
