@@ -702,19 +702,30 @@
                         block.linkUrl = link.url(ctx);
                     }
 
-                    if (block.type != "list-item" && block.type != "o-list-item") {
-                        // it's not a type that groups
-                        blockGroups.push(block);
-                    } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
-                        // it's a new type or no BlockGroup was set so far
+                    if(block.type !== 'list-item' && block.type !== 'o-list-item') {
+                        blockGroups.push(block)
+                    } else {
+                        var blockType = block.type;
+                        var addBlocks = true;
                         blockGroup = {
                             type: "group-" + block.type,
-                            blocks: [block]
+                            blocks: []
                         };
                         blockGroups.push(blockGroup);
-                    } else {
-                        // it's the same type as before, no touching blockGroup
-                        blockGroup.blocks.push(block);
+
+                        // loop through remaining blocks until
+                        // we get one that is not like the one
+                        // we just encountered 
+                        while(addBlocks && i < this.blocks.length) {
+                            if(this.blocks[i].type === blockType) {
+                                blockGroup.blocks.push(this.blocks[i]);
+                                ++i;
+                            } else {
+                                // reset so we start at the right index
+                                i -= 1;
+                                addBlocks = false;
+                            }
+                        }
                     }
                 }
 
