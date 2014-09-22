@@ -1807,7 +1807,6 @@
                 blockGroup,
                 block,
                 html = [];
-
             if (Array.isArray(this.blocks)) {
 
                 for(var i=0; i < this.blocks.length; i++) {
@@ -1819,9 +1818,10 @@
                         block.linkUrl = link.url(ctx);
                     }
 
-                    if (block.type != "list-item" && block.type != "o-list-item") {
+                    if (block.type !== "list-item" && block.type !== "o-list-item") {
                         // it's not a type that groups
                         blockGroups.push(block);
+                        blockGroup = null;
                     } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
                         // it's a new type or no BlockGroup was set so far
                         blockGroup = {
@@ -1875,6 +1875,9 @@
 
     };
 
+    function htmlEscape(input) {
+        return input && input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
 
     /**
      * Parses a block that has spans, and inserts the proper HTML code.
@@ -1887,7 +1890,7 @@
      */
     function insertSpans(text, spans, ctx, htmlSerializer) {
         if (!spans || !spans.length) {
-            return text;
+            return htmlEscape(text);
         }
 
         var tagsStart = {};
@@ -1948,10 +1951,10 @@
                 c = text[pos];
                 if (stack.length == 0) {
                     // Top-level text
-                    html += c;
+                    html += htmlEscape(c);
                 } else {
                     // Inner text of a span
-                    stack[stack.length - 1].text += c;
+                    stack[stack.length - 1].text += htmlEscape(c);
                 }
             }
         }
