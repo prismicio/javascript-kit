@@ -1,3 +1,9 @@
+### 1.0.19 (2014-09-24)
+
+Bigfixes:
+
+  - Fix span labels
+
 ### 1.0.18 (2014-09-22)
 
 **Breaking change**: The content in StructuredText is now escaped. This was a bug that had to be fixed, but if you relied on it to include custom HTML it will no longer work. You can use a custom html serializer to get the behavior you need.
