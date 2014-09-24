@@ -630,6 +630,9 @@
 
     StructuredText.prototype = {
 
+        /**
+         * @returns {object} the first heading block in the text
+         */
         getTitle: function () {
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];
@@ -639,6 +642,9 @@
             }
         },
 
+        /**
+         * @returns {object} the first block of type paragraph
+         */
         getFirstParagraph: function() {
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];
@@ -648,6 +654,9 @@
             }
         },
 
+        /**
+         * @returns {array} all paragraphs
+         */
         getParagraphs: function() {
             var paragraphs = [];
             for(var i=0; i<this.blocks.length; i++) {
@@ -659,10 +668,16 @@
             return paragraphs;
         },
 
+        /**
+         * @returns {object} the nth paragraph
+         */
         getParagraph: function(n) {
             return this.getParagraphs()[n];
         },
 
+        /**
+         * @returns {object}
+         */
         getFirstImage: function() {
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];

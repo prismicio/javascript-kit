@@ -79,6 +79,13 @@ module.exports = function(grunt) {
         }
     },
 
+    'gh-pages': {
+        options: {
+            base: 'doc'
+        },
+        src: ['**']
+    },
+
     connect: {
       options: {
         hostname: 'localhost',
@@ -104,6 +111,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-bump');
   grunt.loadNpmTasks('grunt-jsdoc');
+  grunt.loadNpmTasks('grunt-gh-pages');
 
   // Default task.
   grunt.registerTask('default', ['qunit', 'clean', 'concat', 'uglify']);
