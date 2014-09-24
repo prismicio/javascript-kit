@@ -120,7 +120,7 @@
             
             
             
-            <td class="description last">Optional callback function that is called after the API was retrieved, to which you may pass two parameters: a potential error (null if no problem), and the API object</td>
+            <td class="description last">Optional callback function that is called after the API was retrieved, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest</td>
         </tr>
 	
 	
@@ -356,7 +356,7 @@ You can then chain the calls: api.form("everything").query('[[:d = at(document.i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line252">line 252</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line338">line 338</a>
     </li></ul></dd>
     
     
@@ -493,7 +493,7 @@ You can then chain the calls: api.form("everything").query('[[:d = at(document.i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line240">line 240</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line326">line 326</a>
     </li></ul></dd>
     
     
@@ -602,7 +602,7 @@ This is for internal use, from outside this kit, you should call Prismic.Api()
             
             
             
-            <td class="description last">Optional callback function that is called after the query is made, to which you may pass two parameters: a potential error (null if no problem), and the API object</td>
+            <td class="description last">Optional callback function that is called after the query is made, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest</td>
         </tr>
 	
 	
@@ -633,7 +633,7 @@ This is for internal use, from outside this kit, you should call Prismic.Api()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line132">line 132</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line204">line 204</a>
     </li></ul></dd>
     
     
@@ -725,7 +725,7 @@ This is for internal use, from outside this kit, you should call Prismic.Api()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line228">line 228</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line313">line 313</a>
     </li></ul></dd>
     
     
@@ -796,7 +796,7 @@ Instead, set your ref once in a variable, and call it when you need it; this wil
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line266">line 266</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line352">line 352</a>
     </li></ul></dd>
     
     
@@ -932,7 +932,7 @@ This is for internal use, from outside this kit, you should call Prismic.Api()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line155">line 155</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line239">line 239</a>
     </li></ul></dd>
     
     
@@ -1073,7 +1073,7 @@ Instead, set your ref once in a variable, and call it when you need it; this wil
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line278">line 278</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line364">line 364</a>
     </li></ul></dd>
     
     
@@ -1132,13 +1132,13 @@ Instead, set your ref once in a variable, and call it when you need it; this wil
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Documents.html">Documents</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="DateTime.html">Fragments:DateTime</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Mon Apr 28 2014 17:27:13 GMT-0700 (PDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed Sep 24 2014 11:31:20 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

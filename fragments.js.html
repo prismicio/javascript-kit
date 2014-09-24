@@ -47,7 +47,16 @@
          */
         asHtml: function () {
             return "&lt;span>" + this.value + "&lt;/span>";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value;
+         }
     };
 
     /**
@@ -89,7 +98,16 @@
          */
         url: function (ctx) {
             return ctx.linkResolver(ctx, this.document, this.isBroken);
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function(ctx) {
+            return this.url(ctx);
+         }
     };
 
     /**
@@ -122,7 +140,16 @@
          */
         url: function() {
             return this.value.url;
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.url();
+         }
     };
 
     /**
@@ -155,7 +182,16 @@
          */
         url: function() {
             return this.value.file.url;
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.url();
+         }
     };
 
     /**
@@ -179,7 +215,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "&lt;a href=\""+this.url()+"\">&lt;img src=\""+this.url()+"\"&lt;/a>";
+            return "&lt;a href=\""+this.url()+"\">&lt;img src=\""+this.url()+"\" alt=\"" + this.alt + "\">&lt;/a>";
         },
         /**
          * Returns the URL of the link.
@@ -188,7 +224,16 @@
          */
         url: function() {
             return this.value.image.url;
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.url();
+         }
     };
 
     /**
@@ -213,7 +258,16 @@
          */
         asHtml: function () {
             return "&lt;span>" + this.value + "&lt;/span>";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value;
+         }
     };
 
     /**
@@ -238,6 +292,55 @@
          */
         asHtml: function () {
             return "&lt;span>" + this.value + "&lt;/span>";
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value;
+         }
+    };
+
+    /**
+     * Embodies a geopoint
+     * @constructor
+     * @global
+     * @alias Fragments:GeoPoint
+     */
+    function GeoPoint(latitude, longitude) {
+        /**
+         * @field
+         * @description the latitude of the geo point
+         */
+        this.latitude = latitude;
+        /**
+         * @field
+         * @description the longitude of the geo point
+         */
+        this.longitude = longitude;
+    }
+
+    GeoPoint.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function () {
+            return '&lt;div class="geopoint">&lt;span class="latitude">' + this.latitude + '&lt;/span>&lt;span class="longitude">' + this.longitude + '&lt;/span>&lt;/div>';
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+        asText: function() {
+            return '(' + this.latitude + "," + this.longitude + ')';
         }
     };
 
@@ -263,16 +366,25 @@
          */
         asHtml: function () {
             return "&lt;span>" + this.value + "&lt;/span>";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value.toString();
+         }
     };
 
     /**
-     * Embodies a DateTime fragment
+     * Embodies a Date fragment
      * @constructor
      * @global
-     * @alias Fragments:DateTime
+     * @alias Fragments:Date
      */
-    function DateTime(data) {
+    function DateFragment(data) {
         /**
          * @field
          * @description the Date value of the fragment (as a regular JS Date object)
@@ -280,10 +392,7 @@
         this.value = new Date(data);
     }
 
-    DateTime.prototype = {
-        asText: function (pattern) {
-            throw new Error("not implemented");
-        },
+    DateFragment.prototype = {
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
@@ -292,7 +401,53 @@
          */
         asHtml: function () {
             return "&lt;time>" + this.value + "&lt;/time>";
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value.toString();
+         }
+    };
+
+    /**
+     * Embodies a Timestamp fragment
+     * @constructor
+     * @global
+     * @alias Fragments:Timestamp
+     */
+    function Timestamp(data) {
+        /**
+         * @field
+         * @description the Date value of the fragment (as a regular JS Date object)
+         */
+        // Adding ":" in the locale if needed, so JS considers it ISO8601-compliant
+        var correctIso8601Date = (data.length == 24) ? data.substring(0, 22) + ':' + data.substring(22, 24) : data;
+        this.value = new Date(correctIso8601Date);
+    }
+
+    Timestamp.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function () {
+            return "&lt;time>" + this.value + "&lt;/time>";
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value.toString();
+         }
     };
 
     /**
@@ -318,7 +473,16 @@
          */
         asHtml: function () {
             return this.value.oembed.html;
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return "";
+         }
     };
 
     /**
@@ -361,7 +525,16 @@
          */
         asHtml: function () {
             return this.main.asHtml()
-        }
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return "";
+         }
     };
 
     /**
@@ -370,7 +543,7 @@
      * @global
      * @alias Fragments:ImageView
      */
-    function ImageView(url, width, height) {
+    function ImageView(url, width, height, alt) {
         /**
          * @field
          * @description the URL of the ImageView (useable as it, in a &lt;img> tag in HTML, for instance)
@@ -386,6 +559,11 @@
          * @description the height of the ImageView
          */
         this.height = height;
+        /**
+         * @field
+         * @description the alt text for the ImageView
+         */
+        this.alt = alt;
     }
     ImageView.prototype = {
         ratio: function () {
@@ -398,9 +576,18 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "&lt;img src=" + this.url + " width=" + this.width + " height=" + this.height + ">";
-        }
-    }
+            return "&lt;img src=" + this.url + " width=" + this.width + " height=" + this.height + " alt=\"" + this.alt + "\">";
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return "";
+         }
+    };
 
     /**
      * Embodies a fragment of type "Group" (which is a group of subfragments)
@@ -437,20 +624,24 @@
        */
        toArray: function(){
          return this.value;
-       }
-    }
+       },
 
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function(ctx) {
+            var output = "";
+            for (var i=0; i&lt;this.value.length; i++) {
+              for (var fragmentName in this.value[i]) {
+                output += this.value[i][fragmentName].asText(ctx);
+              }
+            }
+            return output;
+         }
+    };
 
-    /**
-     * Embodies a group of text blocks in a structured text fragment, like a group of list items.
-     * This is only used in the serialization into HTML of structured text fragments.
-     * @constructor
-     * @private
-     */
-    function BlockGroup(tag, blocks) {
-        this.tag = tag;
-        this.blocks = blocks;
-    }
 
     /**
      * Embodies a structured text fragment
@@ -504,9 +695,10 @@
                 var block = this.blocks[i];
                 if(block.type == 'image') {
                     return new ImageView(
-                        block.data.url,
-                        block.data.dimensions.width,
-                        block.data.dimensions.height
+                        block.url,
+                        block.dimensions.width,
+                        block.dimensions.height,
+                        block.alt
                     );
                 }
             }
@@ -515,140 +707,169 @@
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function
+         *      (please read prismic.io online documentation about this)
+         * @params {function} htmlSerializer optional HTML serializer to customize the output
          * @returns {string} - basic HTML code for the fragment
          */
-        asHtml: function(ctx) {
-            return StructuredTextAsHtml.call(this, this.blocks, ctx);
-        }
+        asHtml: function(ctx, htmlSerializer) {
+            var blockGroups = [],
+                blockGroup,
+                block,
+                html = [];
+            if (Array.isArray(this.blocks)) {
+
+                for(var i=0; i &lt; this.blocks.length; i++) {
+                    block = this.blocks[i];
+
+                    // Resolve image links
+                    if (block.type == "image" && block.linkTo) {
+                        var link = initField(block.linkTo);
+                        block.linkUrl = link.url(ctx);
+                    }
+
+                    if (block.type !== "list-item" && block.type !== "o-list-item") {
+                        // it's not a type that groups
+                        blockGroups.push(block);
+                        blockGroup = null;
+                    } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
+                        // it's a new type or no BlockGroup was set so far
+                        blockGroup = {
+                            type: "group-" + block.type,
+                            blocks: [block]
+                        };
+                        blockGroups.push(blockGroup);
+                    } else {
+                        // it's the same type as before, no touching blockGroup
+                        blockGroup.blocks.push(block);
+                    }
+                }
+
+                var blockContent = function(block) {
+                    var content = "";
+                    if (block.blocks) {
+                        block.blocks.forEach(function (block2) {
+                            content = content + serialize(block2, blockContent(block2), htmlSerializer);
+                        });
+                    } else {
+                        content = insertSpans(block.text, block.spans, ctx, htmlSerializer);
+                    }
+                    return content;
+                };
+
+                blockGroups.forEach(function (blockGroup) {
+                    html.push(serialize(blockGroup, blockContent(blockGroup), htmlSerializer));
+                });
+
+            }
+
+            return html.join('');
+
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            var output = [];
+            for(var i=0; i&lt;this.blocks.length; i++) {
+                var block = this.blocks[i];
+                if (block.text) {
+                    output.push(block.text);
+                }
+            }
+            return output.join(' ');
+         }
 
     };
 
-    /**
-     * Transforms a list of blocks as proper HTML.
-     *
-     * @private
-     * @param {array} blocks - the array of blocks to deal with
-     * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
-     * @returns {string} - the HTML output
-     */
-    function StructuredTextAsHtml (blocks, ctx) {
-
-        var blockGroups = [],
-            blockGroup,
-            block,
-            html = [];
-
-        if (Array.isArray(blocks)) {
-            for(var i=0; i&lt;blocks.length; i++) {
-                block = blocks[i];
-
-                if (block.type != "list-item" && block.type != "o-list-item") { // it's not a type that groups
-                    blockGroup = new BlockGroup(block.type, []);
-                    blockGroups.push(blockGroup);
-                }
-                else if (blockGroup && blockGroup.tag != block.type) { // it's a new type
-                    blockGroup = new BlockGroup(block.type, []);
-                    blockGroups.push(blockGroup);
-                }
-                // else: it's the same type as before, no touching group
-
-                blockGroup.blocks.push(block);
-            };
-
-            blockGroups.forEach(function (blockGroup) {
-
-                if(blockGroup.tag == "heading1") {
-                    html.push('&lt;h1>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '&lt;/h1>');
-                }
-                else if(blockGroup.tag == "heading2") {
-                    html.push('&lt;h2>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '&lt;/h2>');
-                }
-                else if(blockGroup.tag == "heading3") {
-                    html.push('&lt;h3>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '&lt;/h3>');
-                }
-                else if(blockGroup.tag == "paragraph") {
-                    html.push('&lt;p>' + insertSpans(blockGroup.blocks[0].text, blockGroup.blocks[0].spans, ctx) + '&lt;/p>');
-                }
-                else if(blockGroup.tag == "preformatted") {
-                    html.push('&lt;pre>' + blockGroup.blocks[0].text + '&lt;/pre>');
-                }
-                else if(blockGroup.tag == "image") {
-                    html.push('&lt;p>&lt;img src="' + blockGroup.blocks[0].url + '">&lt;/p>');
-                }
-                else if(blockGroup.tag == "embed") {
-                    html.push('&lt;div data-oembed="'+ blockGroup.blocks[0].embed_url
-                        + '" data-oembed-type="'+ blockGroup.blocks[0].type
-                        + '" data-oembed-provider="'+ blockGroup.blocks[0].provider_name
-                        + '">' + blockGroup.blocks[0].oembed.html+"&lt;/div>")
-                }
-                else if(blockGroup.tag == "list-item" || blockGroup.tag == "o-list-item") {
-                    html.push(blockGroup.tag == "list-item"?'&lt;ul>':"&lt;ol>");
-                    blockGroup.blocks.forEach(function(block){
-                        html.push("&lt;li>"+insertSpans(block.text, block.spans, ctx)+"&lt;/li>");
-                    });
-                    html.push(blockGroup.tag == "list-item"?'&lt;/ul>':"&lt;/ol>");
-                }
-                else throw new Error(blockGroup.tag+" not implemented");
-            });
-
-        }
-
-        return html.join('');
-
+    function htmlEscape(input) {
+        return input && input.replace(/&/g, "&amp;").replace(/&lt;/g, "&lt;").replace(/>/g, "&gt;");
     }
 
     /**
      * Parses a block that has spans, and inserts the proper HTML code.
      *
-     * @private
      * @param {string} text - the original text of the block
-     * @param {object} span - the spans as returned by the API
+     * @param {object} spans - the spans as returned by the API
      * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
+     * @param {function} htmlSerializer - optional serializer
      * @returns {string} - the HTML output
      */
-    function insertSpans(text, spans, ctx) {
-        var textBits = [];
-        var tags = [];
-        var cursor = 0;
-        var html = [];
+    function insertSpans(text, spans, ctx, htmlSerializer) {
+        if (!spans || !spans.length) {
+            return htmlEscape(text);
+        }
 
-        /* checking the spans are following each other, or else not doing anything */
-        spans.forEach(function(span){
-            if (span.end &lt; span.start) return text;
-            if (span.start &lt; cursor) return text;
-            cursor = span.end;
+        var tagsStart = {};
+        var tagsEnd = {};
+
+        spans.forEach(function (span) {
+            if (!tagsStart[span.start]) { tagsStart[span.start] = []; }
+            if (!tagsEnd[span.end]) { tagsEnd[span.end] = []; }
+
+            tagsStart[span.start].push(span);
+            tagsEnd[span.end].unshift(span);
         });
 
-        cursor = 0;
-
-        spans.forEach(function(span){
-            textBits.push(text.substring(0, span.start-cursor));
-            text = text.substring(span.start-cursor);
-            cursor = span.start;
-            textBits.push(text.substring(0, span.end-cursor));
-            text = text.substring(span.end-cursor);
-            tags.push(span);
-            cursor = span.end;
-        });
-        textBits.push(text);
-
-        tags.forEach(function(tag, index){
-            html.push(textBits.shift());
-            if(tag.type == "hyperlink"){
-                // Since the content of tag.data is similar to a link fragment, we can initialize it just like a fragment.
-                html.push('&lt;a href="'+ initField(tag.data).url(ctx) +'">');
-                html.push(textBits.shift());
-                html.push('&lt;/a>');
-            } else {
-                html.push('&lt;'+tag.type+'>');
-                html.push(textBits.shift());
-                html.push('&lt;/'+tag.type+'>');
+        var c;
+        var html = "";
+        var stack = [];
+        for (var pos = 0, len = text.length + 1; pos &lt; len; pos++) { // Looping to length + 1 to catch closing tags
+            if (tagsEnd[pos]) {
+                tagsEnd[pos].forEach(function () {
+                    // Close a tag
+                    var tag = stack.pop();
+                    var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
+                    if (stack.length == 0) {
+                        // The tag was top level
+                        html += innerHtml;
+                    } else {
+                        // Add the content to the parent tag
+                        stack[stack.length - 1].text += innerHtml;
+                    }
+                });
             }
-        });
-        html.push(textBits.shift());
+            if (tagsStart[pos]) {
+                // Sort bigger tags first to ensure the right tag hierarchy
+                tagsStart[pos].sort(function (a, b) {
+                    return (b.end - b.start) - (a.end - a.start);
+                });
+                tagsStart[pos].forEach(function (span) {
+                    // Open a tag
+                    var url = null;
+                    if (span.type == "hyperlink") {
+                        var fragment = initField(span.data);
+                        if (fragment) {
+                            url = fragment.url(ctx);
+                        } else {
+                            console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                            return '';
+                        }
+                        span.url = url;
+                    }
+                    var elt = {
+                        span: span,
+                        text: ""
+                    };
+                    stack.push(elt);
+                });
+            }
+            if (pos &lt; text.length) {
+                c = text[pos];
+                if (stack.length == 0) {
+                    // Top-level text
+                    html += htmlEscape(c);
+                } else {
+                    // Inner text of a span
+                    stack[stack.length - 1].text += htmlEscape(c);
+                }
+            }
+        }
 
-        return html.join('');
+        return html;
     }
 
     /**
@@ -660,8 +881,7 @@
      */
     function initField(field) {
 
-        var output,
-            img;
+        var output, img;
 
         switch (field.type) {
 
@@ -674,7 +894,11 @@
                 break;
 
             case "Date":
-                output = new DateTime(field.value);
+                output = new DateFragment(field.value);
+                break;
+
+            case "Timestamp":
+                output = new Timestamp(field.value);
                 break;
 
             case "Text":
@@ -685,26 +909,32 @@
                 output = new Embed(field.value);
                 break;
 
+            case "GeoPoint":
+                output = new GeoPoint(field.value.latitude, field.value.longitude);
+                break;
+
             case "Select":
                 output = new Select(field.value);
                 break;
 
             case "Image":
-                var img = field.value.main;
+                img = field.value.main;
                 output = new ImageEl(
                     new ImageView(
                         img.url,
                         img.dimensions.width,
-                        img.dimensions.height
+                        img.dimensions.height,
+                        img.alt
                     ),
                     {}
                 );
                 for (var name in field.value.views) {
-                    var img = field.value.views[name];
+                    img = field.value.views[name];
                     output.views[name] = new ImageView(
                         img.url,
                         img.dimensions.width,
-                        img.dimensions.height
+                        img.dimensions.height,
+                        img.alt
                     );
                 }
                 break;
@@ -744,7 +974,7 @@
                 break;
 
             default:
-                console.log("Fragment type not supported: ", field.type);
+                console && console.log && console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
@@ -752,12 +982,73 @@
 
     }
 
+    function serialize(element, content, htmlSerializer) {
+        // Return the user customized output (if available)
+        if (htmlSerializer) {
+            var custom = htmlSerializer(element, content);
+            if (custom) {
+                return custom;
+            }
+        }
+
+        // Fall back to the default HTML output
+        var TAG_NAMES = {
+            "heading1": "h1",
+            "heading2": "h2",
+            "heading3": "h3",
+            "heading4": "h4",
+            "heading5": "h5",
+            "heading6": "h6",
+            "paragraph": "p",
+            "preformatted": "pre",
+            "list-item": "li",
+            "o-list-item": "li",
+            "group-list-item": "ul",
+            "group-o-list-item": "ol",
+            "strong": "strong",
+            "em": "em"
+        };
+
+        if (TAG_NAMES[element.type]) {
+            var name = TAG_NAMES[element.type];
+            var classCode = element.label ? (' class="' + element.label + '"') : '';
+            return '&lt;' + name + classCode + '>' + content + '&lt;/' + name + '>';
+        }
+
+        if (element.type == "image") {
+            var label = element.label ? (" " + element.label) : "";
+            var imgTag = '&lt;img src="' + element.url + '" alt="' + element.alt + '">';
+            return '&lt;p class="block-img' + label + '">'
+                + (element.linkUrl ? ('&lt;a href="' + element.linkUrl + '">' + imgTag + '&lt;/a>') : imgTag)
+                + '&lt;/p>';
+        }
+
+        if (element.type == "embed") {
+            return '&lt;div data-oembed="'+ element.embed_url
+                + '" data-oembed-type="'+ element.type
+                + '" data-oembed-provider="'+ element.provider_name
+                + (element.label ? ('" class="' + label) : '')
+                + '">' + element.oembed.html+"&lt;/div>";
+        }
+
+        if (element.type === 'hyperlink') {
+            return '&lt;a href="' + element.url + '">' + content + '&lt;/a>';
+        }
+
+        if (element.type === 'span') {
+            return '&lt;span class="' + span.label + '">' + content + '&lt;/span>';
+        }
+
+        return "&lt;!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;
+    }
+
     Global.Prismic.Fragments = {
         Image: ImageEl,
         ImageView: ImageView,
         Text: Text,
         Number: Num,
-        Date: DateTime,
+        Date: DateFragment,
+        Timestamp: Timestamp,
         Select: Select,
         Color: Color,
         StructuredText: StructuredText,
@@ -766,7 +1057,9 @@
         ImageLink: ImageLink,
         FileLink: FileLink,
         Group: Group,
-        initField: initField
+        GeoPoint: GeoPoint,
+        initField: initField,
+        insertSpans: insertSpans
     }
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
@@ -780,13 +1073,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Documents.html">Documents</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="DateTime.html">Fragments:DateTime</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Mon Apr 28 2014 17:27:13 GMT-0700 (PDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed Sep 24 2014 11:31:20 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
