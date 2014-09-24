@@ -559,25 +559,6 @@
                         fragments[doc.type + '.' + field] = doc.data[doc.type][field];
                     }
 
-                    /* Removing incorrect spans from StructuredText fragments */
-                    // This should be removed when the issue is fixed in the API
-                    for(var fragmentKey in fragments) {
-                        var fragment = fragments[fragmentKey];
-                        if (fragment.type === 'StructuredText') {
-                            for (var blockKey in fragment.value) {
-                                var block = fragment.value[blockKey];
-                                var newSpanArray = [];
-                                for (var spanKey in block.spans) {
-                                    var span = block.spans[spanKey];
-                                    if (span.start < span.end) {
-                                        newSpanArray.push(span);
-                                    }
-                                }
-                                block['spans'] = newSpanArray;
-                            }
-                        }
-                    }
-
                     return new Doc(
                         doc.id,
                         doc.type,
@@ -626,63 +607,81 @@
     /**
      * Embodies the response of a SearchForm query as returned by the API.
      * It includes all the fields that are useful for pagination (page, total_pages, total_results_size, ...),
-     * as well as the field "results", which is an array of Doc objects, the documents themselves.
+     * as well as the field "results", which is an array of {@link Doc} objects, the documents themselves.
+     *
      * @constructor
      * @global
      */
     function Response(page, results_per_page, results_size, total_results_size, total_pages, next_page, prev_page, results) {
         /**
-         * @field
-         * @description the current page number
+         * The current page
+         * @type {number}
          */
         this.page = page;
         /**
-         * @field
-         * @description the number of results per page
+         * The number of results per page
+         * @type {number}
          */
         this.results_per_page = results_per_page;
         /**
-         * @field
-         * @description the size of the current page
+         * The size of the current page
+         * @type {number}
          */
         this.results_size = results_size;
         /**
-         * @field
-         * @description the total size of results across all pages
+         * The total size of results across all pages
+         * @type {number}
          */
         this.total_results_size = total_results_size;
         /**
-         * @field
-         * @description the total number of pages
+         * The total number of pages
+         * @type {number}
          */
         this.total_pages = total_pages;
         /**
-         * @field
-         * @description the URL of the next page in the API
+         * The URL of the next page in the API
+         * @type {string}
          */
         this.next_page = next_page;
         /**
-         * @field
-         * @description the URL of the previous page in the API
+         * The URL of the previous page in the API
+         * @type {string}
          */
         this.prev_page = prev_page;
         /**
-         * @field
-         * @description the array of the {Doc} objects
+         * Array of {@link Doc} for the current page
+         * @type {Array}
          */
         this.results = results;
     }
 
+    /**
+     * A link to a document as in "related document" (not a hyperlink).
+     * @constructor
+     * @global
+     */
     function LinkedDocument(id, slug, type, tags) {
+        /**
+         * @type {string}
+         */
         this.id = id;
+        /**
+         * @type {string}
+         */
         this.slug = slug;
+        /**
+         * @type {string}
+         */
         this.type = type;
+        /**
+         * @type {Array}
+         */
         this.tags = tags;
     }
 
     /**
      * Embodies a document as returned by the API.
-     * Most useful fields: id, type, tags, slug, slugs, ...
+     * Most useful fields: id, type, tags, slug, slugs
      * @constructor
      * @global
      * @alias Doc
@@ -690,35 +689,39 @@
     function Doc(id, type, href, tags, slugs, linkedDocuments, fragments) {
 
         /**
-         * @field
-         * @description the ID of the document
+         * The ID of the document
+         * @type {string}
          */
         this.id = id;
         /**
-         * @field
-         * @description the type of the document
+         * The type of the document, corresponds to a document mask defined in the repository
+         * @type {string}
          */
         this.type = type;
         /**
-         * @field
-         * @description the URL of the document in the API
+         * The URL of the document in the API
+         * @type {string}
          */
         this.href = href;
         /**
-         * @field
-         * @description the tags of the document
+         * The tags of the document
+         * @type {array}
          */
         this.tags = tags;
         /**
-         * @field
-         * @description the current slug of the document
+         * The current slug of the document, "-" if none was provided
+         * @type {string}
          */
         this.slug = slugs ? slugs[0] : "-";
         /**
-         * @field
-         * @description all the slugs that were ever used by this document (including the current one, at the head)
+         * All the slugs that were ever used by this document (including the current one, at the head)
+         * @type {array}
          */
         this.slugs = slugs;
+        /**
+         * Linked documents, as an array of {@link LinkedDocument}
+         * @type {array}
+         */
         this.linkedDocuments = linkedDocuments;
         this.fragments = fragments;
     }
@@ -751,7 +754,8 @@
 
         /**
          * Gets the image fragment in the current Document object, for further manipulation.
-         * Typical use: document.getImage('blog-post.photo').asHtml(ctx)
+         *
+         * @example document.getImage('blog-post.photo').asHtml(ctx)
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageEl} - The Image object to manipulate
@@ -786,7 +790,8 @@
 
         /**
          * Gets the view within the image fragment in the current Document object, for further manipulation.
-         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx)
+         *
+         * @example document.getImageView('blog-post.photo', 'large').asHtml(ctx)
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageView} - The View object to manipulate
@@ -815,7 +820,8 @@
 
         /**
          * Gets the date fragment in the current Document object, for further manipulation.
-         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx)
+         *
+         * @example document.getDate('blog-post.publicationdate').asHtml(ctx)
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
@@ -830,8 +836,9 @@
 
         /**
          * Gets a boolean value of the fragment in the current Document object, for further manipulation.
-         * Typical use: if(document.getBoolean('blog-post.enableComments')) { ... }
          * This works great with a Select fragment. The Select values that are considered true are (lowercased before matching): 'yes', 'on', and 'true'.
+         *
+         * @example if(document.getBoolean('blog-post.enableComments')) { ... }
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
          * @returns {boolean} - The boolean value of the fragment
@@ -843,8 +850,9 @@
 
         /**
          * Gets the text fragment in the current Document object, for further manipulation.
-         * Typical use: document.getText('blog-post.label').asHtml(ctx).
          * The method works with StructuredText fragments, Text fragments, Number fragments, Select fragments and Color fragments.
+         *
+         * @example document.getText('blog-post.label').asHtml(ctx).
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.label"
          * @param {string} after - a suffix that will be appended to the value
@@ -888,7 +896,7 @@
 
         /**
          * Gets the StructuredText fragment in the current Document object, for further manipulation.
-         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx).
+         * @example document.getStructuredText('blog-post.body').asHtml(ctx).
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText fragment to manipulate.
@@ -903,7 +911,7 @@
 
         /**
          * Gets the Number fragment in the current Document object, for further manipulation.
-         * Typical use: document.getNumber('product.price')
+         * @example document.getNumber('product.price')
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "product.price"
          * @returns {number} - The number value of the fragment.
@@ -918,7 +926,7 @@
 
         /**
          * Gets the Color fragment in the current Document object, for further manipulation.
-         * Typical use: document.getColor('product.color')
+         * @example document.getColor('product.color')
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.color"
          * @returns {string} - The string value of the Color fragment.
@@ -931,8 +939,9 @@
             }
         },
 
-        /* Gets the GeoPoint fragment in the current Document object, for further manipulation.
-         * Typical use: document.getGeoPoint('blog-post.location').asHtml(ctx)
+        /** Gets the GeoPoint fragment in the current Document object, for further manipulation.
+         *
+         * @example document.getGeoPoint('blog-post.location').asHtml(ctx)
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.location"
          * @returns {GeoPoint} - The GeoPoint object to manipulate
@@ -947,7 +956,8 @@
 
         /**
          * Gets the Group fragment in the current Document object, for further manipulation.
-         * Typical use: document.getGroup('product.gallery').asHtml(ctx).
+         *
+         * @example document.getGroup('product.gallery').asHtml(ctx).
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
          * @returns {Group} - The Group fragment to manipulate.
@@ -977,8 +987,10 @@
         },
 
         /**
-         * Transforms the whole document as an HTML output. Each fragment is separated by a <section> tag,
+         * Transforms the whole document as an HTML output. Each fragment is separated by a &lt;section&gt; tag,
          * with the attribute data-field="nameoffragment"
+         * Note that most of the time you will not use this method, but read fragment independently and generate
+         * HTML output for {@link StructuredText} fragment with that class' asHtml method.
          *
          * @param {object} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
          * @returns {string} - The HTML output
@@ -1747,6 +1759,9 @@
 
     StructuredText.prototype = {
 
+        /**
+         * @returns {object} the first heading block in the text
+         */
         getTitle: function () {
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];
@@ -1756,6 +1771,9 @@
             }
         },
 
+        /**
+         * @returns {object} the first block of type paragraph
+         */
         getFirstParagraph: function() {
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];
@@ -1765,6 +1783,9 @@
             }
         },
 
+        /**
+         * @returns {array} all paragraphs
+         */
         getParagraphs: function() {
             var paragraphs = [];
             for(var i=0; i<this.blocks.length; i++) {
@@ -1776,10 +1797,16 @@
             return paragraphs;
         },
 
+        /**
+         * @returns {object} the nth paragraph
+         */
         getParagraph: function(n) {
             return this.getParagraphs()[n];
         },
 
+        /**
+         * @returns {object}
+         */
         getFirstImage: function() {
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];
@@ -2125,8 +2152,8 @@
             return '<a href="' + element.url + '">' + content + '</a>';
         }
 
-        if (element.type === 'span') {
-            return '<span class="' + span.label + '">' + content + '</span>';
+        if (element.type === 'label') {
+            return '<span class="' + element.data.label + '">' + content + '</span>';
         }
 
         return "<!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;
