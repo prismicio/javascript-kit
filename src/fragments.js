@@ -1023,8 +1023,8 @@
             return '<a href="' + element.url + '">' + content + '</a>';
         }
 
-        if (element.type === 'span') {
-            return '<span class="' + span.label + '">' + content + '</span>';
+        if (element.type === 'label') {
+            return '<span class="' + element.data.label + '">' + content + '</span>';
         }
 
         return "<!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;

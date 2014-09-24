@@ -559,25 +559,6 @@
                         fragments[doc.type + '.' + field] = doc.data[doc.type][field];
                     }
 
-                    /* Removing incorrect spans from StructuredText fragments */
-                    // This should be removed when the issue is fixed in the API
-                    for(var fragmentKey in fragments) {
-                        var fragment = fragments[fragmentKey];
-                        if (fragment.type === 'StructuredText') {
-                            for (var blockKey in fragment.value) {
-                                var block = fragment.value[blockKey];
-                                var newSpanArray = [];
-                                for (var spanKey in block.spans) {
-                                    var span = block.spans[spanKey];
-                                    if (span.start < span.end) {
-                                        newSpanArray.push(span);
-                                    }
-                                }
-                                block['spans'] = newSpanArray;
-                            }
-                        }
-                    }
-
                     return new Doc(
                         doc.id,
                         doc.type,

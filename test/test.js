@@ -436,6 +436,21 @@
     equal(html, 'ab<strong><em>cd</em>ef</strong>ghijklmnopqrstuvwxyz');
   });
 
+  test("HTML content with span labels", 1, function() {
+    var text  = 'abcdefghijklmnopqrstuvwxyz';
+    var spans = [{
+        "type": "label",
+        "start": 2,
+        "end": 6,
+        "data": {
+            "label": "tip"
+        }
+    }];
+    var html = Prismic.Fragments.insertSpans(text, spans, {});
+    equal(html, 'ab<span class="tip">cdef</span>ghijklmnopqrstuvwxyz');
+
+  });
+
   asyncTest('StructuredTexts asHtml with custom serializer', 1, function() {
     Prismic.Api(testRepository, function(err, Api) {
       if (err) { console.log(err); return; }
