@@ -194,7 +194,6 @@
       if (err) { console.log(err); return; }
       Api.form('everything').ref(Api.master()).query(["at", "document.type", "product"]).submit(function(err, documents) {
         if (err) { console.log(err); return; }
-        console.log("result ", documents);
         equal(documents.results.length, 16);
         start();
       });
