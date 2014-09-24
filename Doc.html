@@ -48,7 +48,7 @@
     
     <div class="description">
         Embodies a document as returned by the API.
-Most useful fields: id, type, tags, slug, slugs, ...
+Most useful fields: id, type, tags, slug, slugs
     </div>
     
 
@@ -81,7 +81,7 @@ Most useful fields: id, type, tags, slug, slugs, ...
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line690">line 690</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line708">line 708</a>
     </li></ul></dd>
     
     
@@ -125,17 +125,27 @@ Most useful fields: id, type, tags, slug, slugs, ...
         <dl>
             
 <dt>
-    <h4 class="name" id="href"><span class="type-signature"></span>href<span class="type-signature"></span></h4>
+    <h4 class="name" id="href"><span class="type-signature"></span>href<span class="type-signature"> :string</span></h4>
     
     
 </dt>
 <dd>
     
     <div class="description">
-        the URL of the document in the API
+        The URL of the document in the API
     </div>
     
     
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">string</span>
+
+
+            </li>
+        </ul>
     
 
     
@@ -161,7 +171,7 @@ Most useful fields: id, type, tags, slug, slugs, ...
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line706">line 706</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line724">line 724</a>
     </li></ul></dd>
     
     
@@ -179,17 +189,27 @@ Most useful fields: id, type, tags, slug, slugs, ...
         
             
 <dt>
-    <h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"></span></h4>
+    <h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"> :string</span></h4>
     
     
 </dt>
 <dd>
     
     <div class="description">
-        the ID of the document
+        The ID of the document
     </div>
     
     
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">string</span>
+
+
+            </li>
+        </ul>
     
 
     
@@ -215,7 +235,7 @@ Most useful fields: id, type, tags, slug, slugs, ...
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line696">line 696</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line714">line 714</a>
     </li></ul></dd>
     
     
@@ -233,17 +253,27 @@ Most useful fields: id, type, tags, slug, slugs, ...
         
             
 <dt>
-    <h4 class="name" id="slug"><span class="type-signature"></span>slug<span class="type-signature"></span></h4>
+    <h4 class="name" id="linkedDocuments"><span class="type-signature"></span>linkedDocuments<span class="type-signature"> :array</span></h4>
     
     
 </dt>
 <dd>
     
     <div class="description">
-        the current slug of the document
+        Linked documents, as an array of <a href="LinkedDocument.html">LinkedDocument</a>
     </div>
     
     
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">array</span>
+
+
+            </li>
+        </ul>
     
 
     
@@ -269,7 +299,7 @@ Most useful fields: id, type, tags, slug, slugs, ...
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line716">line 716</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line744">line 744</a>
     </li></ul></dd>
     
     
@@ -287,17 +317,27 @@ Most useful fields: id, type, tags, slug, slugs, ...
         
             
 <dt>
-    <h4 class="name" id="slugs"><span class="type-signature"></span>slugs<span class="type-signature"></span></h4>
+    <h4 class="name" id="slug"><span class="type-signature"></span>slug<span class="type-signature"> :string</span></h4>
     
     
 </dt>
 <dd>
     
     <div class="description">
-        all the slugs that were ever used by this document (including the current one, at the head)
+        The current slug of the document, "-" if none was provided
     </div>
     
     
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">string</span>
+
+
+            </li>
+        </ul>
     
 
     
@@ -323,7 +363,7 @@ Most useful fields: id, type, tags, slug, slugs, ...
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line721">line 721</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line734">line 734</a>
     </li></ul></dd>
     
     
@@ -341,17 +381,27 @@ Most useful fields: id, type, tags, slug, slugs, ...
         
             
 <dt>
-    <h4 class="name" id="tags"><span class="type-signature"></span>tags<span class="type-signature"></span></h4>
+    <h4 class="name" id="slugs"><span class="type-signature"></span>slugs<span class="type-signature"> :array</span></h4>
     
     
 </dt>
 <dd>
     
     <div class="description">
-        the tags of the document
+        All the slugs that were ever used by this document (including the current one, at the head)
     </div>
     
     
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">array</span>
+
+
+            </li>
+        </ul>
     
 
     
@@ -377,7 +427,7 @@ Most useful fields: id, type, tags, slug, slugs, ...
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line711">line 711</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line739">line 739</a>
     </li></ul></dd>
     
     
@@ -395,17 +445,27 @@ Most useful fields: id, type, tags, slug, slugs, ...
         
             
 <dt>
-    <h4 class="name" id="type"><span class="type-signature"></span>type<span class="type-signature"></span></h4>
+    <h4 class="name" id="tags"><span class="type-signature"></span>tags<span class="type-signature"> :array</span></h4>
     
     
 </dt>
 <dd>
     
     <div class="description">
-        the type of the document
+        The tags of the document
     </div>
     
     
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">array</span>
+
+
+            </li>
+        </ul>
     
 
     
@@ -431,7 +491,71 @@ Most useful fields: id, type, tags, slug, slugs, ...
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line701">line 701</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line729">line 729</a>
+    </li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="type"><span class="type-signature"></span>type<span class="type-signature"> :string</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        The type of the document, corresponds to a document mask defined in the repository
+    </div>
+    
+    
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">string</span>
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line719">line 719</a>
     </li></ul></dd>
     
     
@@ -545,7 +669,7 @@ with the attribute data-field="nameoffragment"
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line986">line 986</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line1008">line 1008</a>
     </li></ul></dd>
     
     
@@ -636,7 +760,7 @@ with the attribute data-field="nameoffragment"
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line1000">line 1000</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line1022">line 1022</a>
     </li></ul></dd>
     
     
@@ -777,7 +901,7 @@ for instance.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line735">line 735</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line757">line 757</a>
     </li></ul></dd>
     
     
@@ -916,7 +1040,7 @@ for instance.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line746">line 746</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line768">line 768</a>
     </li></ul></dd>
     
     
@@ -1057,7 +1181,7 @@ This works great with a Select fragment. The Select values that are considered t
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line839">line 839</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line861">line 861</a>
     </li></ul></dd>
     
     
@@ -1197,7 +1321,7 @@ Typical use: document.getColor('product.color')
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line926">line 926</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line948">line 948</a>
     </li></ul></dd>
     
     
@@ -1337,7 +1461,7 @@ Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx)
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line823">line 823</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line845">line 845</a>
     </li></ul></dd>
     
     
@@ -1477,7 +1601,7 @@ Typical use: document.getGroup('product.gallery').asHtml(ctx).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line955">line 955</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line977">line 977</a>
     </li></ul></dd>
     
     
@@ -1640,7 +1764,7 @@ This is the same as writing document.get(fragment).asHtml(ctx);
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line971">line 971</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line993">line 993</a>
     </li></ul></dd>
     
     
@@ -1780,7 +1904,7 @@ Typical use: document.getImage('blog-post.photo').asHtml(ctx)
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line759">line 759</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line781">line 781</a>
     </li></ul></dd>
     
     
@@ -1920,7 +2044,7 @@ Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx)
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line794">line 794</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line816">line 816</a>
     </li></ul></dd>
     
     
@@ -2060,7 +2184,7 @@ Typical use: document.getNumber('product.price')
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line911">line 911</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line933">line 933</a>
     </li></ul></dd>
     
     
@@ -2200,7 +2324,7 @@ Typical use: document.getStructuredText('blog-post.body').asHtml(ctx).
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line896">line 896</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line918">line 918</a>
     </li></ul></dd>
     
     
@@ -2364,7 +2488,7 @@ The method works with StructuredText fragments, Text fragments, Number fragments
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line853">line 853</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line875">line 875</a>
     </li></ul></dd>
     
     
@@ -2427,13 +2551,13 @@ The method works with StructuredText fragments, Text fragments, Number fragments
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="LinkedDocument.html">LinkedDocument</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed Sep 24 2014 11:31:20 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed Sep 24 2014 13:01:37 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
