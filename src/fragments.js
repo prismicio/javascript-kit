@@ -497,7 +497,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return this.main.asHtml()
+            return this.main.asHtml();
         },
 
         /**
@@ -636,7 +636,7 @@
         getTitle: function () {
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];
-                if(block.type.indexOf('heading') == 0) {
+                if(block.type.indexOf('heading') === 0) {
                     return block;
                 }
             }
@@ -709,7 +709,7 @@
                 var ctx = linkResolver;
                 linkResolver = function(doc, isBroken) {
                     return ctx.linkResolver(ctx, doc, isBroken);
-                }
+                };
             }
             if (Array.isArray(this.blocks)) {
 
@@ -817,7 +817,7 @@
                     // Close a tag
                     var tag = stack.pop();
                     var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
-                    if (stack.length == 0) {
+                    if (stack.length === 0) {
                         // The tag was top level
                         html += innerHtml;
                     } else {
@@ -839,7 +839,7 @@
                         if (fragment) {
                             url = fragment.url(linkResolver);
                         } else {
-                            console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                            if (console && console.error) console.error('Impossible to convert span.data as a Fragment', span);
                             return '';
                         }
                         span.url = url;
@@ -853,7 +853,7 @@
             }
             if (pos < text.length) {
                 c = text[pos];
-                if (stack.length == 0) {
+                if (stack.length === 0) {
                     // Top-level text
                     html += htmlEscape(c);
                 } else {
@@ -968,7 +968,7 @@
                 break;
 
             default:
-                console && console.log && console.log("Fragment type not supported: ", field.type);
+                if (console && console.log) console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
@@ -1017,17 +1017,17 @@
         if (element.type == "image") {
             var label = element.label ? (" " + element.label) : "";
             var imgTag = '<img src="' + element.url + '" alt="' + element.alt + '">';
-            return '<p class="block-img' + label + '">'
-                + (element.linkUrl ? ('<a href="' + element.linkUrl + '">' + imgTag + '</a>') : imgTag)
-                + '</p>';
+            return '<p class="block-img' + label + '">' +
+                (element.linkUrl ? ('<a href="' + element.linkUrl + '">' + imgTag + '</a>') : imgTag) +
+                '</p>';
         }
 
         if (element.type == "embed") {
-            return '<div data-oembed="'+ element.embed_url
-                + '" data-oembed-type="'+ element.type
-                + '" data-oembed-provider="'+ element.provider_name
-                + (element.label ? ('" class="' + label) : '')
-                + '">' + element.oembed.html+"</div>";
+            return '<div data-oembed="'+ element.embed_url +
+                '" data-oembed-type="'+ element.type +
+                '" data-oembed-provider="'+ element.provider_name +
+                (element.label ? ('" class="' + element.label) : '') +
+                '">' + element.oembed.html+"</div>";
         }
 
         if (element.type === 'hyperlink') {
@@ -1059,6 +1059,6 @@
         GeoPoint: GeoPoint,
         initField: initField,
         insertSpans: insertSpans
-    }
+    };
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));

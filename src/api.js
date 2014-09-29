@@ -16,7 +16,9 @@
      */
     var prismic = function(url, callback, accessToken, maybeRequestHandler, maybeApiCache) {
         var api = new prismic.fn.init(url, accessToken, maybeRequestHandler, maybeApiCache);
-        callback && api.get(callback);
+        if (callback) {
+            api.get(callback);
+        }
         return api;
     };
     // note that the prismic variable is later affected as "Api" while exporting
@@ -209,19 +211,19 @@
                 function fetchApi (cb) {
                     self.requestHandler(self.url, function(error, data, xhr) {
                         if (error) {
-                            cb && cb(error, null, xhr);
+                            if (cb) cb(error, null, xhr);
                         } else {
-                            cb && cb(null, self.parse(data), xhr);
+                            if (cb) cb(null, self.parse(data), xhr);
                         }
                     });
                 },
                 function done (error, api, xhr) {
-                    if(error) {
-                        callback && callback(error, null, xhr);
+                    if (error) {
+                        if (callback) callback(error, null, xhr);
                     } else {
                         self.data = api;
                         self.bookmarks = api.bookmarks;
-                        callback && callback(null, self, xhr);
+                        if (callback) callback(null, self, xhr);
                     }
                 }
             );
@@ -427,9 +429,9 @@
                 value = null;
             }
             if(fieldDesc.multiple) {
-                value != null && values.push(value);
+                if (value) values.push(value);
             } else {
-                values = value != null && [value];
+                values = value && [value];
             }
             this.data[field] = values;
             return this;
@@ -462,8 +464,7 @@
                 var predicates = [].slice.apply(arguments); // Convert to a real JS array
                 var stringQueries = [];
                 predicates.forEach(function (predicate) {
-                    var firstArg = (predicate[1].indexOf("my.") == 0 || predicate[1].indexOf("document.") == 0)
-                        ? predicate[1]
+                    var firstArg = (predicate[1].indexOf("my.") === 0 || predicate[1].indexOf("document.") === 0) ? predicate[1]
                         : '"' + predicate[1] + '"';
                     stringQueries.push("[:d = " + predicate[0] + "(" + firstArg + ", " + (function() {
                         return predicate.slice(2).map(function(p) {
@@ -581,27 +582,10 @@
                 );
             });
 
-        }
+        },
 
     };
 
-    /**
-     * An array of the fragments with the given fragment name.
-     * The array is often a single-element array, expect when the fragment is a multiple fragment.
-     * @private
-     */
-    function getFragments(name) {
-        if (!this.fragments || !this.fragments[name]) {
-            return [];
-        }
-
-        if (Array.isArray(this.fragments[name])) {
-            return this.fragments[name];
-        } else {
-            return [this.fragments[name]];
-        }
-
-    }
 
     /**
      * Embodies the response of a SearchForm query as returned by the API.
@@ -735,7 +719,7 @@
          * @returns {object} - The JavaScript Fragment object to manipulate
          */
         get: function(name) {
-            var frags = getFragments.call(this, name);
+            var frags = this._getFragments(name);
             return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
         },
 
@@ -746,7 +730,7 @@
          * @returns {array} - An array of each JavaScript fragment object to manipulate.
          */
         getAll: function(name) {
-            return getFragments.call(this, name).map(function (fragment) {
+            return this._getFragments(name).map(function (fragment) {
                 return Global.Prismic.Fragments.initField(fragment);
             }, this);
         },
@@ -1015,7 +999,25 @@
                 texts.push(fragment && fragment.asText ? fragment.asText(ctx) : '');
             }
             return texts.join('');
-         }
+         },
+
+        /**
+         * An array of the fragments with the given fragment name.
+         * The array is often a single-element array, expect when the fragment is a multiple fragment.
+         * @private
+         */
+        _getFragments: function(name) {
+            if (!this.fragments || !this.fragments[name]) {
+                return [];
+            }
+
+            if (Array.isArray(this.fragments[name])) {
+                return this.fragments[name];
+            } else {
+                return [this.fragments[name]];
+            }
+
+        }
 
     };
 
@@ -1085,24 +1087,24 @@
                 var value =  fvalue(function(error, value, xhr) {
                     self.set(key, value, ttl);
                     delete self.states[key];
-                    done && done(error, value, xhr);
+                    if (done) done(error, value, xhr);
                 });
             } else {
-                done && done(null, found);
+                if (done) done(null, found);
             }
         },
 
         isExpired: function(key) {
             var entry = this.cache[key];
             if(entry) {
-                return entry.expiredIn != 0 && entry.expiredIn < Date.now();
+                return entry.expiredIn !== 0 && entry.expiredIn < Date.now();
             } else {
                 return false;
             }
         },
 
         isInProgress: function(key) {
-            return this.states[key] == 'progress';
+            return this.states[key] === 'progress';
         },
 
         exists: function(key) {

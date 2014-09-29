@@ -57,7 +57,7 @@ gulp.task('test:unit', function() {
                .pipe(qunit())
 });
 
-gulp.task('test', ['test:int', 'test:unit']);
+gulp.task('test', ['jshint', 'test:int', 'test:unit']);
 
 gulp.task('default', ['doc', 'concat', 'minify']);
 

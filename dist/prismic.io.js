@@ -16,7 +16,9 @@
      */
     var prismic = function(url, callback, accessToken, maybeRequestHandler, maybeApiCache) {
         var api = new prismic.fn.init(url, accessToken, maybeRequestHandler, maybeApiCache);
-        callback && api.get(callback);
+        if (callback) {
+            api.get(callback);
+        }
         return api;
     };
     // note that the prismic variable is later affected as "Api" while exporting
@@ -209,19 +211,19 @@
                 function fetchApi (cb) {
                     self.requestHandler(self.url, function(error, data, xhr) {
                         if (error) {
-                            cb && cb(error, null, xhr);
+                            if (cb) cb(error, null, xhr);
                         } else {
-                            cb && cb(null, self.parse(data), xhr);
+                            if (cb) cb(null, self.parse(data), xhr);
                         }
                     });
                 },
                 function done (error, api, xhr) {
-                    if(error) {
-                        callback && callback(error, null, xhr);
+                    if (error) {
+                        if (callback) callback(error, null, xhr);
                     } else {
                         self.data = api;
                         self.bookmarks = api.bookmarks;
-                        callback && callback(null, self, xhr);
+                        if (callback) callback(null, self, xhr);
                     }
                 }
             );
@@ -251,9 +253,9 @@
                     f = data.forms[i];
 
                     if(this.accessToken) {
-                        f.fields['access_token'] = {};
-                        f.fields['access_token']['type'] = 'string';
-                        f.fields['access_token']['default'] = this.accessToken;
+                        f.fields.access_token = {};
+                        f.fields.access_token.type = 'string';
+                        f.fields.access_token.default = this.accessToken;
                     }
 
                     form = new Form(
