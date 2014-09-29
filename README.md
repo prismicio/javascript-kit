@@ -61,11 +61,11 @@ Contribution is open to all developer levels, read our "[Contribute to the offic
 
 #### Install the kit locally
 
-You can simply execute this JavaScript kit with a web browser, but before committing, we kindly ask you to run the ```grunt``` command (it will make sure all tests still pass, and concatenate/minify your changes).
+You can simply execute this JavaScript kit with a web browser, but before committing, we kindly ask you to run the ```gulp``` command (it will make sure all tests still pass, and concatenate/minify your changes).
 
-To install grunt and other required packages: [install Node.js and npm](http://www.joyent.com/blog/installing-node-and-npm/), and then run this from your kit's repository, as an administrator:
+To install gulp and other required packages: [install Node.js and npm](http://www.joyent.com/blog/installing-node-and-npm/), and then run this from your kit's repository, as an administrator:
 ```
-npm install -g grunt
+npm install -g gulp
 npm install
 ```
 
@@ -73,13 +73,12 @@ npm install
 
 Please write tests in [test/test.js](test/test.js) for any bugfix or new feature, following the [very simple QUnit syntax](http://qunitjs.com/), if you need to test with a real Prismic.io repository. Otherwise use [test/unit.js](test/unit.js) for unit testing features.
 
-Execute the tests either by opening [test/test.html](test/test.html) or [test/unit.html](test/unit.html) in a browser, or by using Grunt:
+Execute the tests either by opening [test/test.html](test/test.html) or [test/unit.html](test/unit.html) in a browser, or by using Gulp:
 
-* ```grunt test``` will run all the tests and display the result on your shell
-* ```grunt test:int``` will run all integration tests (the ones from [test/test.html](test/test.html))
-* ```grunt test:unit``` will run all unit tests (the ones from [test/unit.html](test/unit.html))
-* ```grunt test:browser``` will start a local server at [http://localhost:8888](http://localhost:8888) so that you can run the tests on your browser
-* ```grunt test:local``` will test the local files without starting any server
+* ```gulp jshint``` will run jshint to check for syntax errors or bad practice in the code
+* ```gulp test``` will run jshint, all the tests and display the result on your shell
+* ```gulp test:int``` will run all integration tests (the ones from [test/test.html](test/test.html))
+* ```gulp test:unit``` will run all unit tests (the ones from [test/unit.html](test/unit.html))
 
 If you find existing code that is not optimally tested and wish to make it better, we really appreciate it; but you should document it on its own branch and its own pull request.
 
