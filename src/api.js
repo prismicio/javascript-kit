@@ -166,10 +166,9 @@
     // Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
     prismic.fn = prismic.prototype = {
 
-        // Predicates: usable as the first element of a query array.
+        // Predicates
         AT: "at",
         ANY: "any",
-        EVERYTHING: "everything",
         SIMILAR: "similar",
         FULLTEXT: "fulltext",
         NUMBER: {
@@ -451,18 +450,16 @@
         /**
          * Sets a predicate-based query for this SearchForm. This is where you
          * paste what you compose in your prismic.io API browser.
-         * You can pass an empty string, the method will simply not send that query.
          *
-         * @param {string} query - The query to perform
+         * @example form.query(Prismic.Predicates.at("document.id", "foobar"))
+         * @param {string|...array} query - Either a query as a string, or as many predicates as you want. See Prismic.Predicates.
          * @returns {SearchForm} - The SearchForm itself
          */
         query: function(query) {
             if (typeof query === 'string') {
                 return this.set("q", query);
             } else {
-                var predicates = (typeof query[0] === 'string')
-                            ? [query]
-                            : query;
+                var predicates = [].slice.apply(arguments); // Convert to a real JS array
                 var stringQueries = [];
                 predicates.forEach(function (predicate) {
                     var firstArg = (predicate[1].indexOf("my.") == 0 || predicate[1].indexOf("document.") == 0)
@@ -472,10 +469,12 @@
                         return predicate.slice(2).map(function(p) {
                             if (typeof p === 'string') {
                                 return '"' + p + '"';
-                            } else if(Array.isArray(p)) {
-                                return "[" + p.map(function(e) {
+                            } else if (Array.isArray(p)) {
+                                return "[" + p.map(function (e) {
                                     return '"' + e + '"';
                                 }).join(',') + "]";
+                            } else if (p instanceof Date) {
+                                return d.getTime();
                             } else {
                                 return p;
                             }

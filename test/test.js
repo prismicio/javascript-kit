@@ -6,7 +6,9 @@
 
       previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70',
 
-      microRepository = 'https://micro.prismic.io/api';
+      microRepository = 'https://micro.prismic.io/api',
+
+      Predicates = Prismic.Predicates;
 
   function getLinkResolver(ref) {
     return function(doc, isBroken) {
@@ -98,7 +100,10 @@
   asyncTest('Use an Array to query', 2, function() {
     Prismic.Api(microRepository, function(err, Api) {
       if (err) { console.log(err); return; }
-      Api.form('everything').query(["any", "document.type", ["doc", "docchapter"]]).ref(Api.master()).submit(function(err, response) {
+      Api.form('everything')
+         .query(Predicates.any("document.type", ["doc", "docchapter"]))
+         .ref(Api.master())
+         .submit(function(err, response) {
         if (err) { console.log(err); return; }
         var document = response.results[0];
         equal(document.linkedDocuments.length, 1);
@@ -234,10 +239,8 @@
     Prismic.Api(microRepository, function(err, Api) {
       if (err) { console.log(err); return; }
       Api.form('everything').ref(Api.master()).query(
-        [
-          ["at", "document.type", "article"],
-          ["fulltext", "my.article.title", "meta"]
-        ]
+        Predicates.at("document.type", "article"),
+        Predicates.fulltext("my.article.title", "meta")
       ).submit(function(err, documents) {
         if (err) { console.log(err); return; }
         equal(documents.results.length, 1);
