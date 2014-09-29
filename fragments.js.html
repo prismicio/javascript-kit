@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>JSDoc: Source: fragments.js</title>
-    
+
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
@@ -16,16 +16,16 @@
 <body>
 
 <div id="main">
-    
+
     <h1 class="page-title">Source: fragments.js</h1>
-    
+
     
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source"><code>(function (Global, undefined) {
+            <pre class="prettyprint source linenums"><code>(function (Global, undefined) {
 
     "use strict";
 
@@ -93,11 +93,11 @@
         /**
          * Returns the URL of the document link.
          *
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @params {object} linkResolver - mandatory linkResolver function (please read prismic.io online documentation about this)
          * @returns {string} - the proper URL to use
          */
-        url: function (ctx) {
-            return ctx.linkResolver(ctx, this.document, this.isBroken);
+        url: function (linkResolver) {
+            return linkResolver(this.document, this.isBroken);
         },
 
         /**
@@ -105,8 +105,8 @@
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function(ctx) {
-            return this.url(ctx);
+         asText: function(linkResolver) {
+            return this.url(linkResolver);
          }
     };
 
@@ -602,15 +602,15 @@
       /**
        * Turns the fragment into a useable HTML version of it.
        * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-       * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+       * @params {function} linkResolver - linkResolver function (please read prismic.io online documentation about this)
        * @returns {string} - basic HTML code for the fragment
        */
-      asHtml: function(ctx) {
+      asHtml: function(linkResolver) {
         var output = "";
         for (var i=0; i&lt;this.value.length; i++) {
           for (var fragmentName in this.value[i]) {
             output += '&lt;section data-field="'+fragmentName+'">';
-            output += this.value[i][fragmentName].asHtml(ctx);
+            output += this.value[i][fragmentName].asHtml(linkResolver);
             output += '&lt;/section>';
           }
         }
@@ -631,11 +631,11 @@
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function(ctx) {
+         asText: function(linkResolver) {
             var output = "";
             for (var i=0; i&lt;this.value.length; i++) {
               for (var fragmentName in this.value[i]) {
-                output += this.value[i][fragmentName].asText(ctx);
+                output += this.value[i][fragmentName].asText(linkResolver);
               }
             }
             return output;
@@ -722,28 +722,34 @@
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function
-         *      (please read prismic.io online documentation about this)
+         * @params {function} linkResolver - please read prismic.io online documentation about link resolvers
          * @params {function} htmlSerializer optional HTML serializer to customize the output
          * @returns {string} - basic HTML code for the fragment
          */
-        asHtml: function(ctx, htmlSerializer) {
+        asHtml: function(linkResolver, htmlSerializer) {
             var blockGroups = [],
                 blockGroup,
                 block,
                 html = [];
+            if (!isFunction(linkResolver)) {
+                // Backward compatibility with the old ctx argument
+                var ctx = linkResolver;
+                linkResolver = function(doc, isBroken) {
+                    return ctx.linkResolver(ctx, doc, isBroken);
+                }
+            }
             if (Array.isArray(this.blocks)) {
 
                 for(var i=0; i &lt; this.blocks.length; i++) {
                     block = this.blocks[i];
 
                     // Resolve image links
-                    if (block.type == "image" && block.linkTo) {
+                    if (block.type == "image" &amp;&amp; block.linkTo) {
                         var link = initField(block.linkTo);
-                        block.linkUrl = link.url(ctx);
+                        block.linkUrl = link.url(linkResolver);
                     }
 
-                    if (block.type !== "list-item" && block.type !== "o-list-item") {
+                    if (block.type !== "list-item" &amp;&amp; block.type !== "o-list-item") {
                         // it's not a type that groups
                         blockGroups.push(block);
                         blockGroup = null;
@@ -767,7 +773,7 @@
                             content = content + serialize(block2, blockContent(block2), htmlSerializer);
                         });
                     } else {
-                        content = insertSpans(block.text, block.spans, ctx, htmlSerializer);
+                        content = insertSpans(block.text, block.spans, linkResolver, htmlSerializer);
                     }
                     return content;
                 };
@@ -801,7 +807,7 @@
     };
 
     function htmlEscape(input) {
-        return input && input.replace(/&/g, "&amp;").replace(/&lt;/g, "&lt;").replace(/>/g, "&gt;");
+        return input &amp;&amp; input.replace(/&amp;/g, "&amp;amp;").replace(/&lt;/g, "&amp;lt;").replace(/>/g, "&amp;gt;");
     }
 
     /**
@@ -809,11 +815,11 @@
      *
      * @param {string} text - the original text of the block
      * @param {object} spans - the spans as returned by the API
-     * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
+     * @param {object} linkResolver - the function to build links that may be in the fragment (please read prismic.io's online documentation about this)
      * @param {function} htmlSerializer - optional serializer
      * @returns {string} - the HTML output
      */
-    function insertSpans(text, spans, ctx, htmlSerializer) {
+    function insertSpans(text, spans, linkResolver, htmlSerializer) {
         if (!spans || !spans.length) {
             return htmlEscape(text);
         }
@@ -858,9 +864,9 @@
                     if (span.type == "hyperlink") {
                         var fragment = initField(span.data);
                         if (fragment) {
-                            url = fragment.url(ctx);
+                            url = fragment.url(linkResolver);
                         } else {
-                            console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                            console &amp;&amp; console.error &amp;&amp; console.error('Impossible to convert span.data as a Fragment', span);
                             return '';
                         }
                         span.url = url;
@@ -989,12 +995,17 @@
                 break;
 
             default:
-                console && console.log && console.log("Fragment type not supported: ", field.type);
+                console &amp;&amp; console.log &amp;&amp; console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
         return output;
 
+    }
+
+    function isFunction(f) {
+        var getType = {};
+        return f &amp;&amp; getType.toString.call(f) === '[object Function]';
     }
 
     function serialize(element, content, htmlSerializer) {
@@ -1050,8 +1061,8 @@
             return '&lt;a href="' + element.url + '">' + content + '&lt;/a>';
         }
 
-        if (element.type === 'span') {
-            return '&lt;span class="' + span.label + '">' + content + '&lt;/span>';
+        if (element.type === 'label') {
+            return '&lt;span class="' + element.data.label + '">' + content + '&lt;/span>';
         }
 
         return "&lt;!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;
@@ -1077,7 +1088,7 @@
         insertSpans: insertSpans
     }
 
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+}(typeof exports === 'object' &amp;&amp; exports ? exports : (typeof module === "object" &amp;&amp; module &amp;&amp; typeof module.exports === "object" ? module.exports : window)));
 </code></pre>
         </article>
     </section>
@@ -1094,7 +1105,7 @@
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed Sep 24 2014 13:01:37 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Mon Sep 29 2014 14:49:46 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

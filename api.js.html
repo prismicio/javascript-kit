@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>JSDoc: Source: api.js</title>
-    
+
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
     <!--[if lt IE 9]>
@@ -16,16 +16,16 @@
 <body>
 
 <div id="main">
-    
+
     <h1 class="page-title">Source: api.js</h1>
-    
+
     
 
 
     
     <section>
         <article>
-            <pre class="prettyprint source"><code>(function (Global, undefined) {
+            <pre class="prettyprint source linenums"><code>(function (Global, undefined) {
 
     "use strict";
 
@@ -43,7 +43,7 @@
      */
     var prismic = function(url, callback, accessToken, maybeRequestHandler, maybeApiCache) {
         var api = new prismic.fn.init(url, accessToken, maybeRequestHandler, maybeApiCache);
-        callback && api.get(callback);
+        callback &amp;&amp; api.get(callback);
         return api;
     };
     // note that the prismic variable is later affected as "Api" while exporting
@@ -51,7 +51,7 @@
     // -- Request handlers
 
     var ajaxRequest = (function() {
-        if(typeof XMLHttpRequest != 'undefined' && 'withCredentials' in new XMLHttpRequest()) {
+        if(typeof XMLHttpRequest != 'undefined' &amp;&amp; 'withCredentials' in new XMLHttpRequest()) {
             return function(url, callback) {
 
                 var xhr = new XMLHttpRequest();
@@ -70,7 +70,7 @@
                 // Bind the XHR finished callback
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
-                        if(xhr.status && xhr.status == 200) {
+                        if(xhr.status &amp;&amp; xhr.status == 200) {
                             resolve();
                         } else {
                             reject();
@@ -134,7 +134,7 @@
     });
 
     var nodeJSRequest = (function() {
-        if(typeof require == 'function' && require('http')) {
+        if(typeof require == 'function' &amp;&amp; require('http')) {
             var requestsCache = {},
                 http = require('http'),
                 https = require('https'),
@@ -160,7 +160,7 @@
                         };
 
                     h.get(options, function(response) {
-                        if(response.statusCode && response.statusCode == 200) {
+                        if(response.statusCode &amp;&amp; response.statusCode == 200) {
                             var jsonStr = '';
 
                             response.setEncoding('utf8');
@@ -170,7 +170,7 @@
 
                             response.on('end', function () {
                               var cacheControl = response.headers['cache-control'],
-                                  maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1]) : undefined,
+                                  maxAge = cacheControl &amp;&amp; /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1]) : undefined,
                                   json = JSON.parse(jsonStr);
 
                               if(maxAge) {
@@ -193,10 +193,9 @@
     // Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
     prismic.fn = prismic.prototype = {
 
-        // Predicates: usable as the first element of a query array.
+        // Predicates
         AT: "at",
         ANY: "any",
-        EVERYTHING: "everything",
         SIMILAR: "similar",
         FULLTEXT: "fulltext",
         NUMBER: {
@@ -237,19 +236,19 @@
                 function fetchApi (cb) {
                     self.requestHandler(self.url, function(error, data, xhr) {
                         if (error) {
-                            cb && cb(error, null, xhr);
+                            cb &amp;&amp; cb(error, null, xhr);
                         } else {
-                            cb && cb(null, self.parse(data), xhr);
+                            cb &amp;&amp; cb(null, self.parse(data), xhr);
                         }
                     });
                 },
                 function done (error, api, xhr) {
                     if(error) {
-                        callback && callback(error, null, xhr);
+                        callback &amp;&amp; callback(error, null, xhr);
                     } else {
                         self.data = api;
                         self.bookmarks = api.bookmarks;
-                        callback && callback(null, self, xhr);
+                        callback &amp;&amp; callback(null, self, xhr);
                     }
                 }
             );
@@ -338,9 +337,9 @@
          * @private
          */
         init: function(url, accessToken, maybeRequestHandler, maybeApiCache) {
-            this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
+            this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&amp;' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
-            this.requestHandler = maybeRequestHandler || ajaxRequest() || xdomainRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
+            this.requestHandler = maybeRequestHandler || ajaxRequest() || xdomainRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest &amp; NodeJS)");})();
             this.apiCache = maybeApiCache || new ApiCache();
             return this;
         },
@@ -455,9 +454,9 @@
                 value = null;
             }
             if(fieldDesc.multiple) {
-                value != null && values.push(value);
+                value != null &amp;&amp; values.push(value);
             } else {
-                values = value != null && [value];
+                values = value != null &amp;&amp; [value];
             }
             this.data[field] = values;
             return this;
@@ -478,18 +477,16 @@
         /**
          * Sets a predicate-based query for this SearchForm. This is where you
          * paste what you compose in your prismic.io API browser.
-         * You can pass an empty string, the method will simply not send that query.
          *
-         * @param {string} query - The query to perform
+         * @example form.query(Prismic.Predicates.at("document.id", "foobar"))
+         * @param {string|...array} query - Either a query as a string, or as many predicates as you want. See Prismic.Predicates.
          * @returns {SearchForm} - The SearchForm itself
          */
         query: function(query) {
             if (typeof query === 'string') {
                 return this.set("q", query);
             } else {
-                var predicates = (typeof query[0] === 'string')
-                            ? [query]
-                            : query;
+                var predicates = [].slice.apply(arguments); // Convert to a real JS array
                 var stringQueries = [];
                 predicates.forEach(function (predicate) {
                     var firstArg = (predicate[1].indexOf("my.") == 0 || predicate[1].indexOf("document.") == 0)
@@ -499,10 +496,12 @@
                         return predicate.slice(2).map(function(p) {
                             if (typeof p === 'string') {
                                 return '"' + p + '"';
-                            } else if(Array.isArray(p)) {
-                                return "[" + p.map(function(e) {
+                            } else if (Array.isArray(p)) {
+                                return "[" + p.map(function (e) {
                                     return '"' + e + '"';
                                 }).join(',') + "]";
+                            } else if (p instanceof Date) {
+                                return d.getTime();
                             } else {
                                 return p;
                             }
@@ -556,13 +555,13 @@
                 url = this.form.action;
 
             if(this.data) {
-                var sep = (url.indexOf('?') > -1 ? '&' : '?');
+                var sep = (url.indexOf('?') > -1 ? '&amp;' : '?');
                 for(var key in this.data) {
                     var values = this.data[key];
                     if(values) {
                         for(var i=0; i&lt;values.length; i++) {
                             url += sep + key + '=' + encodeURIComponent(values[i]);
-                            sep = '&';
+                            sep = '&amp;';
                         }
                     }
                 }
@@ -584,25 +583,6 @@
                     var fragments = {};
                     for(var field in doc.data[doc.type]) {
                         fragments[doc.type + '.' + field] = doc.data[doc.type][field];
-                    }
-
-                    /* Removing incorrect spans from StructuredText fragments */
-                    // This should be removed when the issue is fixed in the API
-                    for(var fragmentKey in fragments) {
-                        var fragment = fragments[fragmentKey];
-                        if (fragment.type === 'StructuredText') {
-                            for (var blockKey in fragment.value) {
-                                var block = fragment.value[blockKey];
-                                var newSpanArray = [];
-                                for (var spanKey in block.spans) {
-                                    var span = block.spans[spanKey];
-                                    if (span.start &lt; span.end) {
-                                        newSpanArray.push(span);
-                                    }
-                                }
-                                block['spans'] = newSpanArray;
-                            }
-                        }
                     }
 
                     return new Doc(
@@ -800,7 +780,8 @@
 
         /**
          * Gets the image fragment in the current Document object, for further manipulation.
-         * Typical use: document.getImage('blog-post.photo').asHtml(ctx)
+         *
+         * @example document.getImage('blog-post.photo').asHtml(ctx)
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageEl} - The Image object to manipulate
@@ -835,7 +816,8 @@
 
         /**
          * Gets the view within the image fragment in the current Document object, for further manipulation.
-         * Typical use: document.getImageView('blog-post.photo', 'large').asHtml(ctx)
+         *
+         * @example document.getImageView('blog-post.photo', 'large').asHtml(ctx)
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageView} - The View object to manipulate
@@ -864,7 +846,8 @@
 
         /**
          * Gets the date fragment in the current Document object, for further manipulation.
-         * Typical use: document.getDate('blog-post.publicationdate').asHtml(ctx)
+         *
+         * @example document.getDate('blog-post.publicationdate').asHtml(ctx)
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
@@ -879,21 +862,23 @@
 
         /**
          * Gets a boolean value of the fragment in the current Document object, for further manipulation.
-         * Typical use: if(document.getBoolean('blog-post.enableComments')) { ... }
          * This works great with a Select fragment. The Select values that are considered true are (lowercased before matching): 'yes', 'on', and 'true'.
+         *
+         * @example if(document.getBoolean('blog-post.enableComments')) { ... }
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
          * @returns {boolean} - The boolean value of the fragment
          */
         getBoolean: function(name) {
             var fragment = this.get(name);
-            return fragment.value && (fragment.value.toLowerCase() == 'yes' || fragment.value.toLowerCase() == 'on' || fragment.value.toLowerCase() == 'true');
+            return fragment.value &amp;&amp; (fragment.value.toLowerCase() == 'yes' || fragment.value.toLowerCase() == 'on' || fragment.value.toLowerCase() == 'true');
         },
 
         /**
          * Gets the text fragment in the current Document object, for further manipulation.
-         * Typical use: document.getText('blog-post.label').asHtml(ctx).
          * The method works with StructuredText fragments, Text fragments, Number fragments, Select fragments and Color fragments.
+         *
+         * @example document.getText('blog-post.label').asHtml(ctx).
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.label"
          * @param {string} after - a suffix that will be appended to the value
@@ -937,7 +922,7 @@
 
         /**
          * Gets the StructuredText fragment in the current Document object, for further manipulation.
-         * Typical use: document.getStructuredText('blog-post.body').asHtml(ctx).
+         * @example document.getStructuredText('blog-post.body').asHtml(ctx).
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText fragment to manipulate.
@@ -952,7 +937,7 @@
 
         /**
          * Gets the Number fragment in the current Document object, for further manipulation.
-         * Typical use: document.getNumber('product.price')
+         * @example document.getNumber('product.price')
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "product.price"
          * @returns {number} - The number value of the fragment.
@@ -967,7 +952,7 @@
 
         /**
          * Gets the Color fragment in the current Document object, for further manipulation.
-         * Typical use: document.getColor('product.color')
+         * @example document.getColor('product.color')
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.color"
          * @returns {string} - The string value of the Color fragment.
@@ -980,8 +965,9 @@
             }
         },
 
-        /* Gets the GeoPoint fragment in the current Document object, for further manipulation.
-         * Typical use: document.getGeoPoint('blog-post.location').asHtml(ctx)
+        /** Gets the GeoPoint fragment in the current Document object, for further manipulation.
+         *
+         * @example document.getGeoPoint('blog-post.location').asHtml(ctx)
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.location"
          * @returns {GeoPoint} - The GeoPoint object to manipulate
@@ -996,7 +982,8 @@
 
         /**
          * Gets the Group fragment in the current Document object, for further manipulation.
-         * Typical use: document.getGroup('product.gallery').asHtml(ctx).
+         *
+         * @example document.getGroup('product.gallery').asHtml(ctx).
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
          * @returns {Group} - The Group fragment to manipulate.
@@ -1020,14 +1007,16 @@
         getHtml: function(name, ctx) {
             var fragment = this.get(name);
 
-            if(fragment && fragment.asHtml) {
+            if(fragment &amp;&amp; fragment.asHtml) {
                 return fragment.asHtml(ctx);
             }
         },
 
         /**
-         * Transforms the whole document as an HTML output. Each fragment is separated by a &lt;section> tag,
+         * Transforms the whole document as an HTML output. Each fragment is separated by a &amp;lt;section&amp;gt; tag,
          * with the attribute data-field="nameoffragment"
+         * Note that most of the time you will not use this method, but read fragment independently and generate
+         * HTML output for {@link StructuredText} fragment with that class' asHtml method.
          *
          * @param {object} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
          * @returns {string} - The HTML output
@@ -1036,7 +1025,7 @@
             var htmls = [];
             for(var field in this.fragments) {
                 var fragment = this.get(field);
-                htmls.push(fragment && fragment.asHtml ? '&lt;section data-field="' + field + '">' + fragment.asHtml(ctx) + '&lt;/section>' : '');
+                htmls.push(fragment &amp;&amp; fragment.asHtml ? '&lt;section data-field="' + field + '">' + fragment.asHtml(ctx) + '&lt;/section>' : '');
             }
             return htmls.join('');
         },
@@ -1050,7 +1039,7 @@
             var texts = [];
             for(var field in this.fragments) {
                 var fragment = this.get(field);
-                texts.push(fragment && fragment.asText ? fragment.asText(ctx) : '');
+                texts.push(fragment &amp;&amp; fragment.asText ? fragment.asText(ctx) : '');
             }
             return texts.join('');
          }
@@ -1103,7 +1092,7 @@
 
         get: function(key) {
             var maybeEntry = this.cache[key];
-            if(maybeEntry && (!this.isExpired(key) || (this.isExpired(key) && this.isInProgress(key)))) {
+            if(maybeEntry &amp;&amp; (!this.isExpired(key) || (this.isExpired(key) &amp;&amp; this.isInProgress(key)))) {
                 return maybeEntry.data;
             } else return null;
         },
@@ -1123,17 +1112,17 @@
                 var value =  fvalue(function(error, value, xhr) {
                     self.set(key, value, ttl);
                     delete self.states[key];
-                    done && done(error, value, xhr);
+                    done &amp;&amp; done(error, value, xhr);
                 });
             } else {
-                done && done(null, found);
+                done &amp;&amp; done(null, found);
             }
         },
 
         isExpired: function(key) {
             var entry = this.cache[key];
             if(entry) {
-                return entry.expiredIn != 0 && entry.expiredIn &lt; Date.now();
+                return entry.expiredIn != 0 &amp;&amp; entry.expiredIn &lt; Date.now();
             } else {
                 return false;
             }
@@ -1162,7 +1151,7 @@
         Api: prismic
     };
 
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+}(typeof exports === 'object' &amp;&amp; exports ? exports : (typeof module === "object" &amp;&amp; module &amp;&amp; typeof module.exports === "object" ? module.exports : window)));
 </code></pre>
         </article>
     </section>
@@ -1179,7 +1168,7 @@
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a> on Wed Sep 24 2014 13:01:37 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Mon Sep 29 2014 14:49:46 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
