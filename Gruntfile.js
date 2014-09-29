@@ -32,7 +32,7 @@ module.exports = function(grunt) {
 
     concat: {
       dist: {
-        src: ['src/api.js', 'src/fragments.js'],
+        src: ['src/api.js', 'src/fragments.js', 'src/predicates.js'],
         dest: 'dist/prismic.io.js'
       }
     },

@@ -166,10 +166,9 @@
     // Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
     prismic.fn = prismic.prototype = {
 
-        // Predicates: usable as the first element of a query array.
+        // Predicates
         AT: "at",
         ANY: "any",
-        EVERYTHING: "everything",
         SIMILAR: "similar",
         FULLTEXT: "fulltext",
         NUMBER: {
@@ -451,18 +450,16 @@
         /**
          * Sets a predicate-based query for this SearchForm. This is where you
          * paste what you compose in your prismic.io API browser.
-         * You can pass an empty string, the method will simply not send that query.
          *
-         * @param {string} query - The query to perform
+         * @example form.query(Prismic.Predicates.at("document.id", "foobar"))
+         * @param {string|...array} query - Either a query as a string, or as many predicates as you want. See Prismic.Predicates.
          * @returns {SearchForm} - The SearchForm itself
          */
         query: function(query) {
             if (typeof query === 'string') {
                 return this.set("q", query);
             } else {
-                var predicates = (typeof query[0] === 'string')
-                            ? [query]
-                            : query;
+                var predicates = [].slice.apply(arguments); // Convert to a real JS array
                 var stringQueries = [];
                 predicates.forEach(function (predicate) {
                     var firstArg = (predicate[1].indexOf("my.") == 0 || predicate[1].indexOf("document.") == 0)
@@ -472,10 +469,12 @@
                         return predicate.slice(2).map(function(p) {
                             if (typeof p === 'string') {
                                 return '"' + p + '"';
-                            } else if(Array.isArray(p)) {
-                                return "[" + p.map(function(e) {
+                            } else if (Array.isArray(p)) {
+                                return "[" + p.map(function (e) {
                                     return '"' + e + '"';
                                 }).join(',') + "]";
+                            } else if (p instanceof Date) {
+                                return d.getTime();
                             } else {
                                 return p;
                             }
@@ -1195,11 +1194,11 @@
         /**
          * Returns the URL of the document link.
          *
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @params {object} linkResolver - mandatory linkResolver function (please read prismic.io online documentation about this)
          * @returns {string} - the proper URL to use
          */
-        url: function (ctx) {
-            return ctx.linkResolver(ctx, this.document, this.isBroken);
+        url: function (linkResolver) {
+            return linkResolver(this.document, this.isBroken);
         },
 
         /**
@@ -1207,8 +1206,8 @@
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function(ctx) {
-            return this.url(ctx);
+         asText: function(linkResolver) {
+            return this.url(linkResolver);
          }
     };
 
@@ -1704,15 +1703,15 @@
       /**
        * Turns the fragment into a useable HTML version of it.
        * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-       * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+       * @params {function} linkResolver - linkResolver function (please read prismic.io online documentation about this)
        * @returns {string} - basic HTML code for the fragment
        */
-      asHtml: function(ctx) {
+      asHtml: function(linkResolver) {
         var output = "";
         for (var i=0; i<this.value.length; i++) {
           for (var fragmentName in this.value[i]) {
             output += '<section data-field="'+fragmentName+'">';
-            output += this.value[i][fragmentName].asHtml(ctx);
+            output += this.value[i][fragmentName].asHtml(linkResolver);
             output += '</section>';
           }
         }
@@ -1733,11 +1732,11 @@
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function(ctx) {
+         asText: function(linkResolver) {
             var output = "";
             for (var i=0; i<this.value.length; i++) {
               for (var fragmentName in this.value[i]) {
-                output += this.value[i][fragmentName].asText(ctx);
+                output += this.value[i][fragmentName].asText(linkResolver);
               }
             }
             return output;
@@ -1824,16 +1823,22 @@
         /**
          * Turns the fragment into a useable HTML version of it.
          * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function
-         *      (please read prismic.io online documentation about this)
+         * @params {function} linkResolver - please read prismic.io online documentation about link resolvers
          * @params {function} htmlSerializer optional HTML serializer to customize the output
          * @returns {string} - basic HTML code for the fragment
          */
-        asHtml: function(ctx, htmlSerializer) {
+        asHtml: function(linkResolver, htmlSerializer) {
             var blockGroups = [],
                 blockGroup,
                 block,
                 html = [];
+            if (!isFunction(linkResolver)) {
+                // Backward compatibility with the old ctx argument
+                var ctx = linkResolver;
+                linkResolver = function(doc, isBroken) {
+                    return ctx.linkResolver(ctx, doc, isBroken);
+                }
+            }
             if (Array.isArray(this.blocks)) {
 
                 for(var i=0; i < this.blocks.length; i++) {
@@ -1842,7 +1847,7 @@
                     // Resolve image links
                     if (block.type == "image" && block.linkTo) {
                         var link = initField(block.linkTo);
-                        block.linkUrl = link.url(ctx);
+                        block.linkUrl = link.url(linkResolver);
                     }
 
                     if (block.type !== "list-item" && block.type !== "o-list-item") {
@@ -1869,7 +1874,7 @@
                             content = content + serialize(block2, blockContent(block2), htmlSerializer);
                         });
                     } else {
-                        content = insertSpans(block.text, block.spans, ctx, htmlSerializer);
+                        content = insertSpans(block.text, block.spans, linkResolver, htmlSerializer);
                     }
                     return content;
                 };
@@ -1911,11 +1916,11 @@
      *
      * @param {string} text - the original text of the block
      * @param {object} spans - the spans as returned by the API
-     * @param {object} ctx - the context object, containing the linkResolver function to build links that may be in the fragment (please read prismic.io's online documentation about this)
+     * @param {object} linkResolver - the function to build links that may be in the fragment (please read prismic.io's online documentation about this)
      * @param {function} htmlSerializer - optional serializer
      * @returns {string} - the HTML output
      */
-    function insertSpans(text, spans, ctx, htmlSerializer) {
+    function insertSpans(text, spans, linkResolver, htmlSerializer) {
         if (!spans || !spans.length) {
             return htmlEscape(text);
         }
@@ -1960,7 +1965,7 @@
                     if (span.type == "hyperlink") {
                         var fragment = initField(span.data);
                         if (fragment) {
-                            url = fragment.url(ctx);
+                            url = fragment.url(linkResolver);
                         } else {
                             console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
                             return '';
@@ -2099,6 +2104,11 @@
 
     }
 
+    function isFunction(f) {
+        var getType = {};
+        return f && getType.toString.call(f) === '[object Function]';
+    }
+
     function serialize(element, content, htmlSerializer) {
         // Return the user customized output (if available)
         if (htmlSerializer) {
@@ -2178,5 +2188,67 @@
         initField: initField,
         insertSpans: insertSpans
     }
+
+}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+
+(function (Global, undefined) {
+
+    "use strict";
+
+    var predicates = {
+
+        at: function(fragment, value) { return ["at", fragment, value]; },
+
+        any: function(fragment, values) { return ["any", fragment, values]; },
+
+        fulltext: function(fragment, values) { return ["fulltext", fragment, values]; },
+
+        similar: function(fragment, value) { return ["similar", fragment, value]; },
+
+        gt: function(fragment, value) { return ["number.gt", fragment, value]; },
+
+        lt: function(fragment, value) { return ["number.lt", fragment, value]; },
+
+        inRange: function(fragment, before, after) { return ["number.inRange", fragment, before, after]; },
+
+        dateBefore: function(fragment, before) { return ["date.before", fragment, before]; },
+
+        dateAfter: function(fragment, after) { return ["date.after", fragment, after]; },
+
+        dateBetween: function(fragment, before, after) { return ["date.between", fragment, before, after]; },
+
+        dayOfMonth: function(fragment, day) { return ["date.day-of-month", fragment, day]; },
+
+        dayOfMonthAfter: function(fragment, day) { return ["date.day-of-month-after", fragment, day]; },
+
+        dayOfMonthBefore: function(fragment, day) { return ["date.day-of-month-before", fragment, day]; },
+
+        dayOfWeek: function(fragment, day) { return ["date.day-of-week", fragment, day]; },
+
+        dayOfWeekAfter: function(fragment, day) { return ["date.day-of-week-after", fragment, day]; },
+
+        dayOfWeekBefore: function(fragment, day) { return ["date.day-of-week-before", fragment, day]; },
+
+        month: function(fragment, month) { return ["date.month", fragment, month]; },
+
+        monthBefore: function(fragment, month) { return ["date.month-before", fragment, month]; },
+
+        monthAfter: function(fragment, month) { return ["date.month-after", fragment, month]; },
+
+        year: function(fragment, year) { return ["date.year", fragment, year]; },
+
+        hour: function(fragment, hour) { return ["date.hour", fragment, hour]; },
+
+        hourBefore: function(fragment, hour) { return ["date.hour-before", fragment, hour]; },
+
+        hourAfter: function(fragment, hour) { return ["date.hour-after", fragment, hour]; },
+
+        near: function(fragment, latitude, longitude, radius) { return ["near", fragment, latitude, longitude]; }
+
+    };
+
+    // -- Export Globally
+
+    Global.Prismic.Predicates = predicates;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
