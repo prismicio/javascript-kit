@@ -9,7 +9,7 @@
     "content",
     "api"
   ],
-  "version": "1.0.19",
+  "version": "1.0.20",
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-bump": "~0.0.13",
