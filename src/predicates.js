@@ -50,7 +50,7 @@
 
         hourAfter: function(fragment, hour) { return ["date.hour-after", fragment, hour]; },
 
-        near: function(fragment, latitude, longitude, radius) { return ["near", fragment, latitude, longitude]; }
+        near: function(fragment, latitude, longitude, radius) { return ["geopoint.near", fragment, latitude, longitude]; }
 
     };
 
