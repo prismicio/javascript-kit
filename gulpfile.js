@@ -23,7 +23,7 @@ gulp.task('minify', function() {
         .pipe(gulp.dest('dist'))
 });
 
-gulp.task('copy', function() {
+gulp.task('copy', ['test'], function() {
     gulp.src(SOURCES)
         .pipe(concat('prismic.io-%VERSION%.min.js'.replace('%VERSION%', pkg.version)))
         .pipe(uglify())
@@ -57,8 +57,8 @@ gulp.task('test:unit', function() {
                .pipe(qunit())
 });
 
+gulp.task('default', ['test']);
+
 gulp.task('test', ['jshint', 'test:int', 'test:unit']);
 
-gulp.task('default', ['doc', 'concat', 'minify']);
-
-gulp.task('dist', ['default']);
+gulp.task('dist', ['doc', 'concat', 'minify', 'copy']);
