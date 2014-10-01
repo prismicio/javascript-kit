@@ -82,19 +82,18 @@
 <h3 id="contribute-to-the-kit">Contribute to the kit</h3>
 <p>Contribution is open to all developer levels, read our &quot;<a href="https://developers.prismic.io/documentation/UszOeAEAANUlwFpp/contribute-to-the-official-kits">Contribute to the official kits</a>&quot; documentation to learn more.</p>
 <h4 id="install-the-kit-locally">Install the kit locally</h4>
-<p>You can simply execute this JavaScript kit with a web browser, but before committing, we kindly ask you to run the <code>grunt</code> command (it will make sure all tests still pass, and concatenate/minify your changes).</p>
-<p>To install grunt and other required packages: <a href="http://www.joyent.com/blog/installing-node-and-npm/">install Node.js and npm</a>, and then run this from your kit&#39;s repository, as an administrator:</p>
-<pre><code>npm install -g grunt
+<p>You can simply execute this JavaScript kit with a web browser, but before committing, we kindly ask you to run the <code>gulp</code> command (it will make sure all tests still pass, and concatenate/minify your changes).</p>
+<p>To install gulp and other required packages: <a href="http://www.joyent.com/blog/installing-node-and-npm/">install Node.js and npm</a>, and then run this from your kit&#39;s repository, as an administrator:</p>
+<pre><code>npm install -g gulp
 npm install
 </code></pre><h4 id="test">Test</h4>
 <p>Please write tests in <a href="test/test.js">test/test.js</a> for any bugfix or new feature, following the <a href="http://qunitjs.com/">very simple QUnit syntax</a>, if you need to test with a real Prismic.io repository. Otherwise use <a href="test/unit.js">test/unit.js</a> for unit testing features.</p>
-<p>Execute the tests either by opening <a href="test/test.html">test/test.html</a> or <a href="test/unit.html">test/unit.html</a> in a browser, or by using Grunt:</p>
+<p>Execute the tests either by opening <a href="test/test.html">test/test.html</a> or <a href="test/unit.html">test/unit.html</a> in a browser, or by using Gulp:</p>
 <ul>
-<li><code>grunt test</code> will run all the tests and display the result on your shell</li>
-<li><code>grunt test:int</code> will run all integration tests (the ones from <a href="test/test.html">test/test.html</a>)</li>
-<li><code>grunt test:unit</code> will run all unit tests (the ones from <a href="test/unit.html">test/unit.html</a>)</li>
-<li><code>grunt test:browser</code> will start a local server at <a href="http://localhost:8888">http://localhost:8888</a> so that you can run the tests on your browser</li>
-<li><code>grunt test:local</code> will test the local files without starting any server</li>
+<li><code>gulp jshint</code> will run jshint to check for syntax errors or bad practice in the code</li>
+<li><code>gulp test</code> will run jshint, all the tests and display the result on your shell</li>
+<li><code>gulp test:int</code> will run all integration tests (the ones from <a href="test/test.html">test/test.html</a>)</li>
+<li><code>gulp test:unit</code> will run all unit tests (the ones from <a href="test/unit.html">test/unit.html</a>)</li>
 </ul>
 <p>If you find existing code that is not optimally tested and wish to make it better, we really appreciate it; but you should document it on its own branch and its own pull request.</p>
 <h4 id="documentation">Documentation</h4>
@@ -117,13 +116,13 @@ npm install
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="LinkedDocument.html">LinkedDocument</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="LinkedDocument.html">LinkedDocument</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Mon Sep 29 2014 14:49:46 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Wed Oct 01 2014 14:51:11 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

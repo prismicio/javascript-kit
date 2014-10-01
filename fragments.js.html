@@ -524,7 +524,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return this.main.asHtml()
+            return this.main.asHtml();
         },
 
         /**
@@ -663,7 +663,7 @@
         getTitle: function () {
             for(var i=0; i&lt;this.blocks.length; i++) {
                 var block = this.blocks[i];
-                if(block.type.indexOf('heading') == 0) {
+                if(block.type.indexOf('heading') === 0) {
                     return block;
                 }
             }
@@ -736,7 +736,7 @@
                 var ctx = linkResolver;
                 linkResolver = function(doc, isBroken) {
                     return ctx.linkResolver(ctx, doc, isBroken);
-                }
+                };
             }
             if (Array.isArray(this.blocks)) {
 
@@ -844,7 +844,7 @@
                     // Close a tag
                     var tag = stack.pop();
                     var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
-                    if (stack.length == 0) {
+                    if (stack.length === 0) {
                         // The tag was top level
                         html += innerHtml;
                     } else {
@@ -866,7 +866,7 @@
                         if (fragment) {
                             url = fragment.url(linkResolver);
                         } else {
-                            console &amp;&amp; console.error &amp;&amp; console.error('Impossible to convert span.data as a Fragment', span);
+                            if (console &amp;&amp; console.error) console.error('Impossible to convert span.data as a Fragment', span);
                             return '';
                         }
                         span.url = url;
@@ -880,7 +880,7 @@
             }
             if (pos &lt; text.length) {
                 c = text[pos];
-                if (stack.length == 0) {
+                if (stack.length === 0) {
                     // Top-level text
                     html += htmlEscape(c);
                 } else {
@@ -995,7 +995,7 @@
                 break;
 
             default:
-                console &amp;&amp; console.log &amp;&amp; console.log("Fragment type not supported: ", field.type);
+                if (console &amp;&amp; console.log) console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
@@ -1044,17 +1044,17 @@
         if (element.type == "image") {
             var label = element.label ? (" " + element.label) : "";
             var imgTag = '&lt;img src="' + element.url + '" alt="' + element.alt + '">';
-            return '&lt;p class="block-img' + label + '">'
-                + (element.linkUrl ? ('&lt;a href="' + element.linkUrl + '">' + imgTag + '&lt;/a>') : imgTag)
-                + '&lt;/p>';
+            return '&lt;p class="block-img' + label + '">' +
+                (element.linkUrl ? ('&lt;a href="' + element.linkUrl + '">' + imgTag + '&lt;/a>') : imgTag) +
+                '&lt;/p>';
         }
 
         if (element.type == "embed") {
-            return '&lt;div data-oembed="'+ element.embed_url
-                + '" data-oembed-type="'+ element.type
-                + '" data-oembed-provider="'+ element.provider_name
-                + (element.label ? ('" class="' + label) : '')
-                + '">' + element.oembed.html+"&lt;/div>";
+            return '&lt;div data-oembed="'+ element.embed_url +
+                '" data-oembed-type="'+ element.type +
+                '" data-oembed-provider="'+ element.provider_name +
+                (element.label ? ('" class="' + element.label) : '') +
+                '">' + element.oembed.html+"&lt;/div>";
         }
 
         if (element.type === 'hyperlink') {
@@ -1086,7 +1086,7 @@
         GeoPoint: GeoPoint,
         initField: initField,
         insertSpans: insertSpans
-    }
+    };
 
 }(typeof exports === 'object' &amp;&amp; exports ? exports : (typeof module === "object" &amp;&amp; module &amp;&amp; typeof module.exports === "object" ? module.exports : window)));
 </code></pre>
@@ -1099,13 +1099,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="LinkedDocument.html">LinkedDocument</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="LinkedDocument.html">LinkedDocument</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Mon Sep 29 2014 14:49:46 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Wed Oct 01 2014 14:51:11 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>

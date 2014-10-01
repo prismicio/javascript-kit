@@ -43,7 +43,9 @@
      */
     var prismic = function(url, callback, accessToken, maybeRequestHandler, maybeApiCache) {
         var api = new prismic.fn.init(url, accessToken, maybeRequestHandler, maybeApiCache);
-        callback &amp;&amp; api.get(callback);
+        if (callback) {
+            api.get(callback);
+        }
         return api;
     };
     // note that the prismic variable is later affected as "Api" while exporting
@@ -236,19 +238,19 @@
                 function fetchApi (cb) {
                     self.requestHandler(self.url, function(error, data, xhr) {
                         if (error) {
-                            cb &amp;&amp; cb(error, null, xhr);
+                            if (cb) cb(error, null, xhr);
                         } else {
-                            cb &amp;&amp; cb(null, self.parse(data), xhr);
+                            if (cb) cb(null, self.parse(data), xhr);
                         }
                     });
                 },
                 function done (error, api, xhr) {
-                    if(error) {
-                        callback &amp;&amp; callback(error, null, xhr);
+                    if (error) {
+                        if (callback) callback(error, null, xhr);
                     } else {
                         self.data = api;
                         self.bookmarks = api.bookmarks;
-                        callback &amp;&amp; callback(null, self, xhr);
+                        if (callback) callback(null, self, xhr);
                     }
                 }
             );
@@ -454,9 +456,9 @@
                 value = null;
             }
             if(fieldDesc.multiple) {
-                value != null &amp;&amp; values.push(value);
+                if (value) values.push(value);
             } else {
-                values = value != null &amp;&amp; [value];
+                values = value &amp;&amp; [value];
             }
             this.data[field] = values;
             return this;
@@ -489,8 +491,7 @@
                 var predicates = [].slice.apply(arguments); // Convert to a real JS array
                 var stringQueries = [];
                 predicates.forEach(function (predicate) {
-                    var firstArg = (predicate[1].indexOf("my.") == 0 || predicate[1].indexOf("document.") == 0)
-                        ? predicate[1]
+                    var firstArg = (predicate[1].indexOf("my.") === 0 || predicate[1].indexOf("document.") === 0) ? predicate[1]
                         : '"' + predicate[1] + '"';
                     stringQueries.push("[:d = " + predicate[0] + "(" + firstArg + ", " + (function() {
                         return predicate.slice(2).map(function(p) {
@@ -608,27 +609,10 @@
                 );
             });
 
-        }
+        },
 
     };
 
-    /**
-     * An array of the fragments with the given fragment name.
-     * The array is often a single-element array, expect when the fragment is a multiple fragment.
-     * @private
-     */
-    function getFragments(name) {
-        if (!this.fragments || !this.fragments[name]) {
-            return [];
-        }
-
-        if (Array.isArray(this.fragments[name])) {
-            return this.fragments[name];
-        } else {
-            return [this.fragments[name]];
-        }
-
-    }
 
     /**
      * Embodies the response of a SearchForm query as returned by the API.
@@ -762,7 +746,7 @@
          * @returns {object} - The JavaScript Fragment object to manipulate
          */
         get: function(name) {
-            var frags = getFragments.call(this, name);
+            var frags = this._getFragments(name);
             return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
         },
 
@@ -773,7 +757,7 @@
          * @returns {array} - An array of each JavaScript fragment object to manipulate.
          */
         getAll: function(name) {
-            return getFragments.call(this, name).map(function (fragment) {
+            return this._getFragments(name).map(function (fragment) {
                 return Global.Prismic.Fragments.initField(fragment);
             }, this);
         },
@@ -1042,7 +1026,25 @@
                 texts.push(fragment &amp;&amp; fragment.asText ? fragment.asText(ctx) : '');
             }
             return texts.join('');
-         }
+         },
+
+        /**
+         * An array of the fragments with the given fragment name.
+         * The array is often a single-element array, expect when the fragment is a multiple fragment.
+         * @private
+         */
+        _getFragments: function(name) {
+            if (!this.fragments || !this.fragments[name]) {
+                return [];
+            }
+
+            if (Array.isArray(this.fragments[name])) {
+                return this.fragments[name];
+            } else {
+                return [this.fragments[name]];
+            }
+
+        }
 
     };
 
@@ -1112,24 +1114,24 @@
                 var value =  fvalue(function(error, value, xhr) {
                     self.set(key, value, ttl);
                     delete self.states[key];
-                    done &amp;&amp; done(error, value, xhr);
+                    if (done) done(error, value, xhr);
                 });
             } else {
-                done &amp;&amp; done(null, found);
+                if (done) done(null, found);
             }
         },
 
         isExpired: function(key) {
             var entry = this.cache[key];
             if(entry) {
-                return entry.expiredIn != 0 &amp;&amp; entry.expiredIn &lt; Date.now();
+                return entry.expiredIn !== 0 &amp;&amp; entry.expiredIn &lt; Date.now();
             } else {
                 return false;
             }
         },
 
         isInProgress: function(key) {
-            return this.states[key] == 'progress';
+            return this.states[key] === 'progress';
         },
 
         exists: function(key) {
@@ -1162,13 +1164,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="LinkedDocument.html">LinkedDocument</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="LinkedDocument.html">LinkedDocument</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Mon Sep 29 2014 14:49:46 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Wed Oct 01 2014 14:51:11 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
