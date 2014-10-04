@@ -18,7 +18,7 @@
         setup: function() {}
     });
 
-    asyncTest('Retrieve the API', 1, function() {
+    asyncTest('prismic-htmlSerializer.js', 1, function() {
         Prismic.Api(testRepository, function (err, Api) {
             Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
                 if (err) {
@@ -67,6 +67,31 @@
                 start();
             });
         });
+    });
+
+    asyncTest('prismic-api.js', 1, function(){
+// startgist:b253d8fddfdd4cceef7a:prismic-api.js
+        Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+            // You can use the Api object inside this block
+            console.log("References: ", Api.data.refs);
+            equal(Api.data.refs.length, 1); // gisthide
+            start(); // gisthide
+        });
+// endgist
+    });
+
+    asyncTest('prismic-api.js', 1, function(){
+// startgist:f3f7d4b970e964131271:prismic-simplequery.js
+        Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+            Api.form('everything')
+                .ref(Api.master())
+                .query(Prismic.Predicates.at("document.type", "product")).submit(function(err, response) {
+                    // The documents object contains a Response object with all documents of type "product"
+                    equal(response.results.length, 16); // gisthide
+                    start(); // gisthide
+                });
+        });
+// endgist
     });
 
 }(window.Prismic));
