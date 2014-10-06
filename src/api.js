@@ -57,7 +57,7 @@
                 xhr.open('GET', url, true);
 
                 // Kit version (can't override the user-agent client side)
-                xhr.setRequestHeader("X-Prismic-User-Agent", "Prismic-javascript-kit/%VERSION%".replace("%VERSION%", Global.Prismic.version));
+                // xhr.setRequestHeader("X-Prismic-User-Agent", "Prismic-javascript-kit/%VERSION%".replace("%VERSION%", Global.Prismic.version));
 
                 // Json request
                 xhr.setRequestHeader('Accept', 'application/json');

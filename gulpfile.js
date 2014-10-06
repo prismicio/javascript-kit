@@ -21,6 +21,10 @@ function string_src(filename, string) {
     return src
 }
 
+/**
+ * Build
+ */
+
 gulp.task('version', function () {
     return string_src("version.js", "Global.Prismic.version = '" + pkg.version + "';\n")
         .pipe(gulp.dest('src/'));
@@ -62,6 +66,12 @@ gulp.task('deploy:gist', ['test:doc'], function () {
         .pipe(gist());
 });
 
+gulp.task('dist', ['doc', 'concat', 'minify', 'copy']);
+
+/**
+ * Tests
+ */
+
 gulp.task('jshint', function() {
     gulp.src(SOURCES)
         .pipe(jshint())
@@ -79,13 +89,22 @@ gulp.task('test:unit', function() {
         .pipe(qunit())
 });
 
+gulp.task('test:fragments', function() {
+    return gulp.src('./test/fragments.html')
+        .pipe(qunit())
+});
+
 gulp.task('test:doc', function() {
     return gulp.src('./test/doc.html')
         .pipe(qunit())
 });
 
+
+gulp.task('test', ['jshint', 'test:int', 'test:unit', 'test:doc', 'test:fragments']);
+
+/**
+ * Default task
+ */
+
 gulp.task('default', ['test']);
 
-gulp.task('test', ['jshint', 'test:int', 'test:unit', 'test:doc']);
-
-gulp.task('dist', ['doc', 'concat', 'minify', 'copy']);
