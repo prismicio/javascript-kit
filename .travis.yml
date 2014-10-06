@@ -11,4 +11,6 @@ deploy:
     secure: C3fXXtk20vLty7/0+ORC0HaKHRGNdSYy8eLt2UZkXKDiBsPBfMyO3MrNASJhWgpZcjNJJBgkWmgOU/g12VrEH6CJ8BicIkOVlhLERPfCc2OfTZGyzZCBx7p1/mu0/FJ0veP5VKYvOIDyJMkwypY0KEN4MJ3RJSfjbTfRsC02SEI=
   on:
     tags: true
+    all_branches: true
     repo: prismicio/javascript-kit
+
