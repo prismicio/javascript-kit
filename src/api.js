@@ -478,7 +478,7 @@
                                     return '"' + e + '"';
                                 }).join(',') + "]";
                             } else if (p instanceof Date) {
-                                return d.getTime();
+                                return p.getTime();
                             } else {
                                 return p;
                             }

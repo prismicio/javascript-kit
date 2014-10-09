@@ -94,4 +94,19 @@
 // endgist
     });
 
+    asyncTest('prismic-predicates.js', 1, function() {
+// startgist:2bdf83055d57f35d5d85:prismic-predicates.js
+      Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+        Api.form('everything').ref(Api.master()).query(
+          Predicates.at("document.type", "blog-post"),
+          Predicates.dateAfter("my.blog-post.date", new Date(2014, 6, 1))
+        ).submit(function(err, response) {
+            // All documents of type "product", updated after June 1st, 2014
+            equal(response.results.length, 0); // gisthide
+            start(); // gisthide
+          });
+      });
+// endgist
+    });
+
 }(window.Prismic));
