@@ -2,11 +2,10 @@
 
 [![Build Status](https://api.travis-ci.org/prismicio/javascript-kit.png)](https://travis-ci.org/prismicio/javascript-kit)
 
-### Getting started
+* The [source code](https://github.com/prismicio/javascript-kit) is on Github.
+* The [Changelog](https://github.com/prismicio/javascript-kit/releases) is on Github's releases tab.
 
-#### Install the kit
-
-You can find downloadable versions of the kit on our release page: [https://github.com/prismicio/javascript-kit/releases](https://github.com/prismicio/javascript-kit/releases).
+### Installation
 
 You can install a stable version using __npm__:
 
@@ -20,40 +19,24 @@ Or using __bower__:
 bower install prismic.io
 ```
 
+Finally, you can find downloadable versions of the kit on our release page: [https://github.com/prismicio/javascript-kit/releases](https://github.com/prismicio/javascript-kit/releases).
 
-#### Get started with prismic.io
+### Usage
 
-You can find out [how to get started with prismic.io](https://developers.prismic.io/documentation/UjBaQsuvzdIHvE4D/getting-started) on our [prismic.io developer's portal](https://developers.prismic.io/).
+If you don't have a Prismic.io repository yet, find out [how to get one](https://developers.prismic.io/documentation/UjBaQsuvzdIHvE4D/getting-started).
 
-#### Get started using the kit
+Once your repository is ready, you can use the Javascript kit server-side with Node.js, or client-side without needing and specific technology server-side. We provide various starter kits depending on your choice:
 
-Also on our [prismic.io developer's portal](https://developers.prismic.io/), on top of our full documentation, you will:
- * get a thorough introduction of [how to use prismic.io kits](https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#kits-and-helpers), including this one.
- * see [what else is available for Javascript](https://developers.prismic.io/technologies/UjBh28uvzeMJvE4i/javascript): starter projects, examples, ...
+* [jQuery starter kit](https://github.com/prismicio/javascript-jquery-starter)
+* [Node.js starter kit](https://github.com/prismicio/javascript-nodejs-starter)
+* [Single page starter kit](https://github.com/prismicio/javascript-singlepage)
+* [Static pages generation with baked.js](https://github.com/prismicio/baked.js)
 
-### Using the kit
+We're working hard to keep all the starter kit up-to-date, but it's always a good idea to check on this page if you're on the
+latest version of the kit. We're constantly adding new features to Prismic.io, and it is necessary to have the latest version
+to use all of them.
 
-#### Kit's detailed documentation
-
-To get a detailed documentation of the JavaScript kit's variables and methods, please check out the [prismic.io JS kit's documentation](http://prismicio.github.io/javascript-kit/).
-
-#### Specific JS kit syntax
-
-The ["Kits and helpers" section of our API documentation](https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#kits-and-helpers) is largely based on the JS kit, so there are not many differences:
- * The `submit()` function takes a callback, which expects two parameters: a potential error, and the object of class `Documents` you can use.
- * For security reasons, non-type-dependent fragments actually get written `document.getId()`, `document.getSlug()`, ... rather than `document.id`, `document.slug`, ...
- * This is not a difference but a confirmation: `asHtml()` expects a `ctx` object that has a `linkResolver` closure and `maybeRef` string as its attributes.
-
-Knowing all that, here is typical code written with the JavaScript kit:
-
- * A typical API object instantiation looks like this: `Prismic.Api(url, callback)`
- * A typical querying looks like this: `api.form('everything').query('[[:d = at(document.type, "product")]]').ref(ref).submit(callback)`
- * A typical fragment manipulation looks like this: `doc.getImageView('article.image', 'icon').getUrl()`
- * A typical fragment serialization to HTML looks like this: `doc.getStructuredText('article.body').asHtml(ctx)`
-
-### Changelog
-
-Need to see what changed, or to upgrade your kit? We keep our changelog on [this repository's "Releases" tab](https://github.com/prismicio/javascript-kit/releases).
+You can then read the documentation from the [Developer's Portal](https://developers.prismic.io/) for more details on how to use
 
 ### Contribute to the kit
 
@@ -79,6 +62,7 @@ Execute the tests either by opening [test/test.html](test/test.html) or [test/un
 * ```gulp test``` will run jshint, all the tests and display the result on your shell
 * ```gulp test:int``` will run all integration tests (the ones from [test/test.html](test/test.html))
 * ```gulp test:unit``` will run all unit tests (the ones from [test/unit.html](test/unit.html))
+* ```gulp test:doc``` will run all tests related to the code snippets from the documentation (the ones from [test/doc.html](test/doc.html))
 
 If you find existing code that is not optimally tested and wish to make it better, we really appreciate it; but you should document it on its own branch and its own pull request.
 
@@ -94,7 +78,7 @@ If you find existing code that is not optimally documented and wish to make it b
 
 This software is licensed under the Apache 2 license, quoted below.
 
-Copyright 2013 Zengularity (http://www.zengularity.com).
+Copyright 2013-2014 Zengularity (http://www.zengularity.com).
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this project except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
 
