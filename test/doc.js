@@ -106,14 +106,42 @@
     // endgist
   });
 
-  asyncTest('prismic-simplequery.js', 1, function(){
+  asyncTest('prismic-simplequery.js', 2, function(){
     // startgist:f3f7d4b970e964131271:prismic-simplequery.js
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
       Api.form('everything')
         .ref(Api.master())
         .query(Prismic.Predicates.at("document.type", "product")).submit(function(err, response) {
-          // The documents object contains a Response object with all documents of type "product"
-          equal(response.results.length, 16); // gisthide
+          // The documents object contains a Response object with all documents of type "product".
+          var page = response.page; // The current page number, the first one being 1
+          equal(page, 1); // gisthide
+          var results = response.results; // An array containing the results of the current page;
+                                          // you may need to retrieve more pages to get all results
+          equal(results.length, 16); // gisthide
+          var prev_page = response.prev_page; // the URL of the previous page (may be null)
+          var next_page = response.next_page; // the URL of the next page (may be null)
+          var results_per_page = response.results_per_page; // max number of results per page
+          var results_size = response.results_size; // the size of the current page
+          var total_pages = response.total_pages; // the number of pages
+          var total_results_size = response.total_results_size; // the total size of results across all pages
+          start(); // gisthide
+        });
+    });
+    // endgist
+  });
+
+  asyncTest('prismic-orderings.js', 1, function(){
+    // startgist:55eb59485855e40680c9:prismic-orderings.js
+    Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+      Api.form('everything')
+        .ref(Api.master())
+        .query(Prismic.Predicates.at("document.type", "product"))
+        .pageSize(100)
+        .orderings('[my.product.price desc]')
+        .submit(function(err, response) {
+          // The products are now ordered by price, highest first
+          var results = response.results;
+          equal(response.results_per_page, 100); // gisthide
           start(); // gisthide
         });
     });
@@ -132,6 +160,49 @@
           start(); // gisthide
         });
     });
+    // endgist
+  });
+
+  test('prismic-allPredicates.js', 2, function() {
+    // startgist:ebec155a66db3c1a29b6:prismic-allPredicates.js
+    // "at" predicate: equality of a fragment to a value.
+    var at = Predicates.at("document.type", "article");
+    deepEqual(at, ["at", "document.type", "article"]); // gisthide
+    // "any" predicate: equality of a fragment to a value.
+    var any = Predicates.any("document.type", ["article", "blog-post"]);
+    deepEqual(any, ["any", "document.type", ["article", "blog-post"]]); // gisthide
+
+    // "fulltext" predicate: fulltext search in a fragment.
+    var fulltext = Predicates.fulltext("my.article.body", "sausage");
+
+    // "similar" predicate, with a document id as reference
+    var similar = Predicates.similar("UXasdFwe42D", 10);
+
+    // Number predicates
+    var gt = Predicates.gt("my.product.price", 10);
+    var lt = Predicates.lt("my.product.price", 20);
+    var inRange = Predicates.inRange("my.product.price", 10, 20);
+
+    // Date and Timestamp predicates
+    var dateBefore = Predicates.dateBefore("my.product.releaseDate", new Date(2014, 6, 1));
+    var dateAfter = Predicates.dateAfter("my.product.releaseDate", new Date(2014, 1, 1));
+    var dateBetween = Predicates.dateBetween("my.product.releaseDate", new Date(2014, 1, 1), new Date(2014, 6, 1));
+    var dayOfMonth = Predicates.dayOfMonth("my.product.releaseDate", 14);
+    var dayOfMonthAfter = Predicates.dayOfMonthAfter("my.product.releaseDate", 14);
+    var dayOfMonthBefore = Predicates.dayOfMonthBefore("my.product.releaseDate", 14);
+    var dayOfWeek = Predicates.dayOfWeek("my.product.releaseDate", 14);
+    var dayOfWeekAfter = Predicates.dayOfWeekAfter("my.product.releaseDate", "Wednesday");
+    var dayOfWeekBefore = Predicates.dayOfWeekBefore("my.product.releaseDate", "Wednesday");
+    var month = Predicates.month("my.product.releaseDate", "June");
+    var monthBefore = Predicates.monthBefore("my.product.releaseDate", "June");
+    var monthAfter = Predicates.monthAfter("my.product.releaseDate", "June");
+    var year = Predicates.year("my.product.releaseDate", 2014);
+    var hour = Predicates.hour("my.product.releaseDate", 12);
+    var hourBefore = Predicates.hourBefore("my.product.releaseDate", 12);
+    var hourAfter = Predicates.hourAfter("my.product.releaseDate", 12);
+
+    // "near" predicate for GeoPoint fragments
+    var near = Predicates.near("my.store.location", 48.8768767, 2.3338802, 10);
     // endgist
   });
 

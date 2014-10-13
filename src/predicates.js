@@ -140,7 +140,7 @@
 
         /**
          *
-         * @example Predicates.dayOfMonthBefore("my.product.releaseDate", 14)
+         * @example Predicates.dayOfWeek("my.product.releaseDate", 14)
          * @param fragment
          * @param day {Number|String} Number between 1 and 7 or string between "Monday" and "Sunday"
          * @returns {Array}
