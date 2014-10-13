@@ -18,7 +18,7 @@
     "gulp-qunit": "~0.3.3",
     "gulp-jsdoc": "~0.1.4",
     "gulp-jshint": "~1.8.5",
-    "gulp-gist": "~1.0.0",
+    "gulp-gist": "~1.0.2",
     "gulp-gh-pages": "~0.3.4"
   },
   "repository": {
