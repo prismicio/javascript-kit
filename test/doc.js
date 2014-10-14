@@ -301,4 +301,57 @@
     });
   });
 
+  asyncTest('prismic-cache.js', 1, function(){
+    // startgist:647bde5c458c44af0981:prismic-cache.js
+    var cache = {
+      get: function(key) {
+        // Retrieve a value from the key
+        return null;
+      },
+
+      set: function(key, value, ttl) {
+        // Save a value to the cache
+        // ttl is the time to live, or expiration in seconds
+      },
+
+      getOrSet: function(key, ttl, fvalue, done) {
+        // Retrieve the value if present, otherwise use the fvalue callback to calculate the value,
+        // save it then return it by calling the "done" callback.
+        // The done callback takes 2 parameters: error and result.
+        fvalue(function(error, result, hdr){
+          done(null, result);
+        });
+      },
+
+      isExpired: function(key) {
+        // Return true if the key exists and is expired, false if the value is either absent or not expired
+        return false;
+      },
+
+      isInProgress: function(key) {
+        // Return true if the value is being saved currently
+        return false;
+      },
+
+      exists: function(key) {
+        // Return true if the value for the key exists
+        return false;
+      },
+
+      remove: function(key) {
+        // Remove a value
+      },
+
+      clear: function(key) {
+        // Clear the whole cache
+      }
+    };
+    Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+      // The Api in this block will use the custom cache object
+      notEqual(Api, null); // gisthide
+      start(); // gisthide
+    }, null /* accessToken */, null /* requestHandler */, cache);
+    // endgist
+  });
+
 }(window.Prismic));
