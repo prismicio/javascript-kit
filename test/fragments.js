@@ -262,6 +262,20 @@
     });
   });
 
+  test('Date and Timestamp are parsed correctly', 2, function() {
+    var json = JSON.parse('{ "id": "UlfoxUnM0wkXYXbm", "type": "blog-post", "href": "https://lesbonneschoses-vcerzcwaaohojzo.prismic.io/api/documents/...",' +
+      '"tags": [], "slugs": [], "linked_documents": [],' +
+      '"data": { "blog-post": {' +
+      '"date": { "type": "Date", "value": "2013-08-17" },' +
+      '"timestamp": { "type": "Timestamp", "value": "2014-10-06T12:24:36+0000" } ' +
+      '}}}');
+    var doc = Prismic.Api("").parseDoc(json);
+    var date = doc.getDate("blog-post.date");
+    equal(date.getFullYear(), 2013);
+    var ts = doc.getTimestamp("blog-post.timestamp");
+    equal(ts.getFullYear(), 2014);
+  });
+
   asyncTest('Block fragments are accessible, loopable, and serializable', 4, function() {
     Prismic.Api(microRepository, function(err, Api) {
       if (err) { console.log(err); return; }

@@ -18,7 +18,8 @@
 
   asyncTest('prismic-htmlSerializer.js', 1, function() {
     Prismic.Api(testRepository, function (err, Api) {
-      Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
+      Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl"))
+         .ref(Api.master()).submit(function (err, documents) {
         if (err) {
           console.log(err);
           return;
@@ -204,6 +205,49 @@
     // "near" predicate for GeoPoint fragments
     var near = Predicates.near("my.store.location", 48.8768767, 2.3338802, 10);
     // endgist
+  });
+
+  asyncTest('prismic-getText.js', 1, function() {
+    Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+      Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
+        var doc = documents.results[0];
+        // startgist:897048416603f89272bf:prismic-getText.js
+        var author = doc.getText("blog-post.author");
+        if (!author) author = "Anonymous";
+        equal(author, "John M. Martelle, Fine Pastry Magazine"); // gisthide
+        // endgist
+        start();
+      });
+    });
+  });
+
+  asyncTest('prismic-getNumber.js', 1, function() {
+    Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+      Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
+        var doc = documents.results[0];
+        // startgist:ea2f95a70621f3e83032:prismic-getNumber.js
+        var price = doc.getNumber("product.price");
+        equal(price, 2.5); // gisthide
+        // endgist
+        start();
+      });
+    });
+  });
+
+  asyncTest('prismic-dateTimestamp.js', 1, function() {
+    Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+      Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
+        var doc = documents.results[0];
+        // startgist:812b109562731b03cb58:prismic-dateTimestamp.js
+        var date = doc.getDate("blog-post.date");
+        var year = date ? date.getFullYear() : null;
+        var updateTime = doc.getTimestamp("blog-post.update");
+        var hour = updateTime ? updateTime.getHours() : 0;
+        equal(year, 2013); // gisthide
+        // endgist
+        start();
+      });
+    });
   });
 
   asyncTest('prismic-asHtml.js', 1, function() {

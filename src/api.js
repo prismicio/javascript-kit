@@ -371,8 +371,36 @@
                     return this.data.refs[i].ref;
                 }
             }
-        }
+        },
 
+        /**
+         * Parse json as a document
+         *
+         * @returns {Doc}
+         */
+        parseDoc: function(json) {
+            var linkedDocuments = [];
+            if(json.linked_documents) {
+                linkedDocuments = json.linked_documents.map(function(linkedDoc) {
+                    return new LinkedDocument(linkedDoc['id'], linkedDoc['slug'], linkedDoc['type'], linkedDoc['tags']);
+                });
+            }
+
+            var fragments = {};
+            for(var field in json.data[json.type]) {
+                fragments[json.type + '.' + field] = json.data[json.type][field];
+            }
+
+            return new Doc(
+                json.id,
+                json.type,
+                json.href,
+                json.tags,
+                json.slugs,
+                linkedDocuments,
+                fragments
+            );
+        }
     };
 
     prismic.fn.init.prototype = prismic.fn;
@@ -548,30 +576,7 @@
 
                 if (err) { callback(err, null, xhr); return; }
 
-                var results = documents.results.map(function (doc) {
-
-                    var linkedDocuments = [];
-                    if(doc.linked_documents) {
-                        linkedDocuments = doc.linked_documents.map(function(linkedDoc) {
-                            return new LinkedDocument(linkedDoc['id'], linkedDoc['slug'], linkedDoc['type'], linkedDoc['tags']);
-                        });
-                    }
-
-                    var fragments = {};
-                    for(var field in doc.data[doc.type]) {
-                        fragments[doc.type + '.' + field] = doc.data[doc.type][field];
-                    }
-
-                    return new Doc(
-                        doc.id,
-                        doc.type,
-                        doc.href,
-                        doc.tags,
-                        doc.slugs,
-                        linkedDocuments,
-                        fragments
-                    );
-                });
+                var results = documents.results.map(prismic.fn.parseDoc);
 
                 callback(null, new Response(
                     documents.page,
@@ -805,6 +810,22 @@
         },
 
         /**
+         * Gets the timestamp fragment in the current Document object, for further manipulation.
+         *
+         * @example document.getDate('blog-post.publicationdate').asHtml(ctx)
+         *
+         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
+         * @returns {Date} - The Date object to manipulate
+         */
+        getTimestamp: function(name) {
+            var fragment = this.get(name);
+
+            if (fragment instanceof Global.Prismic.Fragments.Timestamp) {
+                return fragment.value;
+            }
+        },
+
+        /**
          * Gets the date fragment in the current Document object, for further manipulation.
          *
          * @example document.getDate('blog-post.publicationdate').asHtml(ctx)
@@ -815,7 +836,7 @@
         getDate: function(name) {
             var fragment = this.get(name);
 
-            if(fragment instanceof Global.Prismic.Fragments.Date) {
+            if (fragment instanceof Global.Prismic.Fragments.Date) {
                 return fragment.value;
             }
         },
