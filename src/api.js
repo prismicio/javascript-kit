@@ -778,7 +778,6 @@
             });
         },
 
-
         /**
          * Gets the view within the image fragment in the current Document object, for further manipulation.
          *
@@ -903,9 +902,9 @@
 
         /**
          * Gets the StructuredText fragment in the current Document object, for further manipulation.
-         * @example document.getStructuredText('blog-post.body').asHtml(ctx).
+         * @example document.getStructuredText('blog-post.body').asHtml(ctx)
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText fragment to manipulate.
          */
         getStructuredText: function(name) {
@@ -914,6 +913,25 @@
             if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment;
             }
+            return null;
+        },
+
+        /**
+         * Gets the Link fragment in the current Document object, for further manipulation.
+         * @example document.getLink('blog-post.link').url(resolver)
+         *
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.link"
+         * @returns {WebLink|DocumentLink|ImageLink} - The Link fragment to manipulate.
+         */
+        getLink: function(name) {
+            var fragment = this.get(name);
+
+            if (fragment instanceof Global.Prismic.Fragments.WebLink ||
+                fragment instanceof Global.Prismic.Fragments.DocumentLink ||
+                fragment instanceof Global.Prismic.Fragments.ImageLink) {
+                return fragment;
+            }
+            return null;
         },
 
         /**
@@ -929,6 +947,7 @@
             if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value;
             }
+            return null;
         },
 
         /**
@@ -944,6 +963,7 @@
             if (fragment instanceof Global.Prismic.Fragments.Color) {
                 return fragment.value;
             }
+            return null;
         },
 
         /** Gets the GeoPoint fragment in the current Document object, for further manipulation.
@@ -959,6 +979,7 @@
             if(fragment instanceof Global.Prismic.Fragments.GeoPoint) {
                 return fragment;
             }
+            return null;
         },
 
         /**
@@ -975,6 +996,7 @@
             if (fragment instanceof Global.Prismic.Fragments.Group) {
                 return fragment;
             }
+            return null;
         },
 
         /**
@@ -991,6 +1013,7 @@
             if(fragment && fragment.asHtml) {
                 return fragment.asHtml(ctx);
             }
+            return null;
         },
 
         /**

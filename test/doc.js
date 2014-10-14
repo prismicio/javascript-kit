@@ -250,6 +250,38 @@
     });
   });
 
+  test('prismic-link.js', 1, function() {
+    var doc = Prismic.Api("").parseDoc({
+      id: "abcd",
+      type: "article",
+      data: {
+        article: {
+          source: {
+            type: "Link.document",
+            value: {
+              document: {
+                id: "UlfoxUnM0wkXYXbE",
+                type: "product",
+                tags: ["Macaron"],
+                slug: "dark-chocolate-macaron"
+              },
+              isBroken: false
+            }
+          }
+        }
+      }
+    });
+    // startgist:fa26d9095df192027edf:prismic-link.js
+    var resolver = function (ctx, doc, isBroken) {
+      if (isBroken) return '#broken';
+      return "/testing_url/" + doc.id + "/" + doc.slug + ( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
+    };
+    var source = doc.getLink("article.source");
+    var url = source ? source.url(resolver) : null;
+    // endgist
+    equal(url, "/testing_url/undefined/undefined");
+  });
+
   asyncTest('prismic-asHtml.js', 1, function() {
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
       Api.form('everything').ref(Api.master()).query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbX")).submit(function (err, response) {
