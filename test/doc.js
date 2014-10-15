@@ -178,32 +178,6 @@
 
     // "similar" predicate, with a document id as reference
     var similar = Predicates.similar("UXasdFwe42D", 10);
-
-    // Number predicates
-    var gt = Predicates.gt("my.product.price", 10);
-    var lt = Predicates.lt("my.product.price", 20);
-    var inRange = Predicates.inRange("my.product.price", 10, 20);
-
-    // Date and Timestamp predicates
-    var dateBefore = Predicates.dateBefore("my.product.releaseDate", new Date(2014, 6, 1));
-    var dateAfter = Predicates.dateAfter("my.product.releaseDate", new Date(2014, 1, 1));
-    var dateBetween = Predicates.dateBetween("my.product.releaseDate", new Date(2014, 1, 1), new Date(2014, 6, 1));
-    var dayOfMonth = Predicates.dayOfMonth("my.product.releaseDate", 14);
-    var dayOfMonthAfter = Predicates.dayOfMonthAfter("my.product.releaseDate", 14);
-    var dayOfMonthBefore = Predicates.dayOfMonthBefore("my.product.releaseDate", 14);
-    var dayOfWeek = Predicates.dayOfWeek("my.product.releaseDate", 14);
-    var dayOfWeekAfter = Predicates.dayOfWeekAfter("my.product.releaseDate", "Wednesday");
-    var dayOfWeekBefore = Predicates.dayOfWeekBefore("my.product.releaseDate", "Wednesday");
-    var month = Predicates.month("my.product.releaseDate", "June");
-    var monthBefore = Predicates.monthBefore("my.product.releaseDate", "June");
-    var monthAfter = Predicates.monthAfter("my.product.releaseDate", "June");
-    var year = Predicates.year("my.product.releaseDate", 2014);
-    var hour = Predicates.hour("my.product.releaseDate", 12);
-    var hourBefore = Predicates.hourBefore("my.product.releaseDate", 12);
-    var hourAfter = Predicates.hourAfter("my.product.releaseDate", 12);
-
-    // "near" predicate for GeoPoint fragments
-    var near = Predicates.near("my.store.location", 48.8768767, 2.3338802, 10);
     // endgist
   });
 
@@ -226,6 +200,12 @@
       Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
         var doc = documents.results[0];
         // startgist:ea2f95a70621f3e83032:prismic-getNumber.js
+        // Number predicates
+        var gt = Predicates.gt("my.product.price", 10);
+        var lt = Predicates.lt("my.product.price", 20);
+        var inRange = Predicates.inRange("my.product.price", 10, 20);
+
+        // Accessing number fields
         var price = doc.getNumber("product.price");
         equal(price, 2.5); // gisthide
         // endgist
@@ -239,6 +219,25 @@
       Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
         var doc = documents.results[0];
         // startgist:812b109562731b03cb58:prismic-dateTimestamp.js
+        // Date and Timestamp predicates
+        var dateBefore = Predicates.dateBefore("my.product.releaseDate", new Date(2014, 6, 1));
+        var dateAfter = Predicates.dateAfter("my.product.releaseDate", new Date(2014, 1, 1));
+        var dateBetween = Predicates.dateBetween("my.product.releaseDate", new Date(2014, 1, 1), new Date(2014, 6, 1));
+        var dayOfMonth = Predicates.dayOfMonth("my.product.releaseDate", 14);
+        var dayOfMonthAfter = Predicates.dayOfMonthAfter("my.product.releaseDate", 14);
+        var dayOfMonthBefore = Predicates.dayOfMonthBefore("my.product.releaseDate", 14);
+        var dayOfWeek = Predicates.dayOfWeek("my.product.releaseDate", 14);
+        var dayOfWeekAfter = Predicates.dayOfWeekAfter("my.product.releaseDate", "Wednesday");
+        var dayOfWeekBefore = Predicates.dayOfWeekBefore("my.product.releaseDate", "Wednesday");
+        var month = Predicates.month("my.product.releaseDate", "June");
+        var monthBefore = Predicates.monthBefore("my.product.releaseDate", "June");
+        var monthAfter = Predicates.monthAfter("my.product.releaseDate", "June");
+        var year = Predicates.year("my.product.releaseDate", 2014);
+        var hour = Predicates.hour("my.product.releaseDate", 12);
+        var hourBefore = Predicates.hourBefore("my.product.releaseDate", 12);
+        var hourAfter = Predicates.hourAfter("my.product.releaseDate", 12);
+
+        // Accessing Date and Timestamp fields
         var date = doc.getDate("blog-post.date");
         var year = date ? date.getFullYear() : null;
         var updateTime = doc.getTimestamp("blog-post.update");
@@ -280,6 +279,97 @@
     var url = source ? source.url(resolver) : null;
     // endgist
     equal(url, "/testing_url/undefined/undefined");
+  });
+
+  test('prismic-embed.js', 1, function() {
+    var doc = Prismic.Api("").parseDoc({
+      id: "abcd",
+      type: "article",
+      data: {
+        article: {
+          "video" : {
+            "type" : "Embed",
+            "value" : {
+              "oembed" : {
+                "provider_url" : "http://www.youtube.com/",
+                "type" : "video",
+                "thumbnail_height" : 360,
+                "height" : 270,
+                "thumbnail_url" : "http://i1.ytimg.com/vi/baGfM6dBzs8/hqdefault.jpg",
+                "width" : 480,
+                "provider_name" : "YouTube",
+                "html" : "<iframe width=\"480\" height=\"270\" src=\"http://www.youtube.com/embed/baGfM6dBzs8?feature=oembed\" frameborder=\"0\" allowfullscreen></iframe>",
+                "author_name" : "Siobhan Wilson",
+                "version" : "1.0",
+                "author_url" : "http://www.youtube.com/user/siobhanwilsonsongs",
+                "thumbnail_width" : 480,
+                "title" : "Siobhan Wilson - All Dressed Up",
+                "embed_url" : "https://www.youtube.com/watch?v=baGfM6dBzs8"
+              }
+            }
+          }
+        }
+      }
+    });
+    // startgist:67b2d5f4094c54f3f5c0:prismic-embed.js
+    var video = doc.get("article.video");
+    // Html is the code to include to embed the object, and depends on the embedded service
+    var html = video ? video.asHtml() : "";
+    // endgist
+    equal(html, "<iframe width=\"480\" height=\"270\" src=\"http://www.youtube.com/embed/baGfM6dBzs8?feature=oembed\" frameborder=\"0\" allowfullscreen></iframe>");
+  });
+
+  test('prismic-color.js', 1, function() {
+    var doc = Prismic.Api("").parseDoc({
+      id: "abcd",
+      type: "article",
+      data: {
+        article: {
+          "background" : {
+            "type" : "Color",
+            "value": "#000000"
+          }
+        }
+      }
+    });
+    var $ = function(x) {
+      return { css: function (y, z) {} };
+    };
+    // startgist:9f56474f0946af8ff135:prismic-color.js
+    var bgcolor = doc.getColor("article.background");
+    $("#article").css("background-color", bgcolor);
+    // endgist
+    equal(bgcolor, "#000000");
+  });
+
+  test('prismic-geopoint.js', 1, function() {
+    var doc = Prismic.Api("").parseDoc({
+      id: "abcd",
+      type: "article",
+      data: {
+        article: {
+          "location" : {
+            "type" : "GeoPoint",
+            "value" : {
+              "latitude" : 48.877108,
+              "longitude": 2.3338790
+            }
+          }
+        }
+      }
+    });
+    // startgist:1cf4d536f00bb13f1178:prismic-geopoint.js
+    // "near" predicate for GeoPoint fragments
+    var near = Predicates.near("my.store.location", 48.8768767, 2.3338802, 10);
+
+    // Accessing GeoPoint fragments
+    var place = doc.getGeoPoint("article.location");
+    var coordinates;
+    if (place) {
+      coordinates = place.latitude + "," + place.longitude;
+    }
+    // endgist
+    equal(coordinates, "48.877108,2.333879");
   });
 
   asyncTest('prismic-asHtml.js', 1, function() {
