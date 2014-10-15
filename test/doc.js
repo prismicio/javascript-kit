@@ -249,6 +249,70 @@
     });
   });
 
+  test('prismic-group.js', 1, function() {
+    var doc = Prismic.Api("").parseDoc({
+      id: "abcd",
+      type: "article",
+      data: {
+        article: {
+          documents: {
+            type: "Group",
+            "value": [
+              {
+                "linktodoc": {
+                  "type": "Link.document",
+                  "value": {
+                    "document": {
+                      "id": "UrDejAEAAFwMyrW9",
+                      "type": "doc",
+                      "tags": [ ],
+                      "slug": "installing-meta-micro"
+                    },
+                    "isBroken": false
+                  }
+                },
+                "desc": {
+                  "type": "StructuredText",
+                  "value": [
+                    {
+                      "type": "paragraph",
+                      "text": "A detailed step by step point of view on how installing happens.",
+                      "spans": []
+                    }
+                  ]
+                }
+              },
+              {
+                "linktodoc": {
+                  "type": "Link.document",
+                  "value": {
+                    "document": {
+                      "id": "UrDmKgEAALwMyrXA",
+                      "type": "doc",
+                      "tags": [ ],
+                      "slug": "using-meta-micro"
+                    },
+                    "isBroken": false
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    });
+    // startgist:fa204a2784c0747d552b:prismic-group.js
+    var group = doc.getGroup("article.documents");
+    var docs = group ? group.toArray() : [];
+    for (var i = 0; i < docs.length; i++) {
+      // Desc and Link are Fragments, their type depending on what's declared in the Document Mask
+      var desc = docs[i]["desc"];
+      var link = docs[i]["linktodoc"];
+    }
+    // endgist
+    equal(docs[0]["desc"].asHtml(), "<p>A detailed step by step point of view on how installing happens.</p>");
+  });
+
   test('prismic-link.js', 1, function() {
     var doc = Prismic.Api("").parseDoc({
       id: "abcd",
