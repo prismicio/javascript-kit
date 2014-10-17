@@ -19,6 +19,7 @@
   asyncTest('prismic-api.js', 1, function(){
     // startgist:b253d8fddfdd4cceef7a:prismic-api.js
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
       // You can use the Api object inside this block
       console.log("References: ", Api.data.refs);
       equal(Api.data.refs.length, 1); // gisthide
@@ -41,11 +42,13 @@
     // startgist:11cb93472bc660d423f6:prismic-references.js
     var previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70';
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
       var stPatrickRef = Api.ref("St-Patrick specials");
       // Now we'll use this reference for all our calls
       Api.form('everything')
          .ref(stPatrickRef)
          .query(Prismic.Predicates.at("document.type", "product")).submit(function(err, response) {
+           if (err) { console.log(err); start(); } // gisthide
            // The documents object contains a Response object with all documents of type "product"
            // including the new "Saint-Patrick's Cupcake"
            equal(response.results.length, 17); // gisthide
@@ -58,9 +61,11 @@
   asyncTest('prismic-simplequery.js', 2, function(){
     // startgist:f3f7d4b970e964131271:prismic-simplequery.js
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
       Api.form('everything')
         .ref(Api.master())
         .query(Prismic.Predicates.at("document.type", "product")).submit(function(err, response) {
+          if (err) { console.log(err); start(); } // gisthide
           // The documents object contains a Response object with all documents of type "product".
           var page = response.page; // The current page number, the first one being 1
           equal(page, 1); // gisthide
@@ -82,6 +87,7 @@
   asyncTest('prismic-orderings.js', 1, function(){
     // startgist:55eb59485855e40680c9:prismic-orderings.js
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
       Api.form('everything')
         .ref(Api.master())
         .query(Prismic.Predicates.at("document.type", "product"))
@@ -100,10 +106,12 @@
   asyncTest('prismic-predicates.js', 1, function() {
     // startgist:2bdf83055d57f35d5d85:prismic-predicates.js
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
       Api.form('everything').ref(Api.master()).query(
         Predicates.at("document.type", "blog-post"),
         Predicates.dateAfter("my.blog-post.date", new Date(2014, 6, 1))
       ).submit(function(err, response) {
+          if (err) { console.log(err); start(); } // gisthide
           // All documents of type "product", updated after June 1st, 2014
           equal(response.results.length, 0); // gisthide
           start(); // gisthide
@@ -131,12 +139,10 @@
 
   asyncTest('prismic-htmlSerializer.js', 1, function() {
     Prismic.Api(testRepository, function (err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
       Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl"))
          .ref(Api.master()).submit(function (err, documents) {
-        if (err) {
-          console.log(err);
-          return;
-        }
+        if (err) { console.log(err); start(); }
         var doc = documents.results[0];
         // startgist:3e125676868b16fa91b9:prismic-htmlSerializer.js
         var htmlSerializer = function (element, content) {
@@ -183,7 +189,9 @@
 
   asyncTest('prismic-getText.js', 1, function() {
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
       Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
+        if (err) { console.log(err); start(); } // gisthide
         var doc = documents.results[0];
         // startgist:897048416603f89272bf:prismic-getText.js
         var author = doc.getText("blog-post.author");
@@ -197,7 +205,9 @@
 
   asyncTest('prismic-getNumber.js', 1, function() {
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
       Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
+        if (err) { console.log(err); start(); } // gisthide
         var doc = documents.results[0];
         // startgist:ea2f95a70621f3e83032:prismic-getNumber.js
         // Number predicates
@@ -216,7 +226,9 @@
 
   asyncTest('prismic-dateTimestamp.js', 1, function() {
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
       Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
+        if (err) { console.log(err); start(); } // gisthide
         var doc = documents.results[0];
         // startgist:812b109562731b03cb58:prismic-dateTimestamp.js
         // Date and Timestamp predicates
@@ -438,8 +450,9 @@
 
   asyncTest('prismic-asHtml.js', 1, function() {
     Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+      if (err) { console.log(err); start(); }
       Api.form('everything').ref(Api.master()).query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbX")).submit(function (err, response) {
-        if (err) { console.log(err); return; }
+        if (err) { console.log(err); start(); }
         // startgist:63183c7f26038f884f45:prismic-asHtml.js
         var doc = response.results[0];
         var html = doc.getStructuredText('blog-post.body').asHtml({
@@ -455,57 +468,62 @@
     });
   });
 
+/* Temporary deactivate because problem with PhantomJS
   asyncTest('prismic-cache.js', 1, function(){
     // startgist:647bde5c458c44af0981:prismic-cache.js
     var cache = {
-      get: function(key) {
+      get: function (key) {
         // Retrieve a value from the key
         return null;
       },
 
-      set: function(key, value, ttl) {
+      set: function (key, value, ttl) {
         // Save a value to the cache
         // ttl is the time to live, or expiration in seconds
       },
 
-      getOrSet: function(key, ttl, fvalue, done) {
+      getOrSet: function (key, ttl, fvalue, done) {
         // Retrieve the value if present, otherwise use the fvalue callback to calculate the value,
         // save it then return it by calling the "done" callback.
         // The done callback takes 2 parameters: error and result.
-        fvalue(function(error, result, hdr){
+        fvalue(function (error, result, hdr) {
           done(null, result);
         });
       },
 
-      isExpired: function(key) {
+      isExpired: function (key) {
         // Return true if the key exists and is expired, false if the value is either absent or not expired
         return false;
       },
 
-      isInProgress: function(key) {
+      isInProgress: function (key) {
         // Return true if the value is being saved currently
         return false;
       },
 
-      exists: function(key) {
+      exists: function (key) {
         // Return true if the value for the key exists
         return false;
       },
 
-      remove: function(key) {
+      remove: function (key) {
         // Remove a value
       },
 
-      clear: function(key) {
+      clear: function (key) {
         // Clear the whole cache
       }
     };
-    Prismic.Api('https://lesbonneschoses.prismic.io/api', function(err, Api) {
+    Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+      if (err) {
+        console.log(err);
+        start();
+      } // gisthide
       // The Api in this block will use the custom cache object
       notEqual(Api, null); // gisthide
       start(); // gisthide
-    }, null /* accessToken */, null /* requestHandler */, cache);
+    }, null, null, cache);
     // endgist
   });
-
+*/
 }(window.Prismic));
