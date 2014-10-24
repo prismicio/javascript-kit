@@ -43,42 +43,31 @@
     <section>
         <article><h2 id="javascript-development-kit-for-prismic-io">JavaScript development kit for prismic.io</h2>
 <p><a href="https://travis-ci.org/prismicio/javascript-kit"><img src="https://api.travis-ci.org/prismicio/javascript-kit.png" alt="Build Status"></a></p>
-<h3 id="getting-started">Getting started</h3>
-<h4 id="install-the-kit">Install the kit</h4>
-<p>You can find downloadable versions of the kit on our release page: <a href="https://github.com/prismicio/javascript-kit/releases">https://github.com/prismicio/javascript-kit/releases</a>.</p>
+<ul>
+<li>The <a href="https://github.com/prismicio/javascript-kit">source code</a> is on Github.</li>
+<li>The <a href="https://github.com/prismicio/javascript-kit/releases">Changelog</a> is on Github&#39;s releases tab.</li>
+</ul>
+<h3 id="installation">Installation</h3>
 <p>You can install a stable version using <strong>npm</strong>:</p>
 <pre><code class="lang-sh">npm install prismic.io
 </code></pre>
 <p>Or using <strong>bower</strong>:</p>
 <pre><code class="lang-sh">bower install prismic.io
 </code></pre>
-<h4 id="get-started-with-prismic-io">Get started with prismic.io</h4>
-<p>You can find out <a href="https://developers.prismic.io/documentation/UjBaQsuvzdIHvE4D/getting-started">how to get started with prismic.io</a> on our <a href="https://developers.prismic.io/">prismic.io developer&#39;s portal</a>.</p>
-<h4 id="get-started-using-the-kit">Get started using the kit</h4>
-<p>Also on our <a href="https://developers.prismic.io/">prismic.io developer&#39;s portal</a>, on top of our full documentation, you will:</p>
+<p>Finally, you can find downloadable versions of the kit on our release page: <a href="https://github.com/prismicio/javascript-kit/releases">https://github.com/prismicio/javascript-kit/releases</a>.</p>
+<h3 id="usage">Usage</h3>
+<p>If you don&#39;t have a Prismic.io repository yet, find out <a href="https://developers.prismic.io/documentation/UjBaQsuvzdIHvE4D/getting-started">how to get one</a>.</p>
+<p>Once your repository is ready, you can use the Javascript kit server-side with Node.js, or client-side without needing and specific technology server-side. We provide various starter kits depending on your choice:</p>
 <ul>
-<li>get a thorough introduction of <a href="https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#kits-and-helpers">how to use prismic.io kits</a>, including this one.</li>
-<li>see <a href="https://developers.prismic.io/technologies/UjBh28uvzeMJvE4i/javascript">what else is available for Javascript</a>: starter projects, examples, ...</li>
+<li><a href="https://github.com/prismicio/javascript-jquery-starter">jQuery starter kit</a></li>
+<li><a href="https://github.com/prismicio/javascript-nodejs-starter">Node.js starter kit</a></li>
+<li><a href="https://github.com/prismicio/javascript-singlepage">Single page starter kit</a></li>
+<li><a href="https://github.com/prismicio/baked.js">Static pages generation with baked.js</a></li>
 </ul>
-<h3 id="using-the-kit">Using the kit</h3>
-<h4 id="kit-s-detailed-documentation">Kit&#39;s detailed documentation</h4>
-<p>To get a detailed documentation of the JavaScript kit&#39;s variables and methods, please check out the <a href="http://prismicio.github.io/javascript-kit/">prismic.io JS kit&#39;s documentation</a>.</p>
-<h4 id="specific-js-kit-syntax">Specific JS kit syntax</h4>
-<p>The <a href="https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#kits-and-helpers">&quot;Kits and helpers&quot; section of our API documentation</a> is largely based on the JS kit, so there are not many differences:</p>
-<ul>
-<li>The <code>submit()</code> function takes a callback, which expects two parameters: a potential error, and the object of class <code>Documents</code> you can use.</li>
-<li>For security reasons, non-type-dependent fragments actually get written <code>document.getId()</code>, <code>document.getSlug()</code>, ... rather than <code>document.id</code>, <code>document.slug</code>, ...</li>
-<li>This is not a difference but a confirmation: <code>asHtml()</code> expects a <code>ctx</code> object that has a <code>linkResolver</code> closure and <code>maybeRef</code> string as its attributes.</li>
-</ul>
-<p>Knowing all that, here is typical code written with the JavaScript kit:</p>
-<ul>
-<li>A typical API object instantiation looks like this: <code>Prismic.Api(url, callback)</code></li>
-<li>A typical querying looks like this: <code>api.form(&#39;everything&#39;).query(&#39;[[:d = at(document.type, &quot;product&quot;)]]&#39;).ref(ref).submit(callback)</code></li>
-<li>A typical fragment manipulation looks like this: <code>doc.getImageView(&#39;article.image&#39;, &#39;icon&#39;).getUrl()</code></li>
-<li>A typical fragment serialization to HTML looks like this: <code>doc.getStructuredText(&#39;article.body&#39;).asHtml(ctx)</code></li>
-</ul>
-<h3 id="changelog">Changelog</h3>
-<p>Need to see what changed, or to upgrade your kit? We keep our changelog on <a href="https://github.com/prismicio/javascript-kit/releases">this repository&#39;s &quot;Releases&quot; tab</a>.</p>
+<p>We&#39;re working hard to keep all the starter kit up-to-date, but it&#39;s always a good idea to check on this page if you&#39;re on the
+latest version of the kit. We&#39;re constantly adding new features to Prismic.io, and it is necessary to have the latest version
+to use all of them.</p>
+<p>You can then read the documentation from the <a href="https://developers.prismic.io/">Developer&#39;s Portal</a> for more details on how to use</p>
 <h3 id="contribute-to-the-kit">Contribute to the kit</h3>
 <p>Contribution is open to all developer levels, read our &quot;<a href="https://developers.prismic.io/documentation/UszOeAEAANUlwFpp/contribute-to-the-official-kits">Contribute to the official kits</a>&quot; documentation to learn more.</p>
 <h4 id="install-the-kit-locally">Install the kit locally</h4>
@@ -94,6 +83,7 @@ npm install
 <li><code>gulp test</code> will run jshint, all the tests and display the result on your shell</li>
 <li><code>gulp test:int</code> will run all integration tests (the ones from <a href="test/test.html">test/test.html</a>)</li>
 <li><code>gulp test:unit</code> will run all unit tests (the ones from <a href="test/unit.html">test/unit.html</a>)</li>
+<li><code>gulp test:doc</code> will run all tests related to the code snippets from the documentation (the ones from <a href="test/doc.html">test/doc.html</a>)</li>
 </ul>
 <p>If you find existing code that is not optimally tested and wish to make it better, we really appreciate it; but you should document it on its own branch and its own pull request.</p>
 <h4 id="documentation">Documentation</h4>
@@ -102,7 +92,7 @@ npm install
 <p>If you find existing code that is not optimally documented and wish to make it better, we really appreciate it; but you should document it on its own branch and its own pull request.</p>
 <h3 id="licence">Licence</h3>
 <p>This software is licensed under the Apache 2 license, quoted below.</p>
-<p>Copyright 2013 Zengularity (<a href="http://www.zengularity.com">http://www.zengularity.com</a>).</p>
+<p>Copyright 2013-2014 Zengularity (<a href="http://www.zengularity.com">http://www.zengularity.com</a>).</p>
 <p>Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not use this project except in compliance with the License. You may obtain a copy of the License at <a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a>.</p>
 <p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</p>
 </article>
@@ -122,7 +112,7 @@ npm install
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Wed Oct 01 2014 14:51:11 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Fri Oct 24 2014 16:07:04 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
