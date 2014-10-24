@@ -1,4 +1,5 @@
 {
   "sub": true,
+  "expr": true,
   "loopfunc": true
 }

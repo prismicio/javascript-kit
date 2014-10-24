@@ -226,6 +226,7 @@
                     } else {
                         self.data = api;
                         self.bookmarks = api.bookmarks;
+                        self.experiments = new Global.Prismic.Experiments(api.experiments);
                         if (callback) callback(null, self, xhr);
                     }
                 }
@@ -371,6 +372,14 @@
                     return this.data.refs[i].ref;
                 }
             }
+        },
+
+        /**
+         * The current experiment, or null
+         * @returns {Experiment}
+         */
+        currentExperiment: function() {
+            return this.experiments.current();
         },
 
         /**
@@ -746,7 +755,7 @@
         /**
          * Gets the image fragment in the current Document object, for further manipulation.
          *
-         * @example document.getImage('blog-post.photo').asHtml(ctx)
+         * @example document.getImage('blog-post.photo').asHtml(linkResolver)
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageEl} - The Image object to manipulate
@@ -781,10 +790,10 @@
         /**
          * Gets the view within the image fragment in the current Document object, for further manipulation.
          *
-         * @example document.getImageView('blog-post.photo', 'large').asHtml(ctx)
+         * @example document.getImageView('blog-post.photo', 'large').asHtml(linkResolver)
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
-         * @returns {ImageView} - The View object to manipulate
+         * @param {string} name- The name of the fragment to get, with its type; for instance, "blog-post.photo"
+         * @returns {ImageView} view - The View object to manipulate
          */
         getImageView: function(name, view) {
             var fragment = this.get(name);
@@ -811,9 +820,9 @@
         /**
          * Gets the timestamp fragment in the current Document object, for further manipulation.
          *
-         * @example document.getDate('blog-post.publicationdate').asHtml(ctx)
+         * @example document.getDate('blog-post.publicationdate').asHtml(linkResolver)
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
          */
         getTimestamp: function(name) {
@@ -827,9 +836,9 @@
         /**
          * Gets the date fragment in the current Document object, for further manipulation.
          *
-         * @example document.getDate('blog-post.publicationdate').asHtml(ctx)
+         * @example document.getDate('blog-post.publicationdate').asHtml(linkResolver)
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
          */
         getDate: function(name) {
@@ -846,7 +855,7 @@
          *
          * @example if(document.getBoolean('blog-post.enableComments')) { ... }
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
          * @returns {boolean} - The boolean value of the fragment
          */
         getBoolean: function(name) {
@@ -858,7 +867,7 @@
          * Gets the text fragment in the current Document object, for further manipulation.
          * The method works with StructuredText fragments, Text fragments, Number fragments, Select fragments and Color fragments.
          *
-         * @example document.getText('blog-post.label').asHtml(ctx).
+         * @example document.getText('blog-post.label').asHtml(linkResolver).
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.label"
          * @param {string} after - a suffix that will be appended to the value
@@ -902,7 +911,7 @@
 
         /**
          * Gets the StructuredText fragment in the current Document object, for further manipulation.
-         * @example document.getStructuredText('blog-post.body').asHtml(ctx)
+         * @example document.getStructuredText('blog-post.body').asHtml(linkResolver)
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText fragment to manipulate.
@@ -968,7 +977,7 @@
 
         /** Gets the GeoPoint fragment in the current Document object, for further manipulation.
          *
-         * @example document.getGeoPoint('blog-post.location').asHtml(ctx)
+         * @example document.getGeoPoint('blog-post.location').asHtml(linkResolver)
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.location"
          * @returns {GeoPoint} - The GeoPoint object to manipulate
@@ -985,7 +994,7 @@
         /**
          * Gets the Group fragment in the current Document object, for further manipulation.
          *
-         * @example document.getGroup('product.gallery').asHtml(ctx).
+         * @example document.getGroup('product.gallery').asHtml(linkResolver).
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
          * @returns {Group} - The Group fragment to manipulate.
@@ -1001,17 +1010,24 @@
 
         /**
          * Shortcut to get the HTML output of the fragment in the current document.
-         * This is the same as writing document.get(fragment).asHtml(ctx);
+         * This is the same as writing document.get(fragment).asHtml(linkResolver);
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.body"
-         * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
+         * @param {function} linkResolver
          * @returns {string} - The HTML output
          */
-        getHtml: function(name, ctx) {
+        getHtml: function(name, linkResolver) {
+            if (!isFunction(linkResolver)) {
+                // Backward compatibility with the old ctx argument
+                var ctx = linkResolver;
+                linkResolver = function(doc, isBroken) {
+                    return ctx.linkResolver(ctx, doc, isBroken);
+                };
+            }
             var fragment = this.get(name);
 
             if(fragment && fragment.asHtml) {
-                return fragment.asHtml(ctx);
+                return fragment.asHtml(linkResolver);
             }
             return null;
         },
@@ -1022,14 +1038,21 @@
          * Note that most of the time you will not use this method, but read fragment independently and generate
          * HTML output for {@link StructuredText} fragment with that class' asHtml method.
          *
-         * @param {object} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
+         * @param {function} linkResolver
          * @returns {string} - The HTML output
          */
-        asHtml: function(ctx) {
+        asHtml: function(linkResolver) {
+            if (!isFunction(linkResolver)) {
+                // Backward compatibility with the old ctx argument
+                var ctx = linkResolver;
+                linkResolver = function(doc, isBroken) {
+                    return ctx.linkResolver(ctx, doc, isBroken);
+                };
+            }
             var htmls = [];
             for(var field in this.fragments) {
                 var fragment = this.get(field);
-                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '');
+                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(linkResolver) + '</section>' : '');
             }
             return htmls.join('');
         },
@@ -1039,11 +1062,18 @@
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function(ctx) {
+         asText: function(linkResolver) {
+            if (!isFunction(linkResolver)) {
+                // Backward compatibility with the old ctx argument
+                var ctx = linkResolver;
+                linkResolver = function(doc, isBroken) {
+                    return ctx.linkResolver(ctx, doc, isBroken);
+                };
+            }
             var texts = [];
             for(var field in this.fragments) {
                 var fragment = this.get(field);
-                texts.push(fragment && fragment.asText ? fragment.asText(ctx) : '');
+                texts.push(fragment && fragment.asText ? fragment.asText(linkResolver) : '');
             }
             return texts.join('');
          },
@@ -1166,6 +1196,13 @@
             this.cache = {};
         }
     };
+
+    // -- Private helpers
+
+    function isFunction(f) {
+        var getType = {};
+        return f && getType.toString.call(f) === '[object Function]';
+    }
 
     // -- Export Globally
 

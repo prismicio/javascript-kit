@@ -56,6 +56,9 @@
                 // Open the XHR
                 xhr.open('GET', url, true);
 
+                // Kit version (can't override the user-agent client side)
+                // xhr.setRequestHeader("X-Prismic-User-Agent", "Prismic-javascript-kit/%VERSION%".replace("%VERSION%", Global.Prismic.version));
+
                 // Json request
                 xhr.setRequestHeader('Accept', 'application/json');
 
@@ -223,6 +226,7 @@
                     } else {
                         self.data = api;
                         self.bookmarks = api.bookmarks;
+                        self.experiments = new Global.Prismic.Experiments(api.experiments);
                         if (callback) callback(null, self, xhr);
                     }
                 }
@@ -253,9 +257,9 @@
                     f = data.forms[i];
 
                     if(this.accessToken) {
-                        f.fields.access_token = {};
-                        f.fields.access_token.type = 'string';
-                        f.fields.access_token.default = this.accessToken;
+                        f.fields['access_token'] = {};
+                        f.fields['access_token']['type'] = 'string';
+                        f.fields['access_token']['default'] = this.accessToken;
                     }
 
                     form = new Form(
@@ -368,8 +372,44 @@
                     return this.data.refs[i].ref;
                 }
             }
-        }
+        },
 
+        /**
+         * The current experiment, or null
+         * @returns {Experiment}
+         */
+        currentExperiment: function() {
+            return this.experiments.current();
+        },
+
+        /**
+         * Parse json as a document
+         *
+         * @returns {Doc}
+         */
+        parseDoc: function(json) {
+            var linkedDocuments = [];
+            if(json.linked_documents) {
+                linkedDocuments = json.linked_documents.map(function(linkedDoc) {
+                    return new LinkedDocument(linkedDoc['id'], linkedDoc['slug'], linkedDoc['type'], linkedDoc['tags']);
+                });
+            }
+
+            var fragments = {};
+            for(var field in json.data[json.type]) {
+                fragments[json.type + '.' + field] = json.data[json.type][field];
+            }
+
+            return new Doc(
+                json.id,
+                json.type,
+                json.href,
+                json.tags,
+                json.slugs,
+                linkedDocuments,
+                fragments
+            );
+        }
     };
 
     prismic.fn.init.prototype = prismic.fn;
@@ -429,9 +469,9 @@
                 value = null;
             }
             if(fieldDesc.multiple) {
-                value != null && values.push(value);
+                if (value) values.push(value);
             } else {
-                values = value != null && [value];
+                values = value && [value];
             }
             this.data[field] = values;
             return this;
@@ -464,8 +504,7 @@
                 var predicates = [].slice.apply(arguments); // Convert to a real JS array
                 var stringQueries = [];
                 predicates.forEach(function (predicate) {
-                    var firstArg = (predicate[1].indexOf("my.") == 0 || predicate[1].indexOf("document.") == 0)
-                        ? predicate[1]
+                    var firstArg = (predicate[1].indexOf("my.") === 0 || predicate[1].indexOf("document.") === 0) ? predicate[1]
                         : '"' + predicate[1] + '"';
                     stringQueries.push("[:d = " + predicate[0] + "(" + firstArg + ", " + (function() {
                         return predicate.slice(2).map(function(p) {
@@ -476,7 +515,7 @@
                                     return '"' + e + '"';
                                 }).join(',') + "]";
                             } else if (p instanceof Date) {
-                                return d.getTime();
+                                return p.getTime();
                             } else {
                                 return p;
                             }
@@ -546,30 +585,7 @@
 
                 if (err) { callback(err, null, xhr); return; }
 
-                var results = documents.results.map(function (doc) {
-
-                    var linkedDocuments = [];
-                    if(doc.linked_documents) {
-                        linkedDocuments = doc.linked_documents.map(function(linkedDoc) {
-                            return new LinkedDocument(linkedDoc['id'], linkedDoc['slug'], linkedDoc['type'], linkedDoc['tags']);
-                        });
-                    }
-
-                    var fragments = {};
-                    for(var field in doc.data[doc.type]) {
-                        fragments[doc.type + '.' + field] = doc.data[doc.type][field];
-                    }
-
-                    return new Doc(
-                        doc.id,
-                        doc.type,
-                        doc.href,
-                        doc.tags,
-                        doc.slugs,
-                        linkedDocuments,
-                        fragments
-                    );
-                });
+                var results = documents.results.map(prismic.fn.parseDoc);
 
                 callback(null, new Response(
                     documents.page,
@@ -583,27 +599,10 @@
                 );
             });
 
-        }
+        },
 
     };
 
-    /**
-     * An array of the fragments with the given fragment name.
-     * The array is often a single-element array, expect when the fragment is a multiple fragment.
-     * @private
-     */
-    function getFragments(name) {
-        if (!this.fragments || !this.fragments[name]) {
-            return [];
-        }
-
-        if (Array.isArray(this.fragments[name])) {
-            return this.fragments[name];
-        } else {
-            return [this.fragments[name]];
-        }
-
-    }
 
     /**
      * Embodies the response of a SearchForm query as returned by the API.
@@ -737,7 +736,7 @@
          * @returns {object} - The JavaScript Fragment object to manipulate
          */
         get: function(name) {
-            var frags = getFragments.call(this, name);
+            var frags = this._getFragments(name);
             return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
         },
 
@@ -748,7 +747,7 @@
          * @returns {array} - An array of each JavaScript fragment object to manipulate.
          */
         getAll: function(name) {
-            return getFragments.call(this, name).map(function (fragment) {
+            return this._getFragments(name).map(function (fragment) {
                 return Global.Prismic.Fragments.initField(fragment);
             }, this);
         },
@@ -756,7 +755,7 @@
         /**
          * Gets the image fragment in the current Document object, for further manipulation.
          *
-         * @example document.getImage('blog-post.photo').asHtml(ctx)
+         * @example document.getImage('blog-post.photo').asHtml(linkResolver)
          *
          * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
          * @returns {ImageEl} - The Image object to manipulate
@@ -788,14 +787,13 @@
             });
         },
 
-
         /**
          * Gets the view within the image fragment in the current Document object, for further manipulation.
          *
-         * @example document.getImageView('blog-post.photo', 'large').asHtml(ctx)
+         * @example document.getImageView('blog-post.photo', 'large').asHtml(linkResolver)
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.photo"
-         * @returns {ImageView} - The View object to manipulate
+         * @param {string} name- The name of the fragment to get, with its type; for instance, "blog-post.photo"
+         * @returns {ImageView} view - The View object to manipulate
          */
         getImageView: function(name, view) {
             var fragment = this.get(name);
@@ -820,17 +818,33 @@
         },
 
         /**
+         * Gets the timestamp fragment in the current Document object, for further manipulation.
+         *
+         * @example document.getDate('blog-post.publicationdate').asHtml(linkResolver)
+         *
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
+         * @returns {Date} - The Date object to manipulate
+         */
+        getTimestamp: function(name) {
+            var fragment = this.get(name);
+
+            if (fragment instanceof Global.Prismic.Fragments.Timestamp) {
+                return fragment.value;
+            }
+        },
+
+        /**
          * Gets the date fragment in the current Document object, for further manipulation.
          *
-         * @example document.getDate('blog-post.publicationdate').asHtml(ctx)
+         * @example document.getDate('blog-post.publicationdate').asHtml(linkResolver)
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.publicationdate"
          * @returns {Date} - The Date object to manipulate
          */
         getDate: function(name) {
             var fragment = this.get(name);
 
-            if(fragment instanceof Global.Prismic.Fragments.Date) {
+            if (fragment instanceof Global.Prismic.Fragments.Date) {
                 return fragment.value;
             }
         },
@@ -841,7 +855,7 @@
          *
          * @example if(document.getBoolean('blog-post.enableComments')) { ... }
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.enableComments"
          * @returns {boolean} - The boolean value of the fragment
          */
         getBoolean: function(name) {
@@ -853,7 +867,7 @@
          * Gets the text fragment in the current Document object, for further manipulation.
          * The method works with StructuredText fragments, Text fragments, Number fragments, Select fragments and Color fragments.
          *
-         * @example document.getText('blog-post.label').asHtml(ctx).
+         * @example document.getText('blog-post.label').asHtml(linkResolver).
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.label"
          * @param {string} after - a suffix that will be appended to the value
@@ -897,9 +911,9 @@
 
         /**
          * Gets the StructuredText fragment in the current Document object, for further manipulation.
-         * @example document.getStructuredText('blog-post.body').asHtml(ctx).
+         * @example document.getStructuredText('blog-post.body').asHtml(linkResolver)
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "blog-post.body"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.body"
          * @returns {StructuredText} - The StructuredText fragment to manipulate.
          */
         getStructuredText: function(name) {
@@ -908,6 +922,25 @@
             if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                 return fragment;
             }
+            return null;
+        },
+
+        /**
+         * Gets the Link fragment in the current Document object, for further manipulation.
+         * @example document.getLink('blog-post.link').url(resolver)
+         *
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.link"
+         * @returns {WebLink|DocumentLink|ImageLink} - The Link fragment to manipulate.
+         */
+        getLink: function(name) {
+            var fragment = this.get(name);
+
+            if (fragment instanceof Global.Prismic.Fragments.WebLink ||
+                fragment instanceof Global.Prismic.Fragments.DocumentLink ||
+                fragment instanceof Global.Prismic.Fragments.ImageLink) {
+                return fragment;
+            }
+            return null;
         },
 
         /**
@@ -923,6 +956,7 @@
             if (fragment instanceof Global.Prismic.Fragments.Number) {
                 return fragment.value;
             }
+            return null;
         },
 
         /**
@@ -938,11 +972,12 @@
             if (fragment instanceof Global.Prismic.Fragments.Color) {
                 return fragment.value;
             }
+            return null;
         },
 
         /** Gets the GeoPoint fragment in the current Document object, for further manipulation.
          *
-         * @example document.getGeoPoint('blog-post.location').asHtml(ctx)
+         * @example document.getGeoPoint('blog-post.location').asHtml(linkResolver)
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.location"
          * @returns {GeoPoint} - The GeoPoint object to manipulate
@@ -953,12 +988,13 @@
             if(fragment instanceof Global.Prismic.Fragments.GeoPoint) {
                 return fragment;
             }
+            return null;
         },
 
         /**
          * Gets the Group fragment in the current Document object, for further manipulation.
          *
-         * @example document.getGroup('product.gallery').asHtml(ctx).
+         * @example document.getGroup('product.gallery').asHtml(linkResolver).
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
          * @returns {Group} - The Group fragment to manipulate.
@@ -969,22 +1005,31 @@
             if (fragment instanceof Global.Prismic.Fragments.Group) {
                 return fragment;
             }
+            return null;
         },
 
         /**
          * Shortcut to get the HTML output of the fragment in the current document.
-         * This is the same as writing document.get(fragment).asHtml(ctx);
+         * This is the same as writing document.get(fragment).asHtml(linkResolver);
          *
          * @param {string} name - The name of the fragment to get, with its type; for instance, "blog-post.body"
-         * @param {function} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
+         * @param {function} linkResolver
          * @returns {string} - The HTML output
          */
-        getHtml: function(name, ctx) {
+        getHtml: function(name, linkResolver) {
+            if (!isFunction(linkResolver)) {
+                // Backward compatibility with the old ctx argument
+                var ctx = linkResolver;
+                linkResolver = function(doc, isBroken) {
+                    return ctx.linkResolver(ctx, doc, isBroken);
+                };
+            }
             var fragment = this.get(name);
 
             if(fragment && fragment.asHtml) {
-                return fragment.asHtml(ctx);
+                return fragment.asHtml(linkResolver);
             }
+            return null;
         },
 
         /**
@@ -993,14 +1038,21 @@
          * Note that most of the time you will not use this method, but read fragment independently and generate
          * HTML output for {@link StructuredText} fragment with that class' asHtml method.
          *
-         * @param {object} ctx - The ctx object that contains the context: ctx.api, ctx.ref, ctx.maybeRef, ctx.oauth(), and ctx.linkResolver()
+         * @param {function} linkResolver
          * @returns {string} - The HTML output
          */
-        asHtml: function(ctx) {
+        asHtml: function(linkResolver) {
+            if (!isFunction(linkResolver)) {
+                // Backward compatibility with the old ctx argument
+                var ctx = linkResolver;
+                linkResolver = function(doc, isBroken) {
+                    return ctx.linkResolver(ctx, doc, isBroken);
+                };
+            }
             var htmls = [];
             for(var field in this.fragments) {
                 var fragment = this.get(field);
-                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(ctx) + '</section>' : '');
+                htmls.push(fragment && fragment.asHtml ? '<section data-field="' + field + '">' + fragment.asHtml(linkResolver) + '</section>' : '');
             }
             return htmls.join('');
         },
@@ -1010,14 +1062,39 @@
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function(ctx) {
+         asText: function(linkResolver) {
+            if (!isFunction(linkResolver)) {
+                // Backward compatibility with the old ctx argument
+                var ctx = linkResolver;
+                linkResolver = function(doc, isBroken) {
+                    return ctx.linkResolver(ctx, doc, isBroken);
+                };
+            }
             var texts = [];
             for(var field in this.fragments) {
                 var fragment = this.get(field);
-                texts.push(fragment && fragment.asText ? fragment.asText(ctx) : '');
+                texts.push(fragment && fragment.asText ? fragment.asText(linkResolver) : '');
             }
             return texts.join('');
-         }
+         },
+
+        /**
+         * An array of the fragments with the given fragment name.
+         * The array is often a single-element array, expect when the fragment is a multiple fragment.
+         * @private
+         */
+        _getFragments: function(name) {
+            if (!this.fragments || !this.fragments[name]) {
+                return [];
+            }
+
+            if (Array.isArray(this.fragments[name])) {
+                return this.fragments[name];
+            } else {
+                return [this.fragments[name]];
+            }
+
+        }
 
     };
 
@@ -1087,24 +1164,24 @@
                 var value =  fvalue(function(error, value, xhr) {
                     self.set(key, value, ttl);
                     delete self.states[key];
-                    done && done(error, value, xhr);
+                    if (done) done(error, value, xhr);
                 });
             } else {
-                done && done(null, found);
+                if (done) done(null, found);
             }
         },
 
         isExpired: function(key) {
             var entry = this.cache[key];
             if(entry) {
-                return entry.expiredIn != 0 && entry.expiredIn < Date.now();
+                return entry.expiredIn !== 0 && entry.expiredIn < Date.now();
             } else {
                 return false;
             }
         },
 
         isInProgress: function(key) {
-            return this.states[key] == 'progress';
+            return this.states[key] === 'progress';
         },
 
         exists: function(key) {
@@ -1119,6 +1196,13 @@
             this.cache = {};
         }
     };
+
+    // -- Private helpers
+
+    function isFunction(f) {
+        var getType = {};
+        return f && getType.toString.call(f) === '[object Function]';
+    }
 
     // -- Export Globally
 
@@ -1627,7 +1711,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return this.main.asHtml()
+            return this.main.asHtml();
         },
 
         /**
@@ -1766,7 +1850,7 @@
         getTitle: function () {
             for(var i=0; i<this.blocks.length; i++) {
                 var block = this.blocks[i];
-                if(block.type.indexOf('heading') == 0) {
+                if(block.type.indexOf('heading') === 0) {
                     return block;
                 }
             }
@@ -1839,7 +1923,7 @@
                 var ctx = linkResolver;
                 linkResolver = function(doc, isBroken) {
                     return ctx.linkResolver(ctx, doc, isBroken);
-                }
+                };
             }
             if (Array.isArray(this.blocks)) {
 
@@ -1947,7 +2031,7 @@
                     // Close a tag
                     var tag = stack.pop();
                     var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
-                    if (stack.length == 0) {
+                    if (stack.length === 0) {
                         // The tag was top level
                         html += innerHtml;
                     } else {
@@ -1969,7 +2053,7 @@
                         if (fragment) {
                             url = fragment.url(linkResolver);
                         } else {
-                            console && console.error && console.error('Impossible to convert span.data as a Fragment', span);
+                            if (console && console.error) console.error('Impossible to convert span.data as a Fragment', span);
                             return '';
                         }
                         span.url = url;
@@ -1983,7 +2067,7 @@
             }
             if (pos < text.length) {
                 c = text[pos];
-                if (stack.length == 0) {
+                if (stack.length === 0) {
                     // Top-level text
                     html += htmlEscape(c);
                 } else {
@@ -2098,7 +2182,7 @@
                 break;
 
             default:
-                console && console.log && console.log("Fragment type not supported: ", field.type);
+                if (console && console.log) console.log("Fragment type not supported: ", field.type);
                 break;
         }
 
@@ -2147,17 +2231,17 @@
         if (element.type == "image") {
             var label = element.label ? (" " + element.label) : "";
             var imgTag = '<img src="' + element.url + '" alt="' + element.alt + '">';
-            return '<p class="block-img' + label + '">'
-                + (element.linkUrl ? ('<a href="' + element.linkUrl + '">' + imgTag + '</a>') : imgTag)
-                + '</p>';
+            return '<p class="block-img' + label + '">' +
+                (element.linkUrl ? ('<a href="' + element.linkUrl + '">' + imgTag + '</a>') : imgTag) +
+                '</p>';
         }
 
         if (element.type == "embed") {
-            return '<div data-oembed="'+ element.embed_url
-                + '" data-oembed-type="'+ element.type
-                + '" data-oembed-provider="'+ element.provider_name
-                + (element.label ? ('" class="' + label) : '')
-                + '">' + element.oembed.html+"</div>";
+            return '<div data-oembed="'+ element.embed_url +
+                '" data-oembed-type="'+ element.type +
+                '" data-oembed-provider="'+ element.provider_name +
+                (element.label ? ('" class="' + element.label) : '') +
+                '">' + element.oembed.html+"</div>";
         }
 
         if (element.type === 'hyperlink') {
@@ -2189,7 +2273,7 @@
         GeoPoint: GeoPoint,
         initField: initField,
         insertSpans: insertSpans
-    }
+    };
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
@@ -2197,60 +2281,339 @@
 
     "use strict";
 
+    /**
+     * @global
+     * @namespace
+     * @alias Predicates
+     */
     var predicates = {
 
+        /**
+         * Build an "at" predicate: equality of a fragment to a value.
+         *
+         * @example Predicates.at("document.type", "article")
+         * @param fragment {String}
+         * @param value {String}
+         * @returns {Array} an array corresponding to the predicate
+         */
         at: function(fragment, value) { return ["at", fragment, value]; },
 
+        /**
+         * Build an "any" predicate: equality of a fragment to a value.
+         *
+         * @example Predicates.any("document.type", ["article", "blog-post"])
+         * @param fragment {String}
+         * @param values {Array}
+         * @returns {Array} an array corresponding to the predicate
+         */
         any: function(fragment, values) { return ["any", fragment, values]; },
 
-        fulltext: function(fragment, values) { return ["fulltext", fragment, values]; },
+        /**
+         * Build a "fulltext" predicate: fulltext search in a fragment.
+         *
+         * @example Predicates.fulltext("my.article.body", "sausage"])
+         * @param fragment {String}
+         * @param value {String} the term to search
+         * @returns {Array} an array corresponding to the predicate
+         */
+        fulltext: function(fragment, value) { return ["fulltext", fragment, value]; },
 
-        similar: function(fragment, value) { return ["similar", fragment, value]; },
+        /**
+         * Build a "similar" predicate.
+         *
+         * @example Predicates.similar("UXasdFwe42D", 10)
+         * @param documentId {String} the document id to retrieve similar documents to.
+         * @param maxResults {Number} the maximum number of results to return
+         * @returns {Array} an array corresponding to the predicate
+         */
+        similar: function(documentId, maxResults) { return ["similar", documentId, maxResults]; },
 
+        /**
+         * Build a "number.gt" predicate: documents where the fragment field is greater than the given value.
+         *
+         * @example Predicates.gt("my.product.price", 10)
+         * @param fragment {String} the name of the field - must be a number.
+         * @param value {Number} the lower bound of the predicate
+         * @returns {Array} an array corresponding to the predicate
+         */
         gt: function(fragment, value) { return ["number.gt", fragment, value]; },
 
+        /**
+         * Build a "number.lt" predicate: documents where the fragment field is lower than the given value.
+         *
+         * @example Predicates.lt("my.product.price", 20)
+         * @param fragment {String} the name of the field - must be a number.
+         * @param value {Number} the upper bound of the predicate
+         * @returns {Array} an array corresponding to the predicate
+         */
         lt: function(fragment, value) { return ["number.lt", fragment, value]; },
 
+        /**
+         * Build a "number.inRange" predicate: combination of lt and gt.
+         *
+         * @example Predicates.inRange("my.product.price", 10, 20)
+         * @param fragment {String} the name of the field - must be a number.
+         * @param before {Number}
+         * @param after {Number}
+         * @returns {Array} an array corresponding to the predicate
+         */
         inRange: function(fragment, before, after) { return ["number.inRange", fragment, before, after]; },
 
+        /**
+         * Build a "date.before" predicate: documents where the fragment field is before the given date.
+         *
+         * @example Predicates.dateBefore("my.product.releaseDate", new Date(2014, 6, 1))
+         * @param fragment {String} the name of the field - must be a date or timestamp field.
+         * @param before {Date}
+         * @returns {Array} an array corresponding to the predicate
+         */
         dateBefore: function(fragment, before) { return ["date.before", fragment, before]; },
 
+        /**
+         * Build a "date.after" predicate: documents where the fragment field is after the given date.
+         *
+         * @example Predicates.dateAfter("my.product.releaseDate", new Date(2014, 1, 1))
+         * @param fragment {String} the name of the field - must be a date or timestamp field.
+         * @param after {Date}
+         * @returns {Array} an array corresponding to the predicate
+         */
         dateAfter: function(fragment, after) { return ["date.after", fragment, after]; },
 
+        /**
+         * Build a "date.between" predicate: combination of dateBefore and dateAfter
+         *
+         * @example Predicates.dateBetween("my.product.releaseDate", new Date(2014, 1, 1), new Date(2014, 6, 1))
+         * @param fragment {String} the name of the field - must be a date or timestamp field.
+         * @param before {Date}
+         * @param after {Date}
+         * @returns {Array} an array corresponding to the predicate
+         */
         dateBetween: function(fragment, before, after) { return ["date.between", fragment, before, after]; },
 
+        /**
+         *
+         * @example Predicates.dayOfMonth("my.product.releaseDate", 14)
+         * @param fragment
+         * @param day {Number} between 1 and 31
+         * @returns {Array}
+         */
         dayOfMonth: function(fragment, day) { return ["date.day-of-month", fragment, day]; },
 
+        /**
+         *
+         * @example Predicates.dayOfMonthAfter("my.product.releaseDate", 14)
+         * @param fragment
+         * @param day {Number} between 1 and 31
+         * @returns {Array}
+         */
         dayOfMonthAfter: function(fragment, day) { return ["date.day-of-month-after", fragment, day]; },
 
+        /**
+         *
+         * @example Predicates.dayOfMonthBefore("my.product.releaseDate", 14)
+         * @param fragment
+         * @param day {Number} between 1 and 31
+         * @returns {Array}
+         */
         dayOfMonthBefore: function(fragment, day) { return ["date.day-of-month-before", fragment, day]; },
 
+        /**
+         *
+         * @example Predicates.dayOfWeek("my.product.releaseDate", 14)
+         * @param fragment
+         * @param day {Number|String} Number between 1 and 7 or string between "Monday" and "Sunday"
+         * @returns {Array}
+         */
         dayOfWeek: function(fragment, day) { return ["date.day-of-week", fragment, day]; },
 
+        /**
+         *
+         * @example Predicates.dayOfWeekAfter("my.product.releaseDate", "Wednesday")
+         * @param fragment
+         * @param day {Number|String} Number between 1 and 7 or string between "Monday" and "Sunday"
+         * @returns {Array}
+         */
         dayOfWeekAfter: function(fragment, day) { return ["date.day-of-week-after", fragment, day]; },
 
+        /**
+         *
+         * @example Predicates.dayOfWeekBefore("my.product.releaseDate", "Wednesday")
+         * @param fragment
+         * @param day {Number|String} Number between 1 and 7 or string between "Monday" and "Sunday"
+         * @returns {Array}
+         */
         dayOfWeekBefore: function(fragment, day) { return ["date.day-of-week-before", fragment, day]; },
 
+        /**
+         *
+         * @example Predicates.month("my.product.releaseDate", "June")
+         * @param fragment
+         * @param month {Number|String} Number between 1 and 12 or string between "January" and "December"
+         * @returns {Array}
+         */
         month: function(fragment, month) { return ["date.month", fragment, month]; },
 
+        /**
+         *
+         * @example Predicates.monthBefore("my.product.releaseDate", "June")
+         * @param fragment
+         * @param month {Number|String} Number between 1 and 12 or string between "January" and "December"
+         * @returns {Array}
+         */
         monthBefore: function(fragment, month) { return ["date.month-before", fragment, month]; },
 
+        /**
+         *
+         * @example Predicates.monthAfter("my.product.releaseDate", "June")
+         * @param fragment
+         * @param month {Number|String} Number between 1 and 12 or string between "January" and "December"
+         * @returns {Array}
+         * @returns {Array}
+         */
         monthAfter: function(fragment, month) { return ["date.month-after", fragment, month]; },
 
+        /**
+         *
+         * @example Predicates.year("my.product.releaseDate", 2014)
+         * @param fragment
+         * @param year {Number}
+         * @returns {Array}
+         */
         year: function(fragment, year) { return ["date.year", fragment, year]; },
 
+        /**
+         *
+         * @example Predicates.hour("my.product.releaseDate", 12)
+         * @param fragment
+         * @param hour {Number}
+         * @returns {Array}
+         */
         hour: function(fragment, hour) { return ["date.hour", fragment, hour]; },
 
+        /**
+         *
+         * @example Predicates.hourBefore("my.product.releaseDate", 12)
+         * @param fragment
+         * @param hour {Number}
+         * @returns {Array}
+         */
         hourBefore: function(fragment, hour) { return ["date.hour-before", fragment, hour]; },
 
+        /**
+         *
+         * @example Predicates.hourAfter("my.product.releaseDate", 12)
+         * @param fragment
+         * @param hour {Number}
+         * @returns {Array}
+         */
         hourAfter: function(fragment, hour) { return ["date.hour-after", fragment, hour]; },
 
-        near: function(fragment, latitude, longitude, radius) { return ["near", fragment, latitude, longitude]; }
+        /**
+         *
+         * @example Predicates.near("my.store.location", 48.8768767, 2.3338802, 10)
+         * @param fragment
+         * @param latitude {Number}
+         * @param longitude {Number}
+         * @param radius {Number} in kilometers
+         * @returns {Array}
+         */
+        near: function(fragment, latitude, longitude, radius) { return ["geopoint.near", fragment, latitude, longitude, radius]; }
 
     };
-
-    // -- Export Globally
 
     Global.Prismic.Predicates = predicates;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+
+(function (Global, undefined) {
+
+    "use strict";
+
+    var COOKIE_NAME = "io.prismic.experiment";
+
+    /**
+     * A collection of experiments currently available
+     * @param data the json data received from the Prismic API
+     * @constructor
+     */
+    function Experiments(data) {
+        var drafts = [];
+        var running = [];
+        if (data) {
+            data.drafts && data.drafts.forEach(function (exp) {
+                drafts.push(new Experiment(exp));
+            });
+            data.running && data.running.forEach(function (exp) {
+                running.push(new Experiment(exp));
+            });
+        }
+        this.drafts = drafts;
+        this.running = running;
+        this.cookieName = COOKIE_NAME;
+    }
+
+    Experiments.prototype.current = function() {
+        return this.running.length > 0 ? this.running[0] : null;
+    };
+
+    /**
+     * Get the current running experiment variation ref from a cookie content
+     */
+    Experiments.prototype.refFromCookie = function(cookie) {
+        if (!cookie || cookie.trim() === "") return null;
+        var splitted = cookie.trim().split("%20");
+        if (splitted.length < 2) return null;
+        var expId = splitted[0];
+        var varIndex = parseInt(splitted[1], 10);
+        this.running.forEach(function(exp) {
+            if (exp.googleId() == expId) {
+                return (exp.variations.length > varIndex) ? exp.variations[varIndex] : null;
+            }
+        });
+        return null;
+    };
+
+    function Experiment(data) {
+        this.data = data;
+        var variations = [];
+        data.variations && data.variations.forEach(function(v) {
+            variations.push(new Variation(v));
+        });
+        this.variations = variations;
+    }
+
+    Experiment.prototype.id = function() {
+        return this.data.id;
+    };
+
+    Experiment.prototype.googleId = function() {
+        return this.data.googleId;
+    };
+
+    Experiment.prototype.name = function() {
+        return this.data.name;
+    };
+
+    function Variation(data) {
+        this.data = data;
+    }
+
+    Variation.prototype.id = function() {
+        return this.data.id;
+    };
+
+    Variation.prototype.ref = function() {
+        return this.data.ref;
+    };
+
+    Variation.prototype.label = function() {
+        return this.data.label;
+    };
+
+    Global.Prismic.Experiments = Experiments;
+    Global.Prismic.Experiment = Experiment;
+    Global.Prismic.Variation = Variation;
+
+}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+
+(function (Global, undefined) {Global.Prismic.version = '1.0.21';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));

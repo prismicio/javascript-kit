@@ -8,7 +8,7 @@ var gulp = require('gulp'),
     gist = require('gulp-gist'),
     deploy = require("gulp-gh-pages");
 
-var SOURCES = ['src/api.js', 'src/fragments.js', 'src/predicates.js'];
+var SOURCES = ['src/api.js', 'src/fragments.js', 'src/predicates.js', 'src/experiments.js'];
 
 var pkg = require('./package.json');
 
@@ -26,7 +26,9 @@ function string_src(filename, string) {
  */
 
 gulp.task('version', function () {
-    return string_src("version.js", "Global.Prismic.version = '" + pkg.version + "';\n")
+    return string_src("version.js", "(function (Global, undefined) {" +
+        "Global.Prismic.version = '" + pkg.version + "';" +
+        "}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));\n")
         .pipe(gulp.dest('src/'));
 });
 
@@ -81,22 +83,22 @@ gulp.task('jshint', function() {
 
 gulp.task('test:int', function() {
     return gulp.src('./test/test.html')
-        .pipe(qunit())
+        .pipe(qunit({'phantomjs-options': ['--ssl-protocol=tlsv1']}))
 });
 
 gulp.task('test:unit', function() {
     return gulp.src('./test/unit.html')
-        .pipe(qunit())
+        .pipe(qunit({'phantomjs-options': ['--ssl-protocol=tlsv1']}))
 });
 
 gulp.task('test:fragments', function() {
     return gulp.src('./test/fragments.html')
-        .pipe(qunit())
+        .pipe(qunit({'phantomjs-options': ['--ssl-protocol=tlsv1']}))
 });
 
 gulp.task('test:doc', function() {
     return gulp.src('./test/doc.html')
-        .pipe(qunit())
+        .pipe(qunit({'phantomjs-options': ['--ssl-protocol=tlsv1']}))
 });
 
 
