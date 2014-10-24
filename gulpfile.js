@@ -8,7 +8,14 @@ var gulp = require('gulp'),
     gist = require('gulp-gist'),
     deploy = require("gulp-gh-pages");
 
-var SOURCES = ['src/api.js', 'src/fragments.js', 'src/predicates.js', 'src/experiments.js'];
+var SOURCES = [
+    'src/polyfill.js',
+    'src/api.js',
+    'src/documents.js',
+    'src/fragments.js',
+    'src/predicates.js',
+    'src/experiments.js'
+];
 
 var pkg = require('./package.json');
 

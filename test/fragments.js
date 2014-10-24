@@ -282,11 +282,11 @@
       Api.form('everything').query('[[:d = at(document.id, "UrDndQEAALQMyrXF")]]').ref(Api.master()).submit(function(err, documents) {
         if (err) { console.log(err); start(); }
         // Group fragments are accessible
-        equal(documents.results[0].getGroup('docchapter.docs').toArray()[0]['linktodoc'].value.document.type, 'doc');
+        equal(documents.results[0].getGroup('docchapter.docs').toArray()[0].getLink('linktodoc').value.document.type, 'doc');
         // Group fragments are loopable
         var slugs = "";
         for (var i = 0; i<documents.results[0].getGroup('docchapter.docs').toArray().length; i++) {
-          slugs += documents.results[0].getGroup('docchapter.docs').toArray()[i]['linktodoc'].value.document.slug + ' ';
+          slugs += documents.results[0].getGroup('docchapter.docs').toArray()[i].getLink('linktodoc').value.document.slug + ' ';
         }
         equal(slugs.trim(), 'with-jquery with-bootstrap');
         // Group fragments are serializable when asHtml is called directly on them

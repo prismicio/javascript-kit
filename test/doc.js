@@ -318,11 +318,11 @@
     var docs = group ? group.toArray() : [];
     for (var i = 0; i < docs.length; i++) {
       // Desc and Link are Fragments, their type depending on what's declared in the Document Mask
-      var desc = docs[i]["desc"];
-      var link = docs[i]["linktodoc"];
+      var desc = docs[i].getStructuredText("desc");
+      var link = docs[i].getLink("linktodoc");
     }
     // endgist
-    equal(docs[0]["desc"].asHtml(), "<p>A detailed step by step point of view on how installing happens.</p>");
+    equal(docs[0].getStructuredText("desc").asHtml(), "<p>A detailed step by step point of view on how installing happens.</p>");
   });
 
   test('prismic-link.js', 1, function() {

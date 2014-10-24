@@ -569,50 +569,49 @@
      * @alias Fragments:Group
      */
     function Group(data) {
-      this.value = data;
+        this.value = [];
+        for (var i = 0; i < data.length; i++) {
+            this.value.push(new Global.Prismic.GroupDoc(data[i]));
+        }
     }
     Group.prototype = {
-      /**
-       * Turns the fragment into a useable HTML version of it.
-       * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-       * @params {function} linkResolver - linkResolver function (please read prismic.io online documentation about this)
-       * @returns {string} - basic HTML code for the fragment
-       */
-      asHtml: function(linkResolver) {
-        var output = "";
-        for (var i=0; i<this.value.length; i++) {
-          for (var fragmentName in this.value[i]) {
-            output += '<section data-field="'+fragmentName+'">';
-            output += this.value[i][fragmentName].asHtml(linkResolver);
-            output += '</section>';
-          }
-        }
-        return output;
-      },
-      /**
-       * Turns the Group fragment into an array in order to access its items (groups of fragments),
-       * or to loop through them.
-       * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
-       * @returns {array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
-       */
-       toArray: function(){
-         return this.value;
-       },
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         * @params {function} linkResolver - linkResolver function (please read prismic.io online documentation about this)
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function(linkResolver) {
+            var output = "";
+            for (var i = 0; i < this.value.length; i++) {
+                output += this.value[i].asHtml(linkResolver);
+            }
+            return output;
+        },
+        /**
+         * Turns the Group fragment into an array in order to access its items (groups of fragments),
+         * or to loop through them.
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @returns {array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
+         */
+        toArray: function(){
+            return this.value;
+        },
 
         /**
          * Turns the fragment into a useable text version of it.
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function(linkResolver) {
+        asText: function(linkResolver) {
             var output = "";
             for (var i=0; i<this.value.length; i++) {
-              for (var fragmentName in this.value[i]) {
-                output += this.value[i][fragmentName].asText(linkResolver);
-              }
+                for (var fragmentName in this.value[i]) {
+                    output += this.value[i][fragmentName].asText(linkResolver);
+                }
             }
             return output;
-         }
+        }
     };
 
 
@@ -954,17 +953,7 @@
                 break;
 
             case "Group":
-                var groups_array = [];
-                // for each array of groups
-                for (var i = 0; i < field.value.length; i++) {
-                  var group = {}; // recreate groups with...
-                  for (var fragmentName in field.value[i]) {
-                    // ... the same fragment name as keys, but reinitalized fragments as values
-                    group[fragmentName] = initField(field.value[i][fragmentName]);
-                  }
-                  groups_array.push(group);
-                }
-                output = new Group(groups_array);
+                output = new Group(field.value);
                 break;
 
             default:
