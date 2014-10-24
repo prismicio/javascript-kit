@@ -1,3 +1,19 @@
+(function() {
+
+    if (!Object.create) {
+        Object.create = (function () {
+            function F() {}
+            return function (o) {
+                if (arguments.length != 1) {
+                    throw new Error('Object.create implementation only accepts one parameter.');
+                }
+                F.prototype = o;
+                return new F();
+            };
+        })();
+    }
+
+})();
 (function (Global, undefined) {
 
     "use strict";
@@ -385,7 +401,7 @@
         /**
          * Parse json as a document
          *
-         * @returns {Doc}
+         * @returns {Document}
          */
         parseDoc: function(json) {
             var linkedDocuments = [];
@@ -400,7 +416,7 @@
                 fragments[json.type + '.' + field] = json.data[json.type][field];
             }
 
-            return new Doc(
+            return new Global.Prismic.Document(
                 json.id,
                 json.type,
                 json.href,
@@ -599,7 +615,7 @@
                 );
             });
 
-        },
+        }
 
     };
 
@@ -680,53 +696,123 @@
     }
 
     /**
-     * Embodies a document as returned by the API.
-     * Most useful fields: id, type, tags, slug, slugs
+     * Embodies a prismic.io ref (a past or future point in time you can query)
      * @constructor
      * @global
-     * @alias Doc
      */
-    function Doc(id, type, href, tags, slugs, linkedDocuments, fragments) {
-
+    function Ref(ref, label, isMaster, scheduledAt, id) {
         /**
-         * The ID of the document
-         * @type {string}
+         * @field
+         * @description the ID of the ref
+         */
+        this.ref = ref;
+        /**
+         * @field
+         * @description the label of the ref
+         */
+        this.label = label;
+        /**
+         * @field
+         * @description is true if the ref is the master ref
+         */
+        this.isMaster = isMaster;
+        /**
+         * @field
+         * @description the scheduled date of the ref
+         */
+        this.scheduledAt = scheduledAt;
+        /**
+         * @field
+         * @description the name of the ref
          */
         this.id = id;
-        /**
-         * The type of the document, corresponds to a document mask defined in the repository
-         * @type {string}
-         */
-        this.type = type;
-        /**
-         * The URL of the document in the API
-         * @type {string}
-         */
-        this.href = href;
-        /**
-         * The tags of the document
-         * @type {array}
-         */
-        this.tags = tags;
-        /**
-         * The current slug of the document, "-" if none was provided
-         * @type {string}
-         */
-        this.slug = slugs ? slugs[0] : "-";
-        /**
-         * All the slugs that were ever used by this document (including the current one, at the head)
-         * @type {array}
-         */
-        this.slugs = slugs;
-        /**
-         * Linked documents, as an array of {@link LinkedDocument}
-         * @type {array}
-         */
-        this.linkedDocuments = linkedDocuments;
-        this.fragments = fragments;
+    }
+    Ref.prototype = {};
+
+    /**
+     * Api cache
+     */
+    function ApiCache() {
+        this.cache = {};
+        this.states = {};
     }
 
-    Doc.prototype = {
+    ApiCache.prototype = {
+
+        get: function(key) {
+            var maybeEntry = this.cache[key];
+            if(maybeEntry && (!this.isExpired(key) || (this.isExpired(key) && this.isInProgress(key)))) {
+                return maybeEntry.data;
+            } else return null;
+        },
+
+        set: function(key, value, ttl) {
+            this.cache[key] = {
+                data: value,
+                expiredIn: ttl ? (Date.now() + (ttl * 1000)) : 0
+            };
+        },
+
+        getOrSet: function(key, ttl, fvalue, done) {
+            var found = this.get(key);
+            var self = this;
+            if(!found) {
+                this.states[key] = 'progress';
+                var value =  fvalue(function(error, value, xhr) {
+                    self.set(key, value, ttl);
+                    delete self.states[key];
+                    if (done) done(error, value, xhr);
+                });
+            } else {
+                if (done) done(null, found);
+            }
+        },
+
+        isExpired: function(key) {
+            var entry = this.cache[key];
+            if(entry) {
+                return entry.expiredIn !== 0 && entry.expiredIn < Date.now();
+            } else {
+                return false;
+            }
+        },
+
+        isInProgress: function(key) {
+            return this.states[key] === 'progress';
+        },
+
+        exists: function(key) {
+            return !!this.cache[key];
+        },
+
+        remove: function(key) {
+            return delete this.cache[key];
+        },
+
+        clear: function(key) {
+            this.cache = {};
+        }
+    };
+
+    // -- Export Globally
+
+    Global.Prismic = {
+        Api: prismic
+    };
+
+}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+
+(function (Global, undefined) {
+
+    "use strict";
+
+    /**
+     * Functions to access fragments: superclass for Document and Doc (from Group), not supposed to be created directly
+     * @constructor
+     */
+    function WithFragments() {}
+
+    WithFragments.prototype = {
         /**
          * Gets the fragment in the current Document object. Since you most likely know the type
          * of this fragment, it is advised that you use a dedicated method, like get StructuredText() or getDate(),
@@ -963,7 +1049,7 @@
          * Gets the Color fragment in the current Document object, for further manipulation.
          * @example document.getColor('product.color')
          *
-         * @param {string} fragment - The name of the fragment to get, with its type; for instance, "product.color"
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "product.color"
          * @returns {string} - The string value of the Color fragment.
          */
         getColor: function(name) {
@@ -1098,104 +1184,61 @@
 
     };
 
+
     /**
-     * Embodies a prismic.io ref (a past or future point in time you can query)
+     * Embodies a document as returned by the API.
+     * Most useful fields: id, type, tags, slug, slugs
      * @constructor
      * @global
+     * @alias Doc
      */
-    function Ref(ref, label, isMaster, scheduledAt, id) {
+    function Document(id, type, href, tags, slugs, linkedDocuments, fragments) {
+
         /**
-         * @field
-         * @description the ID of the ref
-         */
-        this.ref = ref;
-        /**
-         * @field
-         * @description the label of the ref
-         */
-        this.label = label;
-        /**
-         * @field
-         * @description is true if the ref is the master ref
-         */
-        this.isMaster = isMaster;
-        /**
-         * @field
-         * @description the scheduled date of the ref
-         */
-        this.scheduledAt = scheduledAt;
-        /**
-         * @field
-         * @description the name of the ref
+         * The ID of the document
+         * @type {string}
          */
         this.id = id;
+        /**
+         * The type of the document, corresponds to a document mask defined in the repository
+         * @type {string}
+         */
+        this.type = type;
+        /**
+         * The URL of the document in the API
+         * @type {string}
+         */
+        this.href = href;
+        /**
+         * The tags of the document
+         * @type {array}
+         */
+        this.tags = tags;
+        /**
+         * The current slug of the document, "-" if none was provided
+         * @type {string}
+         */
+        this.slug = slugs ? slugs[0] : "-";
+        /**
+         * All the slugs that were ever used by this document (including the current one, at the head)
+         * @type {array}
+         */
+        this.slugs = slugs;
+        /**
+         * Linked documents, as an array of {@link LinkedDocument}
+         * @type {array}
+         */
+        this.linkedDocuments = linkedDocuments;
+        this.fragments = fragments;
     }
-    Ref.prototype = {};
 
-    /**
-     * Api cache
-     */
-    function ApiCache() {
-        this.cache = {};
-        this.states = {};
+    Document.prototype = Object.create(WithFragments.prototype, {});
+
+    function GroupDoc(fragments) {
+        this.fragments = fragments;
     }
 
-    ApiCache.prototype = {
-
-        get: function(key) {
-            var maybeEntry = this.cache[key];
-            if(maybeEntry && (!this.isExpired(key) || (this.isExpired(key) && this.isInProgress(key)))) {
-                return maybeEntry.data;
-            } else return null;
-        },
-
-        set: function(key, value, ttl) {
-            this.cache[key] = {
-                data: value,
-                expiredIn: ttl ? (Date.now() + (ttl * 1000)) : 0
-            };
-        },
-
-        getOrSet: function(key, ttl, fvalue, done) {
-            var found = this.get(key);
-            var self = this;
-            if(!found) {
-                this.states[key] = 'progress';
-                var value =  fvalue(function(error, value, xhr) {
-                    self.set(key, value, ttl);
-                    delete self.states[key];
-                    if (done) done(error, value, xhr);
-                });
-            } else {
-                if (done) done(null, found);
-            }
-        },
-
-        isExpired: function(key) {
-            var entry = this.cache[key];
-            if(entry) {
-                return entry.expiredIn !== 0 && entry.expiredIn < Date.now();
-            } else {
-                return false;
-            }
-        },
-
-        isInProgress: function(key) {
-            return this.states[key] === 'progress';
-        },
-
-        exists: function(key) {
-            return !!this.cache[key];
-        },
-
-        remove: function(key) {
-            return delete this.cache[key];
-        },
-
-        clear: function(key) {
-            this.cache = {};
-        }
-    };
+    GroupDoc.prototype = Object.create(WithFragments.prototype, {});
 
     // -- Private helpers
 
@@ -1204,11 +1247,11 @@
         return f && getType.toString.call(f) === '[object Function]';
     }
 
-    // -- Export Globally
+    // -- Export globally
 
-    Global.Prismic = {
-        Api: prismic
-    };
+    Global.Prismic.Document = Document;
+    Global.Prismic.GroupDoc = GroupDoc;
+
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
@@ -1783,50 +1826,49 @@
      * @alias Fragments:Group
      */
     function Group(data) {
-      this.value = data;
+        this.value = [];
+        for (var i = 0; i < data.length; i++) {
+            this.value.push(new Global.Prismic.GroupDoc(data[i]));
+        }
     }
     Group.prototype = {
-      /**
-       * Turns the fragment into a useable HTML version of it.
-       * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-       * @params {function} linkResolver - linkResolver function (please read prismic.io online documentation about this)
-       * @returns {string} - basic HTML code for the fragment
-       */
-      asHtml: function(linkResolver) {
-        var output = "";
-        for (var i=0; i<this.value.length; i++) {
-          for (var fragmentName in this.value[i]) {
-            output += '<section data-field="'+fragmentName+'">';
-            output += this.value[i][fragmentName].asHtml(linkResolver);
-            output += '</section>';
-          }
-        }
-        return output;
-      },
-      /**
-       * Turns the Group fragment into an array in order to access its items (groups of fragments),
-       * or to loop through them.
-       * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
-       * @returns {array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
-       */
-       toArray: function(){
-         return this.value;
-       },
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         * @params {function} linkResolver - linkResolver function (please read prismic.io online documentation about this)
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function(linkResolver) {
+            var output = "";
+            for (var i = 0; i < this.value.length; i++) {
+                output += this.value[i].asHtml(linkResolver);
+            }
+            return output;
+        },
+        /**
+         * Turns the Group fragment into an array in order to access its items (groups of fragments),
+         * or to loop through them.
+         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+         * @returns {array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
+         */
+        toArray: function(){
+            return this.value;
+        },
 
         /**
          * Turns the fragment into a useable text version of it.
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function(linkResolver) {
+        asText: function(linkResolver) {
             var output = "";
             for (var i=0; i<this.value.length; i++) {
-              for (var fragmentName in this.value[i]) {
-                output += this.value[i][fragmentName].asText(linkResolver);
-              }
+                for (var fragmentName in this.value[i]) {
+                    output += this.value[i][fragmentName].asText(linkResolver);
+                }
             }
             return output;
-         }
+        }
     };
 
 
@@ -2168,17 +2210,7 @@
                 break;
 
             case "Group":
-                var groups_array = [];
-                // for each array of groups
-                for (var i = 0; i < field.value.length; i++) {
-                  var group = {}; // recreate groups with...
-                  for (var fragmentName in field.value[i]) {
-                    // ... the same fragment name as keys, but reinitalized fragments as values
-                    group[fragmentName] = initField(field.value[i][fragmentName]);
-                  }
-                  groups_array.push(group);
-                }
-                output = new Group(groups_array);
+                output = new Group(field.value);
                 break;
 
             default:
