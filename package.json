@@ -15,7 +15,7 @@
     "gulp-uglify": "~1.0.1",
     "gulp-util": "~3.0.1",
     "gulp-concat": "~2.4.1",
-    "gulp-qunit": "~0.3.3",
+    "gulp-qunit": "jonkemp/gulp-qunit#0bbfa169f0",
     "gulp-jsdoc": "~0.1.4",
     "gulp-jshint": "~1.8.5",
     "gulp-gist": "~1.0.3",

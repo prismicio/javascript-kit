@@ -727,7 +727,6 @@
      * Api cache
      */
     function ApiCache() {
-        console.log("Create new ApiCache");
         this.cache = {};
         this.states = {};
     }
@@ -749,11 +748,9 @@
         },
 
         getOrSet: function(key, ttl, fvalue, done) {
-            console.log("Get or set " + key);
             var found = this.get(key);
             var self = this;
             if(!found) {
-                console.log("Not found, fetch it");
                 this.states[key] = 'progress';
                 fvalue(function(error, value, xhr) {
                     self.set(key, value, ttl);
@@ -761,7 +758,6 @@
                     if (done) done(error, value, xhr);
                 });
             } else {
-                console.log("Found it!!");
                 if (done) done(null, found);
             }
         },
