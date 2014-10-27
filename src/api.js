@@ -565,42 +565,52 @@
          * and the XMLHttpRequest
          */
         submit: function(callback) {
-            var self = this,
-                url = this.form.action;
+            var url = this.form.action;
 
-            if(this.data) {
+            if (this.data) {
                 var sep = (url.indexOf('?') > -1 ? '&' : '?');
                 for(var key in this.data) {
-                    var values = this.data[key];
-                    if(values) {
-                        for(var i=0; i<values.length; i++) {
-                            url += sep + key + '=' + encodeURIComponent(values[i]);
-                            sep = '&';
+                    if (this.data.hasOwnProperty(key)) {
+                        var values = this.data[key];
+                        if (values) {
+                            for (var i = 0; i < values.length; i++) {
+                                url += sep + key + '=' + encodeURIComponent(values[i]);
+                                sep = '&';
+                            }
                         }
                     }
                 }
             }
 
-            this.api.requestHandler(url, function (err, documents, xhr) {
+            var cacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+            var cache = this.api.apiCache;
 
-                if (err) { callback(err, null, xhr); return; }
-
-                var results = documents.results.map(prismic.fn.parseDoc);
-
-                callback(null, new Response(
-                    documents.page,
-                    documents.results_per_page,
-                    documents.results_size,
-                    documents.total_results_size,
-                    documents.total_pages,
-                    documents.next_page,
-                    documents.prev_page,
-                    results || []), xhr
-                );
-            });
-
+            if (cache.get(cacheKey)) {
+                callback(null, cache.get(cacheKey));
+            } else {
+                // The cache isn't really useful for in-browser usage because we already have the browser cache,
+                // but it is there for Node.js and other server-side implementations
+                this.api.requestHandler(url, function (err, documents, xhr) {
+                    if (err) { callback(err, null, xhr); return; }
+                    var results = documents.results.map(prismic.fn.parseDoc);
+                    var response = new Response(
+                            documents.page,
+                            documents.results_per_page,
+                            documents.results_size,
+                            documents.total_results_size,
+                            documents.total_pages,
+                            documents.next_page,
+                            documents.prev_page,
+                                results || []);
+                    var cacheControl = /max-age\s*=\s*(\d+)/.exec(xhr.getResponseHeader('Cache-Control'));
+                    if (cacheControl && cacheControl.length > 1) {
+                        var ttl = parseInt(cacheControl[1], 10);
+                        cache.set(cacheKey, response, ttl);
+                    }
+                    callback(null, response);
+                });
+            }
         }
-
     };
 
 
@@ -717,6 +727,7 @@
      * Api cache
      */
     function ApiCache() {
+        console.log("Create new ApiCache");
         this.cache = {};
         this.states = {};
     }
@@ -738,16 +749,19 @@
         },
 
         getOrSet: function(key, ttl, fvalue, done) {
+            console.log("Get or set " + key);
             var found = this.get(key);
             var self = this;
             if(!found) {
+                console.log("Not found, fetch it");
                 this.states[key] = 'progress';
-                var value =  fvalue(function(error, value, xhr) {
+                fvalue(function(error, value, xhr) {
                     self.set(key, value, ttl);
                     delete self.states[key];
                     if (done) done(error, value, xhr);
                 });
             } else {
+                console.log("Found it!!");
                 if (done) done(null, found);
             }
         },

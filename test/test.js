@@ -286,4 +286,17 @@
     }, previewToken);
   });
 
+  asyncTest('Test cache', 1, function() {
+      Prismic.Api(testRepository, function(err, Api) {
+          if (err) { console.log(err); start(); }
+          var form =  Api.form('products').ref(Api.master()).query('');
+          form.submit(function(err, response) {
+              if (err) { console.log(err); return; }
+              equal(Api.apiCache.get(form.url).results.length, response.results.length);
+              start();
+          });
+      });
+  });
+
+
 }(window.Prismic));
