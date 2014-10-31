@@ -283,17 +283,17 @@
      * @global
      * @alias Fragments:GeoPoint
      */
-    function GeoPoint(latitude, longitude) {
+    function GeoPoint(data) {
         /**
          * @field
          * @description the latitude of the geo point
          */
-        this.latitude = latitude;
+        this.latitude = data.latitude;
         /**
          * @field
          * @description the longitude of the geo point
          */
-        this.longitude = longitude;
+        this.longitude = data.longitude;
     }
 
     GeoPoint.prototype = {
@@ -874,94 +874,51 @@
      */
     function initField(field) {
 
-        var output, img;
+        var classForType = {
+            "Color": Color,
+            "Number": Num,
+            "Date": DateFragment,
+            "Timestamp": Timestamp,
+            "Text": Text,
+            "Embed": Embed,
+            "GeoPoint": GeoPoint,
+            "Select": Select,
+            "StructuredText": StructuredText,
+            "Link.document": DocumentLink,
+            "Link.web": WebLink,
+            "Link.file": FileLink,
+            "Link.image": ImageLink,
+            "Group": Group
+        };
 
-        switch (field.type) {
-
-            case "Color":
-                output = new Color(field.value);
-                break;
-
-            case "Number":
-                output = new Num(field.value);
-                break;
-
-            case "Date":
-                output = new DateFragment(field.value);
-                break;
-
-            case "Timestamp":
-                output = new Timestamp(field.value);
-                break;
-
-            case "Text":
-                output = new Text(field.value);
-                break;
-
-            case "Embed":
-                output = new Embed(field.value);
-                break;
-
-            case "GeoPoint":
-                output = new GeoPoint(field.value.latitude, field.value.longitude);
-                break;
-
-            case "Select":
-                output = new Select(field.value);
-                break;
-
-            case "Image":
-                img = field.value.main;
-                output = new ImageEl(
-                    new ImageView(
-                        img.url,
-                        img.dimensions.width,
-                        img.dimensions.height,
-                        img.alt
-                    ),
-                    {}
-                );
-                for (var name in field.value.views) {
-                    img = field.value.views[name];
-                    output.views[name] = new ImageView(
-                        img.url,
-                        img.dimensions.width,
-                        img.dimensions.height,
-                        img.alt
-                    );
-                }
-                break;
-
-            case "StructuredText":
-                output = new StructuredText(field.value);
-                break;
-
-            case "Link.document":
-                output = new DocumentLink(field.value);
-                break;
-
-            case "Link.web":
-                output = new WebLink(field.value);
-                break;
-
-            case "Link.file":
-                output = new FileLink(field.value);
-                break;
-
-            case "Link.image":
-                output = new ImageLink(field.value);
-                break;
-
-            case "Group":
-                output = new Group(field.value);
-                break;
-
-            default:
-                if (console && console.log) console.log("Fragment type not supported: ", field.type);
-                break;
+        if (classForType[field.type]) {
+            return new classForType[field.type](field.value);
         }
 
-        return output;
+        if (field.type === "Image") {
+            var img = field.value.main;
+            var output = new ImageEl(
+                new ImageView(
+                    img.url,
+                    img.dimensions.width,
+                    img.dimensions.height,
+                    img.alt
+                ),
+                {}
+            );
+            for (var name in field.value.views) {
+                img = field.value.views[name];
+                output.views[name] = new ImageView(
+                    img.url,
+                    img.dimensions.width,
+                    img.dimensions.height,
+                    img.alt
+                );
+            }
+            return output;
+        }
+
+        if (console && console.log) console.log("Fragment type not supported: ", field.type);
 
     }
 
