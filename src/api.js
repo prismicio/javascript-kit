@@ -148,7 +148,7 @@
 
                             response.on('end', function () {
                               var cacheControl = response.headers['cache-control'],
-                                  maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1]) : undefined,
+                                  maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1], 10) : undefined,
                                   json = JSON.parse(jsonStr);
 
                               if(maxAge) {
