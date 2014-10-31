@@ -529,7 +529,7 @@
         /**
          * Sets a page size to query for this SearchForm. This is an optional method.
          *
-         * @param {number} pageSize - The page size
+         * @param {number} size - The page size
          * @returns {SearchForm} - The SearchForm itself
          */
         pageSize: function(size) {
@@ -539,7 +539,7 @@
         /**
          * Sets the page number to query for this SearchForm. This is an optional method.
          *
-         * @param {number} page - The page number
+         * @param {number} p - The page number
          * @returns {SearchForm} - The SearchForm itself
          */
         page: function(p) {
@@ -617,7 +617,7 @@
     /**
      * Embodies the response of a SearchForm query as returned by the API.
      * It includes all the fields that are useful for pagination (page, total_pages, total_results_size, ...),
-     * as well as the field "results", which is an array of {@link Doc} objects, the documents themselves.
+     * as well as the field "results", which is an array of {@link Document} objects, the documents themselves.
      *
      * @constructor
      * @global
@@ -659,7 +659,7 @@
          */
         this.prev_page = prev_page;
         /**
-         * Array of {@link Doc} for the current page
+         * Array of {@link Document} for the current page
          * @type {Array}
          */
         this.results = results;

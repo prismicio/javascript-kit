@@ -217,8 +217,26 @@
 
         // Accessing number fields
         var price = doc.getNumber("product.price");
-        equal(price, 2.5); // gisthide
         // endgist
+          equal(price, 2.5);
+        start();
+      });
+    });
+  });
+
+  asyncTest('prismic-images.js', 1, function() {
+    Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+      if (err) { console.log(err); start(); } // gisthide
+      Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
+        if (err) { console.log(err); start(); } // gisthide
+        var doc = documents.results[0];
+        // startgist:fb48d850fd28f61fc0fb:prismic-images.js
+        // Accessing image fields
+        var image = doc.getImage("product.image");
+        // Most of the time you will be using the "main" view
+        var url = image.main.url;
+        // endgist
+        equal(url, "https://prismic-io.s3.amazonaws.com/lesbonneschoses/f606ad513fcc2a73b909817119b84d6fd0d61a6d.png");
         start();
       });
     });

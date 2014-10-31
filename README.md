@@ -1,6 +1,7 @@
 ## JavaScript development kit for prismic.io
 
 [![Build Status](https://api.travis-ci.org/prismicio/javascript-kit.png)](https://travis-ci.org/prismicio/javascript-kit)
+[![Code Climate](https://codeclimate.com/github/prismicio/javascript-kit.png)](https://codeclimate.com/github/prismicio/javascript-kit)
 
 * The [source code](https://github.com/prismicio/javascript-kit) is on Github.
 * The [Changelog](https://github.com/prismicio/javascript-kit/releases) is on Github's releases tab.
