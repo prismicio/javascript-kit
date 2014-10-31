@@ -2,7 +2,7 @@ var gulp = require('gulp'),
     gutil = require('gulp-util'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
-    qunit = require('gulp-qunit'),
+    mocha = require('gulp-mocha-phantomjs'),
     jsdoc = require('gulp-jsdoc'),
     jshint = require('gulp-jshint'),
     gist = require('gulp-gist'),
@@ -90,22 +90,22 @@ gulp.task('jshint', function() {
 
 gulp.task('test:int', function() {
     return gulp.src('./test/test.html')
-        .pipe(qunit({'phantomjs-options': ['--ssl-protocol=tlsv1']}))
+        .pipe(mocha())
 });
 
 gulp.task('test:unit', function() {
     return gulp.src('./test/unit.html')
-        .pipe(qunit({'phantomjs-options': ['--ssl-protocol=tlsv1']}))
+        .pipe(mocha())
 });
 
 gulp.task('test:fragments', function() {
     return gulp.src('./test/fragments.html')
-        .pipe(qunit({'phantomjs-options': ['--ssl-protocol=tlsv1']}))
+        .pipe(mocha())
 });
 
 gulp.task('test:doc', function() {
     return gulp.src('./test/doc.html')
-        .pipe(qunit({'phantomjs-options': ['--ssl-protocol=tlsv1']}))
+        .pipe(mocha())
 });
 
 

@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Prismic.io Javascript kit Test Suite</title>
-  <!-- Load local QUnit. -->
-  <link rel="stylesheet" href="../libs/qunit/qunit.css" media="screen">
-  <script src="../libs/qunit/qunit.js"></script>
-  <!-- Load local lib and tests. -->
-  <script src="../src/api.js"></script>
-  <script src="../src/documents.js"></script>
-  <script src="../src/fragments.js"></script>
-  <script src="../src/predicates.js"></script>
-  <script src="../src/experiments.js"></script>
-  <script src="./fragments.js"></script>
+    <meta charset="utf-8">
+    <title>Prismic.io Javascript kit Test Suite</title>
+    <!-- Mocha and Chai -->
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css">
 </head>
 <body>
-  <div id="qunit"></div>
-  <div id="qunit-fixture"></div>
+<div id="mocha"></div>
+<script src="../node_modules/chai/chai.js"></script>
+<script src="../node_modules/mocha/mocha.js"></script>
+<script>mocha.setup('bdd')</script>
+<!-- Load local lib and tests. -->
+<script src="../src/api.js"></script>
+<script src="../src/documents.js"></script>
+<script src="../src/fragments.js"></script>
+<script src="../src/predicates.js"></script>
+<script src="../src/experiments.js"></script>
+<script src="./fragments.js"></script>
+<script>
+    if (window.mochaPhantomJS) {
+        mochaPhantomJS.run();
+    } else {
+        mocha.run();
+    }
+</script>
 </body>
 </html>
