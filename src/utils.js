@@ -92,57 +92,43 @@
 
     var nodeJSRequest = (function() {
         if(typeof require == 'function' && require('http')) {
-            var requestsCache = {},
-                http = require('http'),
+            var http = require('http'),
                 https = require('https'),
                 url = require('url'),
                 querystring = require('querystring'),
                 pjson = require('../package.json');
 
             return function(requestUrl, callback) {
-                if(requestsCache[requestUrl]) {
-                    callback(null, requestsCache[requestUrl]);
-                } else {
 
-                    var parsed = url.parse(requestUrl),
-                        h = parsed.protocol == 'https:' ? https : http,
-                        options = {
-                            hostname: parsed.hostname,
-                            path: parsed.path,
-                            query: parsed.query,
-                            headers: {
-                                'Accept': 'application/json',
-                                'User-Agent': 'Prismic-javascript-kit/' + pjson.version + " NodeJS/" + process.version
-                            }
-                        };
-
-                    h.get(options, function(response) {
-                        if(response.statusCode && response.statusCode == 200) {
-                            var jsonStr = '';
-
-                            response.setEncoding('utf8');
-                            response.on('data', function (chunk) {
-                                jsonStr += chunk;
-                            });
-
-                            response.on('end', function () {
-                              var cacheControl = response.headers['cache-control'],
-                                  maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1], 10) : undefined,
-                                  json = JSON.parse(jsonStr);
-
-                              if(maxAge) {
-                                  requestsCache[requestUrl] = json;
-                              }
-
-                              callback(null, json, response);
-                            });
-                        } else {
-                            callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
+                var parsed = url.parse(requestUrl),
+                    h = parsed.protocol == 'https:' ? https : http,
+                    options = {
+                        hostname: parsed.hostname,
+                        path: parsed.path,
+                        query: parsed.query,
+                        headers: {
+                            'Accept': 'application/json',
+                            'User-Agent': 'Prismic-javascript-kit/' + pjson.version + " NodeJS/" + process.version
                         }
-                    });
+                    };
 
-                }
+                h.get(options, function(response) {
+                    if(response.statusCode && response.statusCode == 200) {
+                        var jsonStr = '';
 
+                        response.setEncoding('utf8');
+                        response.on('data', function (chunk) {
+                            jsonStr += chunk;
+                        });
+
+                        response.on('end', function () {
+                          var json = JSON.parse(jsonStr);
+                          callback(null, json, response);
+                        });
+                    } else {
+                        callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
+                    }
+                });
             };
         }
     });
@@ -151,6 +137,15 @@
         request: function() {
             return ajaxRequest() || xdomainRequest() || nodeJSRequest() ||
                 (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
+        },
+        parseMaxAge: function(xhr) {
+            var cacheControl = /max-age\s*=\s*(\d+)/.exec(
+                xhr.getResponseHeader('Cache-Control'));
+            if (cacheControl && cacheControl.length > 1) {
+                return parseInt(cacheControl[1], 10);
+            } else {
+                return undefined;
+            }
         }
     };
 

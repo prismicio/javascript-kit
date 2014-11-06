@@ -10,7 +10,7 @@
         return function(doc, isBroken) {
             if (isBroken) return '#broken';
             return "/testing_url/" + doc.id + "/" + doc.slug + (ref ? ('?ref=' + ref) : '');
-        }
+        };
     }
 
     describe('API', function() {
@@ -280,10 +280,10 @@
 
                     // Accessing Date and Timestamp fields
                     var date = doc.getDate("blog-post.date");
-                    var year = date ? date.getFullYear() : null;
+                    var resultYear = date ? date.getFullYear() : null;
                     var updateTime = doc.getTimestamp("blog-post.update");
-                    var hour = updateTime ? updateTime.getHours() : 0;
-                    assert.equal(year, 2013); // gisthide
+                    var updateHour = updateTime ? updateTime.getHours() : 0;
+                    assert.equal(resultYear, 2013); // gisthide
                     // endgist
                     done();
                 });
@@ -478,7 +478,7 @@
             assert.equal(coordinates, "48.877108,2.333879");
         });
 
-        it('prismic-asHtml.js', function () {
+        it('prismic-asHtml.js', function (done) {
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) {
                     console.log(err);
@@ -511,50 +511,27 @@
         it('prismic-cache.js', function(done) {
             // startgist:647bde5c458c44af0981:prismic-cache.js
             var cache = {
-                get: function (key) {
+                get: function (key, cb) {
                     // Retrieve a value from the key
-                    return null;
+                    return cb();
                 },
 
-                set: function (key, value, ttl) {
-                    // Save a value to the cache
-                    // ttl is the time to live, or expiration in seconds
+                set: function (key, value, ttl, cb) {
+                    return cb();
                 },
 
-                getOrSet: function (key, ttl, fvalue, done) {
-                    // Retrieve the value if present, otherwise use the fvalue callback to calculate the value,
-                    // save it then return it by calling the "done" callback.
-                    // The done callback takes 2 parameters: error and result.
-                    fvalue(function (error, result, hdr) {
-                        done(null, result);
-                    });
-                },
-
-                isExpired: function (key) {
-                    // Return true if the key exists and is expired, false if the value is either absent or not expired
-                    return false;
-                },
-
-                isInProgress: function (key) {
-                    // Return true if the value is being saved currently
-                    return false;
-                },
-
-                exists: function (key) {
-                    // Return true if the value for the key exists
-                    return false;
-                },
-
-                remove: function (key) {
+                remove: function (key, cb) {
                     // Remove a value
+                    return cb();
                 },
 
-                clear: function (key) {
-                    // Clear the whole cache
+                clear: function (key, cb) {
+                    return cb();
                 }
             };
+
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
-                if (err) throw err; // gisthide
+                if (err) return done(err); // gisthide
                 // The Api in this block will use the custom cache object
                 assert.notEqual(Api, null); // gisthide
                 done(); // gisthide

@@ -345,15 +345,17 @@
 
         it('Test cache', function (done) {
             Prismic.Api(testRepository, function (err, Api) {
-                if (err) throw err;
+                if (err) return done(err);
                 var form = Api.form('products').ref(Api.master()).query('');
                 form.submit(function (err, response) {
                     if (err) {
                         console.log(err);
-                        return;
+                        return done(err);
                     }
-                    assert.equal(Api.apiCache.get(form.url).results.length, response.results.length);
-                    done();
+                    Api.apiCache.get(form.url, function (err, value) {
+                        assert.equal(value.results.length, response.results.length);
+                        done();
+                    });
                 });
             });
         });
