@@ -471,7 +471,7 @@
                 }
             }
 
-            var cacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+            var cacheKey = url + (this.api.accessToken ? ('#' + this.api.accessToken) : '');
             var cache = this.api.apiCache;
             var self = this;
 

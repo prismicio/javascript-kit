@@ -352,7 +352,10 @@
                         console.log(err);
                         return done(err);
                     }
-                    Api.apiCache.get(form.url, function (err, value) {
+
+                    var keys = Object.keys(Api.apiCache.cache);
+                    var key = keys[0] === 'https://lesbonneschoses.prismic.io/api' ? keys[1] : keys[0];
+                    Api.apiCache.get(key, function (err, value) {
                         assert.equal(value.results.length, response.results.length);
                         done();
                     });
