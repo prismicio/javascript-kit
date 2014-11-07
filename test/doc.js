@@ -478,7 +478,7 @@
             assert.equal(coordinates, "48.877108,2.333879");
         });
 
-        it('prismic-asHtml.js', function () {
+        it('prismic-asHtml.js', function (done) {
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) {
                     console.log(err);
