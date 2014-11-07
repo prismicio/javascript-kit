@@ -9,16 +9,28 @@
      * @alias Api
      * @constructor
      * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
-     * @param {function} callback - Optional callback function that is called after the API was retrieved, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest
-     * @param {string} accessToken - The optional accessToken for the OAuth2 connection
-     * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
+     * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
+     * @param {string} accessToken - The accessToken for an OAuth2 connection
+     * @param {function} requestHandler - Environment specific HTTP request handling function
+     * @param {object} apiCache - A cache object with get/set functions for caching API responses
+     * @param {int} apiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
      * @returns {Api} - The Api object that can be manipulated
      */
-    var prismic = function(url, callback, accessToken, maybeRequestHandler, maybeApiCache) {
-        var api = new prismic.fn.init(url, accessToken, maybeRequestHandler, maybeApiCache);
-        if (callback) {
-            api.get(callback);
-        }
+    var prismic = function(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+        var api = new prismic.fn.init(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL);
+        //Use cached api data if available
+        api.get(function (err, data) {
+            if (callback && err) { return callback(err); }
+
+            if (data) {
+                api.data = data;
+                api.bookmarks = data.bookmarks;
+                api.experiments = new Global.Prismic.Experiments(data.experiments);
+            }
+
+            if (callback) { return callback(null, api); }
+        });
+
         return api;
     };
     // note that the prismic variable is later affected as "Api" while exporting
@@ -54,38 +66,58 @@
         data: null,
 
         /**
-         * Requests (with the proper handler), parses, and returns the /api document.
-         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         * Fetches data used to construct the api client, from cache if it's
+         * present, otherwise from calling the prismic api endpoint (which is
+         * then cached).
          *
-         * @param {function} callback - Optional callback function that is called after the query is made, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest
-         * @returns {Api} - The Api object that can be manipulated
+         * @param {function} callback - Callback to receive the data
          */
         get: function(callback) {
             var self = this;
-            var cacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
-            this.apiCache.getOrSet(
-                cacheKey,
-                5, // ttl
-                function fetchApi (cb) {
-                    self.requestHandler(self.url, function(error, data, xhr) {
-                        if (error) {
-                            if (cb) cb(error, null, xhr);
-                        } else {
-                            if (cb) cb(null, self.parse(data), xhr);
-                        }
+            var cacheKey = this.apiCacheKey;
+
+            this.apiCache.get(cacheKey, function (err, value) {
+                if (err) { return callback(err); }
+                if (value) { return callback(null, value); }
+
+                self.requestHandler(self.url, function(err, data, xhr, ttl) {
+                    if (err) { return callback(err, null, xhr); }
+
+                    var parsed = self.parse(data);
+                    ttl = ttl | self.apiDataTTL;
+
+                    self.apiCache.set(cacheKey, parsed, ttl, function (err) {
+                        if (err) { return callback(err, null, xhr); }
+                        return callback(null, parsed, xhr);
                     });
-                },
-                function done (error, api, xhr) {
-                    if (error) {
-                        if (callback) callback(error, null, xhr);
-                    } else {
-                        self.data = api;
-                        self.bookmarks = api.bookmarks;
-                        self.experiments = new Global.Prismic.Experiments(api.experiments);
-                        if (callback) callback(null, self, xhr);
-                    }
-                }
-            );
+                });
+            });
+        },
+
+        /**
+         * Cleans api data from the cache and fetches an up to date copy.
+         *
+         * @param {function} callback - Optional callback function that is called after the data has been refreshed
+         */
+        refresh: function (callback) {
+            var self = this;
+            var cacheKey = this.apiCacheKey;
+
+            this.apiCache.remove(cacheKey, function (err) {
+                if (callback && err) { return callback(err); }
+                if (!callback && err) { throw err; }
+
+                self.get(function (err, data, xhr) {
+                    if (callback && err) { return callback(err); }
+                    if (!callback && err) { throw err; }
+
+                    self.data = data;
+                    self.bookmarks = data.bookmarks;
+                    self.experiments = new Global.Prismic.Experiments(data.experiments);
+
+                    if (callback) { return callback(); }
+                });
+            });
         },
 
         /**
@@ -170,11 +202,13 @@
          * This is for internal use, from outside this kit, you should call Prismic.Api()
          * @private
          */
-        init: function(url, accessToken, maybeRequestHandler, maybeApiCache) {
+        init: function(url, accessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
             this.requestHandler = maybeRequestHandler || Global.Prismic.Utils.request();
             this.apiCache = maybeApiCache || new ApiCache();
+            this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+            this.apiDataTTL = maybeApiDataTTL || 5;
             return this;
         },
 
@@ -437,15 +471,17 @@
                 }
             }
 
-            var cacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+            var cacheKey = url + (this.api.accessToken ? ('#' + this.api.accessToken) : '');
             var cache = this.api.apiCache;
+            var self = this;
 
-            if (cache.get(cacheKey)) {
-                callback(null, cache.get(cacheKey));
-            } else {
+            cache.get(cacheKey, function (err, value) {
+                if (err) { return callback(err); }
+                if (value) { return callback(null, value); }
+
                 // The cache isn't really useful for in-browser usage because we already have the browser cache,
                 // but it is there for Node.js and other server-side implementations
-                this.api.requestHandler(url, function (err, documents, xhr) {
+                self.api.requestHandler(url, function (err, documents, xhr, ttl) {
                     if (err) { callback(err, null, xhr); return; }
                     var results = documents.results.map(prismic.fn.parseDoc);
                     var response = new Response(
@@ -457,14 +493,17 @@
                             documents.next_page,
                             documents.prev_page,
                                 results || []);
-                    var cacheControl = /max-age\s*=\s*(\d+)/.exec(xhr.getResponseHeader('Cache-Control'));
-                    if (cacheControl && cacheControl.length > 1) {
-                        var ttl = parseInt(cacheControl[1], 10);
-                        cache.set(cacheKey, response, ttl);
+
+                    if (ttl) {
+                        cache.set(cacheKey, response, ttl, function (err) {
+                            if (err) { return callback(err); }
+                            return callback(null, response);
+                        });
+                    } else {
+                        return callback(null, response);
                     }
-                    callback(null, response);
                 });
-            }
+            });
         }
     };
 
@@ -588,33 +627,21 @@
 
     ApiCache.prototype = {
 
-        get: function(key) {
+        get: function(key, cb) {
             var maybeEntry = this.cache[key];
-            if(maybeEntry && (!this.isExpired(key) || (this.isExpired(key) && this.isInProgress(key)))) {
-                return maybeEntry.data;
-            } else return null;
+            if(maybeEntry && !this.isExpired(key)) {
+                return cb(null, maybeEntry.data);
+            }
+            return cb();
         },
 
-        set: function(key, value, ttl) {
+        set: function(key, value, ttl, cb) {
             this.cache[key] = {
                 data: value,
                 expiredIn: ttl ? (Date.now() + (ttl * 1000)) : 0
             };
-        },
 
-        getOrSet: function(key, ttl, fvalue, done) {
-            var found = this.get(key);
-            var self = this;
-            if(!found) {
-                this.states[key] = 'progress';
-                fvalue(function(error, value, xhr) {
-                    self.set(key, value, ttl);
-                    delete self.states[key];
-                    if (done) done(error, value, xhr);
-                });
-            } else {
-                if (done) done(null, found);
-            }
+            return cb();
         },
 
         isExpired: function(key) {
@@ -626,20 +653,14 @@
             }
         },
 
-        isInProgress: function(key) {
-            return this.states[key] === 'progress';
+        remove: function(key, cb) {
+            delete this.cache[key];
+            return cb();
         },
 
-        exists: function(key) {
-            return !!this.cache[key];
-        },
-
-        remove: function(key) {
-            return delete this.cache[key];
-        },
-
-        clear: function(key) {
+        clear: function(key, cb) {
             this.cache = {};
+            return cb();
         }
     };
 
