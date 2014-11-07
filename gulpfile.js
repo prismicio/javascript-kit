@@ -82,6 +82,10 @@ gulp.task('dist', ['doc', 'concat', 'minify', 'copy']);
  * Tests
  */
 
+var mocha_options = {
+    timeout: 30000
+};
+
 gulp.task('jshint', function() {
     gulp.src(SOURCES)
         .pipe(jshint())
@@ -91,22 +95,22 @@ gulp.task('jshint', function() {
 
 gulp.task('test:int', function() {
     return gulp.src('./test/test.html')
-        .pipe(mocha())
+        .pipe(mocha(mocha_options))
 });
 
 gulp.task('test:unit', function() {
     return gulp.src('./test/unit.html')
-        .pipe(mocha())
+        .pipe(mocha(mocha_options))
 });
 
 gulp.task('test:fragments', function() {
     return gulp.src('./test/fragments.html')
-        .pipe(mocha())
+        .pipe(mocha(mocha_options))
 });
 
 gulp.task('test:doc', function() {
     return gulp.src('./test/doc.html')
-        .pipe(mocha())
+        .pipe(mocha(mocha_options))
 });
 
 
