@@ -9,16 +9,17 @@
      * @alias Api
      * @constructor
      * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
+     * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
      * @param {string} accessToken - The accessToken for an OAuth2 connection
      * @param {function} requestHandler - Environment specific HTTP request handling function
      * @param {object} apiCache - A cache object with get/set functions for caching API responses
-     * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
+     * @param {int} apiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
      * @returns {Api} - The Api object that can be manipulated
      */
-    var prismic = function(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache) {
-        var api = new prismic.fn.init(url, maybeAccessToken, maybeRequestHandler, maybeApiCache);
+    var prismic = function(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+        var api = new prismic.fn.init(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL);
         //Use cached api data if available
-        api.getApiData(function (err, data) {
+        api.get(function (err, data) {
             if (callback && err) { return callback(err); }
 
             if (data) {
@@ -71,7 +72,7 @@
          *
          * @param {function} callback - Callback to receive the data
          */
-        getApiData: function(callback) {
+        get: function(callback) {
             var self = this;
             var cacheKey = this.apiCacheKey;
 
@@ -79,11 +80,11 @@
                 if (err) { return callback(err); }
                 if (value) { return callback(null, value); }
 
-                self.requestHandler(self.url, function(err, data, xhr) {
+                self.requestHandler(self.url, function(err, data, xhr, ttl) {
                     if (err) { return callback(err, null, xhr); }
 
                     var parsed = self.parse(data);
-                    var ttl = Global.Prismic.Utils.parseMaxAge(xhr);
+                    ttl = ttl | self.apiDataTTL;
 
                     self.apiCache.set(cacheKey, parsed, ttl, function (err) {
                         if (err) { return callback(err, null, xhr); }
@@ -98,7 +99,7 @@
          *
          * @param {function} callback - Optional callback function that is called after the data has been refreshed
          */
-        refreshApiData: function (callback) {
+        refresh: function (callback) {
             var self = this;
             var cacheKey = this.apiCacheKey;
 
@@ -106,7 +107,7 @@
                 if (callback && err) { return callback(err); }
                 if (!callback && err) { throw err; }
 
-                self.getApiData(function (err, data, xhr) {
+                self.get(function (err, data, xhr) {
                     if (callback && err) { return callback(err); }
                     if (!callback && err) { throw err; }
 
@@ -201,12 +202,13 @@
          * This is for internal use, from outside this kit, you should call Prismic.Api()
          * @private
          */
-        init: function(url, accessToken, maybeRequestHandler, maybeApiCache) {
+        init: function(url, accessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
             this.requestHandler = maybeRequestHandler || Global.Prismic.Utils.request();
             this.apiCache = maybeApiCache || new ApiCache();
             this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+            this.apiDataTTL = maybeApiDataTTL || 5;
             return this;
         },
 
@@ -479,7 +481,7 @@
 
                 // The cache isn't really useful for in-browser usage because we already have the browser cache,
                 // but it is there for Node.js and other server-side implementations
-                self.api.requestHandler(url, function (err, documents, xhr) {
+                self.api.requestHandler(url, function (err, documents, xhr, ttl) {
                     if (err) { callback(err, null, xhr); return; }
                     var results = documents.results.map(prismic.fn.parseDoc);
                     var response = new Response(
@@ -492,7 +494,6 @@
                             documents.prev_page,
                                 results || []);
 
-                    var ttl = Global.Prismic.Utils.parseMaxAge(xhr);
                     if (ttl) {
                         cache.set(cacheKey, response, ttl, function (err) {
                             if (err) { return callback(err); }

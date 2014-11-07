@@ -12,7 +12,12 @@
 
                 // Called on success
                 var resolve = function() {
-                    callback(null, JSON.parse(xhr.responseText), xhr);
+                    var ttl, cacheControl = /max-age\s*=\s*(\d+)/.exec(
+                        xhr.getResponseHeader('Cache-Control'));
+                    if (cacheControl && cacheControl.length > 1) {
+                        ttl = parseInt(cacheControl[1], 10);
+                    }
+                    callback(null, JSON.parse(xhr.responseText), xhr, ttl);
                 };
 
                 // Called on error
@@ -55,7 +60,12 @@
 
                 // Called on success
                 var resolve = function() {
-                    callback(null, JSON.parse(xdr.responseText), xdr);
+                    var ttl, cacheControl = /max-age\s*=\s*(\d+)/.exec(
+                        xhr.getResponseHeader('Cache-Control'));
+                    if (cacheControl && cacheControl.length > 1) {
+                        ttl = parseInt(cacheControl[1], 10);
+                    }
+                    callback(null, JSON.parse(xdr.responseText), xdr, ttl);
                 };
 
                 // Called on error
@@ -123,7 +133,10 @@
 
                         response.on('end', function () {
                           var json = JSON.parse(jsonStr);
-                          callback(null, json, response);
+                          var cacheControl = response.headers['cache-control'];
+                          var ttl = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1], 10) : undefined;
+
+                          callback(null, json, response, ttl);
                         });
                     } else {
                         callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
@@ -137,15 +150,6 @@
         request: function() {
             return ajaxRequest() || xdomainRequest() || nodeJSRequest() ||
                 (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
-        },
-        parseMaxAge: function(xhr) {
-            var cacheControl = /max-age\s*=\s*(\d+)/.exec(
-                xhr.getResponseHeader('Cache-Control'));
-            if (cacheControl && cacheControl.length > 1) {
-                return parseInt(cacheControl[1], 10);
-            } else {
-                return undefined;
-            }
         }
     };
 
