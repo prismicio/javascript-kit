@@ -10,10 +10,10 @@
      * @constructor
      * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
      * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
-     * @param {string} accessToken - The accessToken for an OAuth2 connection
-     * @param {function} requestHandler - Environment specific HTTP request handling function
-     * @param {object} apiCache - A cache object with get/set functions for caching API responses
-     * @param {int} apiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
+     * @param {string} maybeAccessToken - The accessToken for an OAuth2 connection
+     * @param {function} maybeRequestHandler - Environment specific HTTP request handling function
+     * @param {object} maybeApiCache - A cache object with get/set functions for caching API responses
+     * @param {int} maybeApiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
      * @returns {Api} - The Api object that can be manipulated
      */
     var prismic = function(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
