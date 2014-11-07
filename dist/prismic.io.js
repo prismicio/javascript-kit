@@ -25,164 +25,31 @@
      * @alias Api
      * @constructor
      * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
-     * @param {function} callback - Optional callback function that is called after the API was retrieved, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest
-     * @param {string} accessToken - The optional accessToken for the OAuth2 connection
-     * @param {function} maybeRequestHandler - The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment
+     * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
+     * @param {string} maybeAccessToken - The accessToken for an OAuth2 connection
+     * @param {function} maybeRequestHandler - Environment specific HTTP request handling function
+     * @param {object} maybeApiCache - A cache object with get/set functions for caching API responses
+     * @param {int} maybeApiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
      * @returns {Api} - The Api object that can be manipulated
      */
-    var prismic = function(url, callback, accessToken, maybeRequestHandler, maybeApiCache) {
-        var api = new prismic.fn.init(url, accessToken, maybeRequestHandler, maybeApiCache);
-        if (callback) {
-            api.get(callback);
-        }
+    var prismic = function(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+        var api = new prismic.fn.init(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL);
+        //Use cached api data if available
+        api.get(function (err, data) {
+            if (callback && err) { return callback(err); }
+
+            if (data) {
+                api.data = data;
+                api.bookmarks = data.bookmarks;
+                api.experiments = new Global.Prismic.Experiments(data.experiments);
+            }
+
+            if (callback) { return callback(null, api); }
+        });
+
         return api;
     };
     // note that the prismic variable is later affected as "Api" while exporting
-
-    // -- Request handlers
-
-    var ajaxRequest = (function() {
-        if(typeof XMLHttpRequest != 'undefined' && 'withCredentials' in new XMLHttpRequest()) {
-            return function(url, callback) {
-
-                var xhr = new XMLHttpRequest();
-
-                // Called on success
-                var resolve = function() {
-                    callback(null, JSON.parse(xhr.responseText), xhr);
-                };
-
-                // Called on error
-                var reject = function() {
-                    var status = xhr.status;
-                    callback(new Error("Unexpected status code [" + status + "] on URL "+url), null, xhr);
-                };
-
-                // Bind the XHR finished callback
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4) {
-                        if(xhr.status && xhr.status == 200) {
-                            resolve();
-                        } else {
-                            reject();
-                        }
-                    }
-                };
-
-                // Open the XHR
-                xhr.open('GET', url, true);
-
-                // Kit version (can't override the user-agent client side)
-                // xhr.setRequestHeader("X-Prismic-User-Agent", "Prismic-javascript-kit/%VERSION%".replace("%VERSION%", Global.Prismic.version));
-
-                // Json request
-                xhr.setRequestHeader('Accept', 'application/json');
-
-                // Send the XHR
-                xhr.send();
-            };
-        }
-    });
-
-    var xdomainRequest = (function() {
-        if(typeof XDomainRequest != 'undefined') {
-            return function(url, callback) {
-
-                var xdr = new XDomainRequest();
-
-                // Called on success
-                var resolve = function() {
-                    callback(null, JSON.parse(xdr.responseText), xdr);
-                };
-
-                // Called on error
-                var reject = function(msg) {
-                    callback(new Error(msg), null, xdr);
-                };
-
-                // Bind the XDR finished callback
-                xdr.onload = function() {
-                    resolve(xdr);
-                };
-
-                // Bind the XDR error callback
-                xdr.onerror = function() {
-                    reject("Unexpected status code on URL "+url);
-                };
-
-                // Open the XHR
-                xdr.open('GET', url, true);
-
-                // Bind the XDR timeout callback
-                xdr.ontimeout = function () {
-                    reject("Request timeout");
-                };
-
-                // Empty callback. IE sometimes abort the reqeust if
-                // this is not present
-                xdr.onprogress = function () { };
-
-                xdr.send();
-            };
-        }
-    });
-
-    var nodeJSRequest = (function() {
-        if(typeof require == 'function' && require('http')) {
-            var requestsCache = {},
-                http = require('http'),
-                https = require('https'),
-                url = require('url'),
-                querystring = require('querystring'),
-                pjson = require('../package.json');
-
-            return function(requestUrl, callback) {
-                if(requestsCache[requestUrl]) {
-                    callback(null, requestsCache[requestUrl]);
-                } else {
-
-                    var parsed = url.parse(requestUrl),
-                        h = parsed.protocol == 'https:' ? https : http,
-                        options = {
-                            hostname: parsed.hostname,
-                            path: parsed.path,
-                            query: parsed.query,
-                            headers: {
-                                'Accept': 'application/json',
-                                'User-Agent': 'Prismic-javascript-kit/' + pjson.version + " NodeJS/" + process.version
-                            }
-                        };
-
-                    h.get(options, function(response) {
-                        if(response.statusCode && response.statusCode == 200) {
-                            var jsonStr = '';
-
-                            response.setEncoding('utf8');
-                            response.on('data', function (chunk) {
-                                jsonStr += chunk;
-                            });
-
-                            response.on('end', function () {
-                              var cacheControl = response.headers['cache-control'],
-                                  maxAge = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1]) : undefined,
-                                  json = JSON.parse(jsonStr);
-
-                              if(maxAge) {
-                                  requestsCache[requestUrl] = json;
-                              }
-
-                              callback(null, json, response);
-                            });
-                        } else {
-                            callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
-                        }
-                    });
-
-                }
-
-            };
-        }
-    });
 
     // Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
     prismic.fn = prismic.prototype = {
@@ -215,38 +82,58 @@
         data: null,
 
         /**
-         * Requests (with the proper handler), parses, and returns the /api document.
-         * This is for internal use, from outside this kit, you should call Prismic.Api()
+         * Fetches data used to construct the api client, from cache if it's
+         * present, otherwise from calling the prismic api endpoint (which is
+         * then cached).
          *
-         * @param {function} callback - Optional callback function that is called after the query is made, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest
-         * @returns {Api} - The Api object that can be manipulated
+         * @param {function} callback - Callback to receive the data
          */
         get: function(callback) {
             var self = this;
-            var cacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
-            this.apiCache.getOrSet(
-                cacheKey,
-                5, // ttl
-                function fetchApi (cb) {
-                    self.requestHandler(self.url, function(error, data, xhr) {
-                        if (error) {
-                            if (cb) cb(error, null, xhr);
-                        } else {
-                            if (cb) cb(null, self.parse(data), xhr);
-                        }
+            var cacheKey = this.apiCacheKey;
+
+            this.apiCache.get(cacheKey, function (err, value) {
+                if (err) { return callback(err); }
+                if (value) { return callback(null, value); }
+
+                self.requestHandler(self.url, function(err, data, xhr, ttl) {
+                    if (err) { return callback(err, null, xhr); }
+
+                    var parsed = self.parse(data);
+                    ttl = ttl | self.apiDataTTL;
+
+                    self.apiCache.set(cacheKey, parsed, ttl, function (err) {
+                        if (err) { return callback(err, null, xhr); }
+                        return callback(null, parsed, xhr);
                     });
-                },
-                function done (error, api, xhr) {
-                    if (error) {
-                        if (callback) callback(error, null, xhr);
-                    } else {
-                        self.data = api;
-                        self.bookmarks = api.bookmarks;
-                        self.experiments = new Global.Prismic.Experiments(api.experiments);
-                        if (callback) callback(null, self, xhr);
-                    }
-                }
-            );
+                });
+            });
+        },
+
+        /**
+         * Cleans api data from the cache and fetches an up to date copy.
+         *
+         * @param {function} callback - Optional callback function that is called after the data has been refreshed
+         */
+        refresh: function (callback) {
+            var self = this;
+            var cacheKey = this.apiCacheKey;
+
+            this.apiCache.remove(cacheKey, function (err) {
+                if (callback && err) { return callback(err); }
+                if (!callback && err) { throw err; }
+
+                self.get(function (err, data, xhr) {
+                    if (callback && err) { return callback(err); }
+                    if (!callback && err) { throw err; }
+
+                    self.data = data;
+                    self.bookmarks = data.bookmarks;
+                    self.experiments = new Global.Prismic.Experiments(data.experiments);
+
+                    if (callback) { return callback(); }
+                });
+            });
         },
 
         /**
@@ -331,11 +218,13 @@
          * This is for internal use, from outside this kit, you should call Prismic.Api()
          * @private
          */
-        init: function(url, accessToken, maybeRequestHandler, maybeApiCache) {
+        init: function(url, accessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
-            this.requestHandler = maybeRequestHandler || ajaxRequest() || xdomainRequest() || nodeJSRequest() || (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
+            this.requestHandler = maybeRequestHandler || Global.Prismic.Utils.request();
             this.apiCache = maybeApiCache || new ApiCache();
+            this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+            this.apiDataTTL = maybeApiDataTTL || 5;
             return this;
         },
 
@@ -545,7 +434,7 @@
         /**
          * Sets a page size to query for this SearchForm. This is an optional method.
          *
-         * @param {number} pageSize - The page size
+         * @param {number} size - The page size
          * @returns {SearchForm} - The SearchForm itself
          */
         pageSize: function(size) {
@@ -555,7 +444,7 @@
         /**
          * Sets the page number to query for this SearchForm. This is an optional method.
          *
-         * @param {number} page - The page number
+         * @param {number} p - The page number
          * @returns {SearchForm} - The SearchForm itself
          */
         page: function(p) {
@@ -581,49 +470,64 @@
          * and the XMLHttpRequest
          */
         submit: function(callback) {
-            var self = this,
-                url = this.form.action;
+            var url = this.form.action;
 
-            if(this.data) {
+            if (this.data) {
                 var sep = (url.indexOf('?') > -1 ? '&' : '?');
                 for(var key in this.data) {
-                    var values = this.data[key];
-                    if(values) {
-                        for(var i=0; i<values.length; i++) {
-                            url += sep + key + '=' + encodeURIComponent(values[i]);
-                            sep = '&';
+                    if (this.data.hasOwnProperty(key)) {
+                        var values = this.data[key];
+                        if (values) {
+                            for (var i = 0; i < values.length; i++) {
+                                url += sep + key + '=' + encodeURIComponent(values[i]);
+                                sep = '&';
+                            }
                         }
                     }
                 }
             }
 
-            this.api.requestHandler(url, function (err, documents, xhr) {
+            var cacheKey = url + (this.api.accessToken ? ('#' + this.api.accessToken) : '');
+            var cache = this.api.apiCache;
+            var self = this;
 
-                if (err) { callback(err, null, xhr); return; }
+            cache.get(cacheKey, function (err, value) {
+                if (err) { return callback(err); }
+                if (value) { return callback(null, value); }
 
-                var results = documents.results.map(prismic.fn.parseDoc);
+                // The cache isn't really useful for in-browser usage because we already have the browser cache,
+                // but it is there for Node.js and other server-side implementations
+                self.api.requestHandler(url, function (err, documents, xhr, ttl) {
+                    if (err) { callback(err, null, xhr); return; }
+                    var results = documents.results.map(prismic.fn.parseDoc);
+                    var response = new Response(
+                            documents.page,
+                            documents.results_per_page,
+                            documents.results_size,
+                            documents.total_results_size,
+                            documents.total_pages,
+                            documents.next_page,
+                            documents.prev_page,
+                                results || []);
 
-                callback(null, new Response(
-                    documents.page,
-                    documents.results_per_page,
-                    documents.results_size,
-                    documents.total_results_size,
-                    documents.total_pages,
-                    documents.next_page,
-                    documents.prev_page,
-                    results || []), xhr
-                );
+                    if (ttl) {
+                        cache.set(cacheKey, response, ttl, function (err) {
+                            if (err) { return callback(err); }
+                            return callback(null, response);
+                        });
+                    } else {
+                        return callback(null, response);
+                    }
+                });
             });
-
         }
-
     };
 
 
     /**
      * Embodies the response of a SearchForm query as returned by the API.
      * It includes all the fields that are useful for pagination (page, total_pages, total_results_size, ...),
-     * as well as the field "results", which is an array of {@link Doc} objects, the documents themselves.
+     * as well as the field "results", which is an array of {@link Document} objects, the documents themselves.
      *
      * @constructor
      * @global
@@ -665,7 +569,7 @@
          */
         this.prev_page = prev_page;
         /**
-         * Array of {@link Doc} for the current page
+         * Array of {@link Document} for the current page
          * @type {Array}
          */
         this.results = results;
@@ -739,33 +643,21 @@
 
     ApiCache.prototype = {
 
-        get: function(key) {
+        get: function(key, cb) {
             var maybeEntry = this.cache[key];
-            if(maybeEntry && (!this.isExpired(key) || (this.isExpired(key) && this.isInProgress(key)))) {
-                return maybeEntry.data;
-            } else return null;
+            if(maybeEntry && !this.isExpired(key)) {
+                return cb(null, maybeEntry.data);
+            }
+            return cb();
         },
 
-        set: function(key, value, ttl) {
+        set: function(key, value, ttl, cb) {
             this.cache[key] = {
                 data: value,
                 expiredIn: ttl ? (Date.now() + (ttl * 1000)) : 0
             };
-        },
 
-        getOrSet: function(key, ttl, fvalue, done) {
-            var found = this.get(key);
-            var self = this;
-            if(!found) {
-                this.states[key] = 'progress';
-                var value =  fvalue(function(error, value, xhr) {
-                    self.set(key, value, ttl);
-                    delete self.states[key];
-                    if (done) done(error, value, xhr);
-                });
-            } else {
-                if (done) done(null, found);
-            }
+            return cb();
         },
 
         isExpired: function(key) {
@@ -777,20 +669,14 @@
             }
         },
 
-        isInProgress: function(key) {
-            return this.states[key] === 'progress';
+        remove: function(key, cb) {
+            delete this.cache[key];
+            return cb();
         },
 
-        exists: function(key) {
-            return !!this.cache[key];
-        },
-
-        remove: function(key) {
-            return delete this.cache[key];
-        },
-
-        clear: function(key) {
+        clear: function(key, cb) {
             this.cache = {};
+            return cb();
         }
     };
 
@@ -798,6 +684,187 @@
 
     Global.Prismic = {
         Api: prismic
+    };
+
+}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+
+(function (Global, undefined) {
+
+    "use strict";
+
+    // -- Request handlers
+
+    var ajaxRequest = (function() {
+        if(typeof XMLHttpRequest != 'undefined' && 'withCredentials' in new XMLHttpRequest()) {
+            return function(url, callback) {
+
+                var xhr = new XMLHttpRequest();
+
+                // Called on success
+                var resolve = function() {
+                    var ttl, cacheControl = /max-age\s*=\s*(\d+)/.exec(
+                        xhr.getResponseHeader('Cache-Control'));
+                    if (cacheControl && cacheControl.length > 1) {
+                        ttl = parseInt(cacheControl[1], 10);
+                    }
+                    callback(null, JSON.parse(xhr.responseText), xhr, ttl);
+                };
+
+                // Called on error
+                var reject = function() {
+                    var status = xhr.status;
+                    callback(new Error("Unexpected status code [" + status + "] on URL "+url), null, xhr);
+                };
+
+                // Bind the XHR finished callback
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if(xhr.status && xhr.status == 200) {
+                            resolve();
+                        } else {
+                            reject();
+                        }
+                    }
+                };
+
+                // Open the XHR
+                xhr.open('GET', url, true);
+
+                // Kit version (can't override the user-agent client side)
+                // xhr.setRequestHeader("X-Prismic-User-Agent", "Prismic-javascript-kit/%VERSION%".replace("%VERSION%", Global.Prismic.version));
+
+                // Json request
+                xhr.setRequestHeader('Accept', 'application/json');
+
+                // Send the XHR
+                xhr.send();
+            };
+        }
+    });
+
+    var xdomainRequest = (function() {
+        if(typeof XDomainRequest != 'undefined') {
+            return function(url, callback) {
+
+                var xdr = new XDomainRequest();
+
+                // Called on success
+                var resolve = function() {
+                    var ttl, cacheControl = /max-age\s*=\s*(\d+)/.exec(
+                        xhr.getResponseHeader('Cache-Control'));
+                    if (cacheControl && cacheControl.length > 1) {
+                        ttl = parseInt(cacheControl[1], 10);
+                    }
+                    callback(null, JSON.parse(xdr.responseText), xdr, ttl);
+                };
+
+                // Called on error
+                var reject = function(msg) {
+                    callback(new Error(msg), null, xdr);
+                };
+
+                // Bind the XDR finished callback
+                xdr.onload = function() {
+                    resolve(xdr);
+                };
+
+                // Bind the XDR error callback
+                xdr.onerror = function() {
+                    reject("Unexpected status code on URL " + url);
+                };
+
+                // Open the XHR
+                xdr.open('GET', url, true);
+
+                // Bind the XDR timeout callback
+                xdr.ontimeout = function () {
+                    reject("Request timeout");
+                };
+
+                // Empty callback. IE sometimes abort the reqeust if
+                // this is not present
+                xdr.onprogress = function () { };
+
+                xdr.send();
+            };
+        }
+    });
+
+    var nodeJSRequest = (function() {
+        if(typeof require == 'function' && require('http')) {
+            var http = require('http'),
+                https = require('https'),
+                url = require('url'),
+                querystring = require('querystring'),
+                pjson = require('../package.json');
+
+            return function(requestUrl, callback) {
+
+                var parsed = url.parse(requestUrl),
+                    h = parsed.protocol == 'https:' ? https : http,
+                    options = {
+                        hostname: parsed.hostname,
+                        path: parsed.path,
+                        query: parsed.query,
+                        headers: {
+                            'Accept': 'application/json',
+                            'User-Agent': 'Prismic-javascript-kit/' + pjson.version + " NodeJS/" + process.version
+                        }
+                    };
+
+                h.get(options, function(response) {
+                    if(response.statusCode && response.statusCode == 200) {
+                        var jsonStr = '';
+
+                        response.setEncoding('utf8');
+                        response.on('data', function (chunk) {
+                            jsonStr += chunk;
+                        });
+
+                        response.on('end', function () {
+                          var json = JSON.parse(jsonStr);
+                          var cacheControl = response.headers['cache-control'];
+                          var ttl = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1], 10) : undefined;
+
+                          callback(null, json, response, ttl);
+                        });
+                    } else {
+                        callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
+                    }
+                });
+            };
+        }
+    });
+
+    var last = null;
+    var deferTimer = null;
+
+    var request = function () {
+        var fn = ajaxRequest() || xdomainRequest() || nodeJSRequest() ||
+            (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
+        return function () {
+            var context = this;
+
+            var now = +new Date(),
+                args = arguments;
+            if (last && now < last + Global.Prismic.Utils.THRESHOLD) {
+                // wait before firing the request
+                clearTimeout(deferTimer);
+                deferTimer = setTimeout(function () {
+                    last = now;
+                    fn.apply(context, args);
+                }, Global.Prismic.Utils.THRESHOLD);
+            } else {
+                // Call it right away
+                last = now;
+                fn.apply(context, args);
+            }
+        };
+    };
+
+    Global.Prismic.Utils = {
+        THRESHOLD: 50, // Minimum delay between 2 requests in milliseconds (50ms => 20 requests/second)
+        request: request
     };
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
@@ -1540,17 +1607,17 @@
      * @global
      * @alias Fragments:GeoPoint
      */
-    function GeoPoint(latitude, longitude) {
+    function GeoPoint(data) {
         /**
          * @field
          * @description the latitude of the geo point
          */
-        this.latitude = latitude;
+        this.latitude = data.latitude;
         /**
          * @field
          * @description the longitude of the geo point
          */
-        this.longitude = longitude;
+        this.longitude = data.longitude;
     }
 
     GeoPoint.prototype = {
@@ -2131,94 +2198,51 @@
      */
     function initField(field) {
 
-        var output, img;
+        var classForType = {
+            "Color": Color,
+            "Number": Num,
+            "Date": DateFragment,
+            "Timestamp": Timestamp,
+            "Text": Text,
+            "Embed": Embed,
+            "GeoPoint": GeoPoint,
+            "Select": Select,
+            "StructuredText": StructuredText,
+            "Link.document": DocumentLink,
+            "Link.web": WebLink,
+            "Link.file": FileLink,
+            "Link.image": ImageLink,
+            "Group": Group
+        };
 
-        switch (field.type) {
-
-            case "Color":
-                output = new Color(field.value);
-                break;
-
-            case "Number":
-                output = new Num(field.value);
-                break;
-
-            case "Date":
-                output = new DateFragment(field.value);
-                break;
-
-            case "Timestamp":
-                output = new Timestamp(field.value);
-                break;
-
-            case "Text":
-                output = new Text(field.value);
-                break;
-
-            case "Embed":
-                output = new Embed(field.value);
-                break;
-
-            case "GeoPoint":
-                output = new GeoPoint(field.value.latitude, field.value.longitude);
-                break;
-
-            case "Select":
-                output = new Select(field.value);
-                break;
-
-            case "Image":
-                img = field.value.main;
-                output = new ImageEl(
-                    new ImageView(
-                        img.url,
-                        img.dimensions.width,
-                        img.dimensions.height,
-                        img.alt
-                    ),
-                    {}
-                );
-                for (var name in field.value.views) {
-                    img = field.value.views[name];
-                    output.views[name] = new ImageView(
-                        img.url,
-                        img.dimensions.width,
-                        img.dimensions.height,
-                        img.alt
-                    );
-                }
-                break;
-
-            case "StructuredText":
-                output = new StructuredText(field.value);
-                break;
-
-            case "Link.document":
-                output = new DocumentLink(field.value);
-                break;
-
-            case "Link.web":
-                output = new WebLink(field.value);
-                break;
-
-            case "Link.file":
-                output = new FileLink(field.value);
-                break;
-
-            case "Link.image":
-                output = new ImageLink(field.value);
-                break;
-
-            case "Group":
-                output = new Group(field.value);
-                break;
-
-            default:
-                if (console && console.log) console.log("Fragment type not supported: ", field.type);
-                break;
+        if (classForType[field.type]) {
+            return new classForType[field.type](field.value);
         }
 
-        return output;
+        if (field.type === "Image") {
+            var img = field.value.main;
+            var output = new ImageEl(
+                new ImageView(
+                    img.url,
+                    img.dimensions.width,
+                    img.dimensions.height,
+                    img.alt
+                ),
+                {}
+            );
+            for (var name in field.value.views) {
+                img = field.value.views[name];
+                output.views[name] = new ImageView(
+                    img.url,
+                    img.dimensions.width,
+                    img.dimensions.height,
+                    img.alt
+                );
+            }
+            return output;
+        }
+
+        if (console && console.log) console.log("Fragment type not supported: ", field.type);
 
     }
 
@@ -2648,4 +2672,4 @@
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.0.21';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.0.22';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
