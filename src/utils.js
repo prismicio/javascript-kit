@@ -70,7 +70,7 @@
 
                 // Bind the XDR error callback
                 xdr.onerror = function() {
-                    reject("Unexpected status code on URL "+url);
+                    reject("Unexpected status code on URL " + url);
                 };
 
                 // Open the XHR
@@ -147,11 +147,35 @@
         }
     });
 
+    var last = null;
+    var deferTimer = null;
+
+    var request = function () {
+        var fn = ajaxRequest() || xdomainRequest() || nodeJSRequest() ||
+            (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
+        return function () {
+            var context = this;
+
+            var now = +new Date(),
+                args = arguments;
+            if (last && now < last + Global.Prismic.Utils.THRESHOLD) {
+                // wait before firing the request
+                clearTimeout(deferTimer);
+                deferTimer = setTimeout(function () {
+                    last = now;
+                    fn.apply(context, args);
+                }, Global.Prismic.Utils.THRESHOLD);
+            } else {
+                // Call it right away
+                last = now;
+                fn.apply(context, args);
+            }
+        };
+    };
+
     Global.Prismic.Utils = {
-        request: function() {
-            return ajaxRequest() || xdomainRequest() || nodeJSRequest() ||
-                (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
-        }
+        THRESHOLD: 50, // Minimum delay between 2 requests in milliseconds (50ms => 20 requests/second)
+        request: request
     };
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
