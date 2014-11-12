@@ -2,8 +2,6 @@
 
     "use strict";
 
-    var COOKIE_NAME = "io.prismic.experiment";
-
     /**
      * A collection of experiments currently available
      * @param data the json data received from the Prismic API
@@ -22,7 +20,6 @@
         }
         this.drafts = drafts;
         this.running = running;
-        this.cookieName = COOKIE_NAME;
     }
 
     Experiments.prototype.current = function() {

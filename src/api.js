@@ -298,7 +298,45 @@
                 linkedDocuments,
                 fragments
             );
+        },
+
+        /**
+         * Return the URL to display a given preview
+         * @param {string} token as received from Prismic server to identify the content to preview
+         * @param {function} linkResolver the link resolver to build URL for your site
+         * @param {string} defaultUrl the URL to default to return if the preview doesn't correspond to a document
+         *                (usually the home page of your site)
+         * @param {function} callback to get the resulting URL
+         */
+        previewSession: function(token, linkResolver, defaultUrl, callback) {
+            var api = this;
+            var Predicates = Global.Prismic.Predicates;
+            this.requestHandler(token, function (err, result, xhr) {
+                if (err) {
+                    console.log("Error from the request");
+                    callback(err, defaultUrl, xhr);
+                    return;
+                }
+                try {
+                    var mainDocumentId = result.mainDocument;
+                    if (!mainDocumentId) {
+                        callback(null, defaultUrl, xhr);
+                    } else {
+                        api.form("everything").query(Predicates.at("document.id", mainDocumentId)).ref(token).submit(function(err, response) {
+                            if (response.results.length == 0) {
+                                callback(null, defaultUrl, xhr);
+                            } else {
+                                callback(null, linkResolver(response.results[0], xhr));
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.log("Caught e ", e);
+                    callback(e, defaultUrl, xhr);
+                }
+            });
         }
+
     };
 
     prismic.fn.init.prototype = prismic.fn;
@@ -667,6 +705,8 @@
     // -- Export Globally
 
     Global.Prismic = {
+        experimentCookie: "io.prismic.experiment",
+        previewCookie: "io.prismic.preview",
         Api: prismic
     };
 
