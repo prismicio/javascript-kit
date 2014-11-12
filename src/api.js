@@ -323,7 +323,7 @@
                         callback(null, defaultUrl, xhr);
                     } else {
                         api.form("everything").query(Predicates.at("document.id", mainDocumentId)).ref(token).submit(function(err, response) {
-                            if (response.results.length == 0) {
+                            if (response.results.length === 0) {
                                 callback(null, defaultUrl, xhr);
                             } else {
                                 callback(null, linkResolver(response.results[0], xhr));
