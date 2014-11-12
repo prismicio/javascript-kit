@@ -146,34 +146,38 @@
         }
     });
 
-    var last = null;
-    var deferTimer = null;
+    // Number of requests currently running (capped by MAX_CONNECTIONS)
+    var running = 0;
+    // Requests in queue
+    var queue = [];
 
-    var request = function () {
+    var processQueue = function() {
+        if (queue.length === 0 || running >= Global.Prismic.Utils.MAX_CONNECTIONS) {
+            return;
+        }
+        running++;
+        var next = queue.shift();
         var fn = ajaxRequest() || xdomainRequest() || nodeJSRequest() ||
             (function() {throw new Error("No request handler available (tried XMLHttpRequest & NodeJS)");})();
-        return function () {
-            var context = this;
+        fn.call(this, next.url, function(error, result, xhr, ttl) {
+            running--;
+            next.callback(error, result, xhr, ttl);
+            processQueue();
+        });
+    };
 
-            var now = +new Date(),
-                args = arguments;
-            if (last && now < last + Global.Prismic.Utils.THRESHOLD) {
-                // wait before firing the request
-                clearTimeout(deferTimer);
-                deferTimer = setTimeout(function () {
-                    last = now;
-                    fn.apply(context, args);
-                }, Global.Prismic.Utils.THRESHOLD);
-            } else {
-                // Call it right away
-                last = now;
-                fn.apply(context, args);
-            }
+    var request = function () {
+        return function (url, callback) {
+            queue.push({
+                'url': url,
+                'callback': callback
+            });
+            processQueue();
         };
     };
 
     Global.Prismic.Utils = {
-        THRESHOLD: 50, // Minimum delay between 2 requests in milliseconds (50ms => 20 requests/second)
+        MAX_CONNECTIONS: 20, // Number of maximum simultaneous connections to the prismic server
         request: request
     };
 

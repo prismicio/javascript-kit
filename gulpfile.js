@@ -41,38 +41,37 @@ gulp.task('version', function () {
 });
 
 gulp.task('concat', ['version'], function() {
-    gulp.src(SOURCES.concat('src/version.js'))
+    return gulp.src(SOURCES.concat('src/version.js'))
         .pipe(concat('prismic.io.js'))
         .pipe(gulp.dest('dist'))
 });
 
 gulp.task('minify', ['version'], function() {
-    gulp.src(SOURCES.concat('src/version.js'))
+    return gulp.src(SOURCES.concat('src/version.js'))
         .pipe(concat('prismic.io.min.js'))
         .pipe(uglify())
         .pipe(gulp.dest('dist'))
 });
 
 gulp.task('copy', ['test', 'version'], function() {
-    gulp.src(SOURCES.concat('src/version.js'))
+    return gulp.src(SOURCES.concat('src/version.js'))
         .pipe(concat('prismic.io-%VERSION%.min.js'.replace('%VERSION%', pkg.version)))
         .pipe(uglify())
         .pipe(gulp.dest('dist'))
 });
 
 gulp.task('doc', function() {
-    gulp.src(SOURCES.concat(['README.md']))
+    return gulp.src(SOURCES.concat(['README.md']))
         .pipe(jsdoc('doc'))
 });
 
 gulp.task('deploy:doc', ['doc'], function () {
-    gulp.src("./doc/**/*")
+    return gulp.src("./doc/**/*")
         .pipe(deploy());
 });
 
-gulp.task('deploy:gist', ['test:doc'], function () {
-
-    gulp.src("./test/doc.js")
+gulp.task('deploy:gist', ['test:doc'], function (cb) {
+    return gulp.src("./test/doc.js")
         .pipe(gist());
 });
 
@@ -87,7 +86,7 @@ var mocha_options = {
 };
 
 gulp.task('jshint', function() {
-    gulp.src(SOURCES)
+    return gulp.src(SOURCES)
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
         .pipe(jshint.reporter('fail'))
