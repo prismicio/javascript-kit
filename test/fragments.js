@@ -213,12 +213,12 @@
         });
 
         it('Proper escaping in asHtml', function (done) {
-            var jsonString = "{ \"type\": \"StructuredText\", \"value\": [ { \"type\": \"paragraph\", \"text\": \"<not a real tag>\", \"spans\": [] } ]}";
+            var jsonString = "{ \"type\": \"StructuredText\", \"value\": [ { \"type\": \"paragraph\", \"text\": \"<not a real tag>\\nsome text\", \"spans\": [] } ]}";
             var jsonObject = JSON.parse(jsonString);
             var text = Prismic.Fragments.initField(jsonObject);
             assert.equal(
                 text.asHtml(),
-                "<p>&lt;not a real tag&gt;</p>"
+                "<p>&lt;not a real tag&gt;<br>some text</p>"
             );
             done();
         });
