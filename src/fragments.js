@@ -549,7 +549,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "<img src=" + this.url + " width=" + this.width + " height=" + this.height + " alt=\"" + this.alt + "\">";
+            return "<img src=\"" + this.url + "\" width=\"" + this.width + "\" height=\"" + this.height + "\" alt=\"" + this.alt + "\">";
         },
 
         /**

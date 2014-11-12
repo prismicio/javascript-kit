@@ -200,7 +200,8 @@
                     assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().alt, "");
                     assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().height, 427);
                     assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().width, 640);
-                    assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().asHtml(), '<img src=https://prismic-io.s3.amazonaws.com/lesbonneschoses/c38f9e5a1a6c43aa7aae516c154013a2cee2bc75.jpg width=640 height=427 alt="">');
+                    assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().asHtml(),
+                        '<img src="https://prismic-io.s3.amazonaws.com/lesbonneschoses/c38f9e5a1a6c43aa7aae516c154013a2cee2bc75.jpg" width="640" height="427" alt="">');
                     done();
                 });
             }, previewToken);
@@ -243,8 +244,8 @@
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbO")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
-                    assert.equal(documents.results[0].getImageView('product.image', 'main').asHtml(), '<img src=https://prismic-io.s3.amazonaws.com/lesbonneschoses/f606ad513fcc2a73b909817119b84d6fd0d61a6d.png width=500 height=500 alt="">');
-                    assert.equal(documents.results[0].getImageView('product.image', 'icon').asHtml(), '<img src=https://prismic-io.s3.amazonaws.com/lesbonneschoses/fe4f9379ee325456992d48204b8d94aeb60cc976.png width=250 height=250 alt="">');
+                    assert.equal(documents.results[0].getImageView('product.image', 'main').asHtml(), '<img src="https://prismic-io.s3.amazonaws.com/lesbonneschoses/f606ad513fcc2a73b909817119b84d6fd0d61a6d.png" width="500" height="500" alt="">');
+                    assert.equal(documents.results[0].getImageView('product.image', 'icon').asHtml(), '<img src="https://prismic-io.s3.amazonaws.com/lesbonneschoses/fe4f9379ee325456992d48204b8d94aeb60cc976.png" width="250" height="250" alt="">');
                     done();
                 });
             }, previewToken);
