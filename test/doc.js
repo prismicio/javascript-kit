@@ -13,6 +13,28 @@
         };
     }
 
+    describe('Previews', function() {
+
+        it('preview-js', function() {
+            // startgist:d271f9c4a863c35995d0:preview-js.js
+            // todo
+            // endgist
+        });
+
+        it('endpoint-js', function() {
+            // startgist:ee4c46bcc635829e286f:endpoint-js.js
+            // todo
+            // endgist
+        });
+
+        it('preview-ref', function() {
+            // startgist:6ad513d7d0f784de36d9:preview-ref.js
+            // todo
+            // endgist
+        });
+
+    });
+
     describe('API', function() {
 
         it('prismic-api.js', function (done) {
@@ -540,5 +562,7 @@
         });
 
     });
+
+
 
 }(window.Prismic));
