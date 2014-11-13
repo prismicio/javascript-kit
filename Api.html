@@ -39,7 +39,7 @@
     
         
 <dt>
-    <h4 class="name" id="Api"><span class="type-signature"></span>new Api<span class="signature">(url, callback, accessToken, maybeRequestHandler)</span><span class="type-signature"> &rarr; {<a href="Api.html">Api</a>}</span></h4>
+    <h4 class="name" id="Api"><span class="type-signature"></span>new Api<span class="signature">(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL)</span><span class="type-signature"> &rarr; {<a href="Api.html">Api</a>}</span></h4>
 
     
 </dt>
@@ -120,14 +120,14 @@
 
             
 
-            <td class="description last">Optional callback function that is called after the API was retrieved, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest</td>
+            <td class="description last">Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>accessToken</code></td>
+                <td class="name"><code>maybeAccessToken</code></td>
             
 
             <td class="type">
@@ -143,7 +143,7 @@
 
             
 
-            <td class="description last">The optional accessToken for the OAuth2 connection</td>
+            <td class="description last">The accessToken for an OAuth2 connection</td>
         </tr>
 
     
@@ -166,7 +166,53 @@
 
             
 
-            <td class="description last">The kit knows how to handle the HTTP request in Node.js and in the browser (with Ajax); you will need to pass a maybeRequestHandler if you're in another JS environment</td>
+            <td class="description last">Environment specific HTTP request handling function</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maybeApiCache</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A cache object with get/set functions for caching API responses</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maybeApiDataTTL</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds</td>
         </tr>
 
     
@@ -197,7 +243,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line17">line 17</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line19">line 19</a>
     </li></ul></dd>
     
 
@@ -308,7 +354,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line381">line 381</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line270">line 270</a>
     </li></ul></dd>
     
 
@@ -447,7 +493,7 @@ You can then chain the calls: api.form("everything").query('[[:d = at(document.i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line343">line 343</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line232">line 232</a>
     </li></ul></dd>
     
 
@@ -586,7 +632,7 @@ You can then chain the calls: api.form("everything").query('[[:d = at(document.i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line331">line 331</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line220">line 220</a>
     </li></ul></dd>
     
 
@@ -638,7 +684,7 @@ You can then chain the calls: api.form("everything").query('[[:d = at(document.i
         
             
 <dt>
-    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(callback)</span><span class="type-signature"> &rarr; {<a href="Api.html">Api</a>}</span></h4>
+    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(callback)</span><span class="type-signature"></span></h4>
 
     
 </dt>
@@ -646,8 +692,9 @@ You can then chain the calls: api.form("everything").query('[[:d = at(document.i
 
     
     <div class="description">
-        Requests (with the proper handler), parses, and returns the /api document.
-This is for internal use, from outside this kit, you should call Prismic.Api()
+        Fetches data used to construct the api client, from cache if it's
+present, otherwise from calling the prismic api endpoint (which is
+then cached).
     </div>
     
 
@@ -697,7 +744,7 @@ This is for internal use, from outside this kit, you should call Prismic.Api()
 
             
 
-            <td class="description last">Optional callback function that is called after the query is made, to which you may pass three parameters: a potential error (null if no problem), the API object, and the XMLHttpRequest</td>
+            <td class="description last">Callback to receive the data</td>
         </tr>
 
     
@@ -728,7 +775,7 @@ This is for internal use, from outside this kit, you should call Prismic.Api()
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line208">line 208</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -751,28 +798,6 @@ This is for internal use, from outside this kit, you should call Prismic.Api()
     
 
     
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    - The Api object that can be manipulated
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="Api.html">Api</a></span>
-
-
-    </dd>
-</dl>
-
-        
 
     
 </dd>
@@ -823,7 +848,7 @@ Instead, set your ref once in a variable, and call it when you need it; this wil
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line357">line 357</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line246">line 246</a>
     </li></ul></dd>
     
 
@@ -912,7 +937,7 @@ Instead, set your ref once in a variable, and call it when you need it; this wil
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line390">line 390</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line279">line 279</a>
     </li></ul></dd>
     
 
@@ -953,6 +978,195 @@ Instead, set your ref once in a variable, and call it when you need it; this wil
 </dl>
 
         
+
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="previewSession"><span class="type-signature"></span>previewSession<span class="signature">(token, linkResolver, defaultUrl, callback)</span><span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Return the URL to display a given preview
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>token</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">as received from Prismic server to identify the content to preview</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>linkResolver</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the link resolver to build URL for your site</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>defaultUrl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the URL to default to return if the preview doesn't correspond to a document
+               (usually the home page of your site)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">to get the resulting URL</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line311">line 311</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
 
     
 </dd>
@@ -1051,7 +1265,7 @@ Instead, set your ref once in a variable, and call it when you need it; this wil
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="api.js.html">api.js</a>, <a href="api.js.html#line369">line 369</a>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line258">line 258</a>
     </li></ul></dd>
     
 
@@ -1096,6 +1310,125 @@ Instead, set your ref once in a variable, and call it when you need it; this wil
     
 </dd>
 
+        
+            
+<dt>
+    <h4 class="name" id="refresh"><span class="type-signature"></span>refresh<span class="signature">(callback)</span><span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Cleans api data from the cache and fetches an up to date copy.
+    </div>
+    
+
+    
+
+    
+
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Optional callback function that is called after the data has been refreshed</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+    
+
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line102">line 102</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
         </dl>
     
 
@@ -1118,7 +1451,7 @@ Instead, set your ref once in a variable, and call it when you need it; this wil
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Tue Oct 28 2014 16:37:23 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Thu Nov 13 2014 11:31:00 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
