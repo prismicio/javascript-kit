@@ -314,7 +314,45 @@
                 linkedDocuments,
                 fragments
             );
+        },
+
+        /**
+         * Return the URL to display a given preview
+         * @param {string} token as received from Prismic server to identify the content to preview
+         * @param {function} linkResolver the link resolver to build URL for your site
+         * @param {string} defaultUrl the URL to default to return if the preview doesn't correspond to a document
+         *                (usually the home page of your site)
+         * @param {function} callback to get the resulting URL
+         */
+        previewSession: function(token, linkResolver, defaultUrl, callback) {
+            var api = this;
+            var Predicates = Global.Prismic.Predicates;
+            this.requestHandler(token, function (err, result, xhr) {
+                if (err) {
+                    console.log("Error from the request");
+                    callback(err, defaultUrl, xhr);
+                    return;
+                }
+                try {
+                    var mainDocumentId = result.mainDocument;
+                    if (!mainDocumentId) {
+                        callback(null, defaultUrl, xhr);
+                    } else {
+                        api.form("everything").query(Predicates.at("document.id", mainDocumentId)).ref(token).submit(function(err, response) {
+                            if (response.results.length === 0) {
+                                callback(null, defaultUrl, xhr);
+                            } else {
+                                callback(null, linkResolver(response.results[0], xhr));
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.log("Caught e ", e);
+                    callback(e, defaultUrl, xhr);
+                }
+            });
         }
+
     };
 
     prismic.fn.init.prototype = prismic.fn;
@@ -683,6 +721,8 @@
     // -- Export Globally
 
     Global.Prismic = {
+        experimentCookie: "io.prismic.experiment",
+        previewCookie: "io.prismic.preview",
         Api: prismic
     };
 
@@ -1877,7 +1917,7 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function () {
-            return "<img src=" + this.url + " width=" + this.width + " height=" + this.height + " alt=\"" + this.alt + "\">";
+            return "<img src=\"" + this.url + "\" width=\"" + this.width + "\" height=\"" + this.height + "\" alt=\"" + this.alt + "\">";
         },
 
         /**
@@ -2107,7 +2147,10 @@
     };
 
     function htmlEscape(input) {
-        return input && input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return input && input.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\n/g, "<br>");
     }
 
     /**
@@ -2589,8 +2632,6 @@
 
     "use strict";
 
-    var COOKIE_NAME = "io.prismic.experiment";
-
     /**
      * A collection of experiments currently available
      * @param data the json data received from the Prismic API
@@ -2609,7 +2650,6 @@
         }
         this.drafts = drafts;
         this.running = running;
-        this.cookieName = COOKIE_NAME;
     }
 
     Experiments.prototype.current = function() {
@@ -2676,4 +2716,4 @@
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.0.23';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.0.24';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));

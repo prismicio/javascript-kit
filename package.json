@@ -9,7 +9,7 @@
     "content",
     "api"
   ],
-  "version": "1.0.23",
+  "version": "1.0.24",
   "devDependencies": {
     "codeclimate-test-reporter": "~0.0.4",
     "gulp": "~3.8.8",
