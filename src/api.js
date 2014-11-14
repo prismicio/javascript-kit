@@ -191,6 +191,7 @@
                 master: master[0],
                 types: types,
                 tags: tags,
+                experiments: data.experiments,
                 oauthInitiate: data['oauth_initiate'],
                 oauthToken: data['oauth_token']
             };
