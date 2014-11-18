@@ -207,6 +207,7 @@
                 master: master[0],
                 types: types,
                 tags: tags,
+                experiments: data.experiments,
                 oauthInitiate: data['oauth_initiate'],
                 oauthToken: data['oauth_token']
             };
@@ -2663,21 +2664,23 @@
         return this.running.length > 0 ? this.running[0] : null;
     };
 
+    Experiments.prototype.currentGoogleId = function() {
+      return this.current() ? this.current().googleId() : null;
+    };
+
     /**
      * Get the current running experiment variation ref from a cookie content
      */
     Experiments.prototype.refFromCookie = function(cookie) {
         if (!cookie || cookie.trim() === "") return null;
-        var splitted = cookie.trim().split("%20");
+        var splitted = cookie.trim().split(" ");
         if (splitted.length < 2) return null;
         var expId = splitted[0];
         var varIndex = parseInt(splitted[1], 10);
-        this.running.forEach(function(exp) {
-            if (exp.googleId() == expId) {
-                return (exp.variations.length > varIndex) ? exp.variations[varIndex] : null;
-            }
-        });
-        return null;
+        var exp = this.running.filter(function(exp) {
+          return exp.googleId() == expId && exp.variations.length > varIndex;
+        })[0];
+        return exp ? exp.variations[varIndex].ref() : null;
     };
 
     function Experiment(data) {
