@@ -305,12 +305,19 @@
                 fragments[json.type + '.' + field] = json.data[json.type][field];
             }
 
+            var slugs = [];
+            if (json.slugs !== undefined) {
+                for (var i = 0; i < json.slugs.length; i++) {
+                    slugs.push(decodeURIComponent(json.slugs[i]));
+                }
+            }
+
             return new Global.Prismic.Document(
                 json.id,
                 json.type,
                 json.href,
                 json.tags,
-                json.slugs,
+                slugs,
                 linkedDocuments,
                 fragments
             );
@@ -342,7 +349,7 @@
                             if (response.results.length === 0) {
                                 callback(null, defaultUrl, xhr);
                             } else {
-                                callback(null, linkResolver(response.results[0], xhr));
+                                callback(null, linkResolver(response.results[0]), xhr);
                             }
                         });
                     }
@@ -2716,4 +2723,4 @@
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.0.24';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.0.25';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
