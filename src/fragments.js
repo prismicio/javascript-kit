@@ -818,13 +818,16 @@
                 tagsEnd[pos].forEach(function () {
                     // Close a tag
                     var tag = stack.pop();
-                    var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
-                    if (stack.length === 0) {
-                        // The tag was top level
-                        html += innerHtml;
-                    } else {
-                        // Add the content to the parent tag
-                        stack[stack.length - 1].text += innerHtml;
+                    // Continue only if block contains content.
+                    if (typeof tag !== 'undefined') {
+                      var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
+                      if (stack.length === 0) {
+                          // The tag was top level
+                          html += innerHtml;
+                      } else {
+                          // Add the content to the parent tag
+                          stack[stack.length - 1].text += innerHtml;
+                      }
                     }
                 });
             }
