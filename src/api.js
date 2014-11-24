@@ -484,11 +484,20 @@
         /**
          * Sets the orderings to query for this SearchForm. This is an optional method.
          *
-         * @param {string} orderings - The orderings
+         * @param {array} orderings - Array of string: list of fields, optionally followed by space and desc. Example: ['my.product.price desc', 'my.product.date']
          * @returns {SearchForm} - The SearchForm itself
          */
         orderings: function(orderings) {
-            return this.set("orderings", orderings);
+            if (typeof orderings === 'string') {
+                // Backward compatibility
+                return this.set("orderings", orderings);
+            } else if (!orderings) {
+                // Noop
+                return this;
+            } else {
+                // Normal usage
+                return this.set("orderings", "[" + orderings.join(",") + "]");
+            }
         },
 
         /**

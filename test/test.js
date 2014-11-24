@@ -103,9 +103,7 @@
                     .query(Predicates.any("document.type", ["doc", "docchapter"]))
                     .ref(Api.master())
                     .submit(function (err, response) {
-                        if (err) {
-                            console.log(err);
-                            return;
+                        if (err) { console.log(err);
                         }
                         var document = response.results[0];
                         assert.equal(document.linkedDocuments.length, 1);
@@ -122,9 +120,23 @@
                     done();
                 }
                 Api.form('everything').ref(Api.master()).orderings('[my.product.price desc]').submit(function (err, documents) {
+                    if (err) { console.log(err); }
+                    assert.equal(documents.results.length, 20);
+                    assert.equal(documents.results[0].id, 'UlfoxUnM0wkXYXbj');
+                    done();
+                });
+            });
+        });
+
+        it('Submit with an ordering array', function(done) {
+            Prismic.Api(testRepository, function (err, Api) {
+                if (err) {
+                    console.log(err);
+                    done();
+                }
+                Api.form('everything').ref(Api.master()).orderings(['my.product.price desc']).submit(function (err, documents) {
                     if (err) {
                         console.log(err);
-                        return;
                     }
                     assert.equal(documents.results.length, 20);
                     assert.equal(documents.results[0].id, 'UlfoxUnM0wkXYXbj');
