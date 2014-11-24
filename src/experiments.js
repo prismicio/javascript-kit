@@ -26,10 +26,6 @@
         return this.running.length > 0 ? this.running[0] : null;
     };
 
-    Experiments.prototype.currentGoogleId = function() {
-      return this.current() ? this.current().googleId() : null;
-    };
-
     /**
      * Get the current running experiment variation ref from a cookie content
      */

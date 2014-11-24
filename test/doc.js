@@ -43,7 +43,7 @@
                 if (err) throw err; // gisthide
                 // You can use the Api object inside this block
                 console.log("References: ", Api.data.refs);
-                assert.equal(Api.data.refs.length, 1); // gisthide
+                assert.operator(Api.data.refs.length, '>', 0, 'at least one reference'); // gisthide
                 done(); // gisthide
             });
             // endgist

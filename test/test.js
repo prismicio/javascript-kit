@@ -14,7 +14,7 @@
         it('Retrieve the API', function(done) {
             Prismic.Api(testRepository, function(err, Api) {
                 if (err) throw err;
-                assert.equal(Api.data.refs.length, 1);
+                assert.operator(Api.data.refs.length, '>', 0, 'at least one reference');
                 assert.equal(Api.url, testRepository);
                 done();
             });
