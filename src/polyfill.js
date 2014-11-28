@@ -1,14 +1,19 @@
 (function() {
 
-    if (!Object.create) {
-        Object.create = (function () {
-            function F() {}
-            return function (o) {
-                if (arguments.length != 1) {
-                    throw new Error('Object.create implementation only accepts one parameter.');
+    if (typeof Object.create != 'function') {
+        Object.create = (function() {
+            var Object = function() {};
+            return function (prototype) {
+                if (arguments.length > 1) {
+                    throw Error('Second argument not supported');
                 }
-                F.prototype = o;
-                return new F();
+                if (typeof prototype != 'object') {
+                    throw TypeError('Argument must be an object');
+                }
+                Object.prototype = prototype;
+                var result = new Object();
+                Object.prototype = null;
+                return result;
             };
         })();
     }
