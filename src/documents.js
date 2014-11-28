@@ -428,13 +428,13 @@
         this.fragments = fragments;
     }
 
-    Document.prototype = Object.create(WithFragments.prototype, {});
+    Document.prototype = Object.create(WithFragments.prototype);
 
     function GroupDoc(fragments) {
         this.fragments = fragments;
     }
 
-    GroupDoc.prototype = Object.create(WithFragments.prototype, {});
+    GroupDoc.prototype = Object.create(WithFragments.prototype);
 
     // -- Private helpers
 
