@@ -1,14 +1,19 @@
 (function() {
 
-    if (!Object.create) {
-        Object.create = (function () {
-            function F() {}
-            return function (o) {
-                if (arguments.length != 1) {
-                    throw new Error('Object.create implementation only accepts one parameter.');
+    if (typeof Object.create != 'function') {
+        Object.create = (function() {
+            var Object = function() {};
+            return function (prototype) {
+                if (arguments.length > 1) {
+                    throw Error('Second argument not supported');
                 }
-                F.prototype = o;
-                return new F();
+                if (typeof prototype != 'object') {
+                    throw TypeError('Argument must be an object');
+                }
+                Object.prototype = prototype;
+                var result = {};
+                Object.prototype = null;
+                return result;
             };
         })();
     }
@@ -500,11 +505,20 @@
         /**
          * Sets the orderings to query for this SearchForm. This is an optional method.
          *
-         * @param {string} orderings - The orderings
+         * @param {array} orderings - Array of string: list of fields, optionally followed by space and desc. Example: ['my.product.price desc', 'my.product.date']
          * @returns {SearchForm} - The SearchForm itself
          */
         orderings: function(orderings) {
-            return this.set("orderings", orderings);
+            if (typeof orderings === 'string') {
+                // Backward compatibility
+                return this.set("orderings", orderings);
+            } else if (!orderings) {
+                // Noop
+                return this;
+            } else {
+                // Normal usage
+                return this.set("orderings", "[" + orderings.join(",") + "]");
+            }
         },
 
         /**
@@ -1351,13 +1365,13 @@
         this.fragments = fragments;
     }
 
-    Document.prototype = Object.create(WithFragments.prototype, {});
+    Document.prototype = Object.create(WithFragments.prototype);
 
     function GroupDoc(fragments) {
         this.fragments = fragments;
     }
 
-    GroupDoc.prototype = Object.create(WithFragments.prototype, {});
+    GroupDoc.prototype = Object.create(WithFragments.prototype);
 
     // -- Private helpers
 
@@ -2194,13 +2208,16 @@
                 tagsEnd[pos].forEach(function () {
                     // Close a tag
                     var tag = stack.pop();
-                    var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
-                    if (stack.length === 0) {
-                        // The tag was top level
-                        html += innerHtml;
-                    } else {
-                        // Add the content to the parent tag
-                        stack[stack.length - 1].text += innerHtml;
+                    // Continue only if block contains content.
+                    if (typeof tag !== 'undefined') {
+                      var innerHtml = serialize(tag.span, tag.text, htmlSerializer);
+                      if (stack.length === 0) {
+                          // The tag was top level
+                          html += innerHtml;
+                      } else {
+                          // Add the content to the parent tag
+                          stack[stack.length - 1].text += innerHtml;
+                      }
                     }
                 });
             }
@@ -2664,10 +2681,6 @@
         return this.running.length > 0 ? this.running[0] : null;
     };
 
-    Experiments.prototype.currentGoogleId = function() {
-      return this.current() ? this.current().googleId() : null;
-    };
-
     /**
      * Get the current running experiment variation ref from a cookie content
      */
@@ -2726,4 +2739,4 @@
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.0.25';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.0.27';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
