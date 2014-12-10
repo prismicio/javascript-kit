@@ -3,6 +3,36 @@
     "use strict";
 
     /**
+     * This class exists to make it possible to chain calls without having to check for null at each step
+     */
+    function NoFragment() {}
+
+    NoFragment.prototype = {
+        // Common methods
+        isDefined: function() { return false; },
+        asHtml: function() { return null; },
+        asText: function() { return null; },
+
+        // ImageEl
+        getView: function() { return new NoFragment(); },
+
+        // Link
+        url: function() { return null; },
+
+        // Group
+        toArray: function() { return []; },
+        size: function() { return 0; },
+        get: function(index) { return new Global.Prismic.GroupDoc({}); },
+
+        // StructuredText
+        getTitle: function () { return null; },
+        getFirstParagraph : function() { return null; },
+        getParagraphs : function() { return null; },
+        getParagraph : function(n) { return null; },
+        getFirstImage : function() { return null; }
+    };
+
+    /**
      * Embodies a plain text fragment (beware: not a structured text)
      * @constructor
      * @global
@@ -11,25 +41,28 @@
     function Text(data) {
         this.value = data;
     }
-    Text.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<span>" + this.value + "</span>";
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return this.value;
-         }
+    Text.prototype = Object.create(NoFragment.prototype);
+
+    Text.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    Text.prototype.asHtml = function () {
+        return "<span>" + this.value + "</span>";
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    Text.prototype.asText = function() {
+        return this.value;
     };
 
     /**
@@ -52,35 +85,37 @@
         this.isBroken = data.isBroken;
     }
 
-    DocumentLink.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function (ctx) {
-            return "<a href=\""+this.url(ctx)+"\">"+this.url(ctx)+"</a>";
-        },
-        /**
-         * Returns the URL of the document link.
-         *
-         * @params {object} linkResolver - mandatory linkResolver function (please read prismic.io online documentation about this)
-         * @returns {string} - the proper URL to use
-         */
-        url: function (linkResolver) {
-            return linkResolver(this.document, this.isBroken);
-        },
+    DocumentLink.prototype = Object.create(NoFragment.prototype);
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function(linkResolver) {
-            return this.url(linkResolver);
-         }
+    DocumentLink.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+     * @returns {string} - basic HTML code for the fragment
+     */
+    DocumentLink.prototype.asHtml = function (ctx) {
+        return "<a href=\""+this.url(ctx)+"\">"+this.url(ctx)+"</a>";
+    };
+    /**
+     * Returns the URL of the document link.
+     *
+     * @params {object} linkResolver - mandatory linkResolver function (please read prismic.io online documentation about this)
+     * @returns {string} - the proper URL to use
+     */
+    DocumentLink.prototype.url = function (linkResolver) {
+        return linkResolver(this.document, this.isBroken);
+    };
+
+    /**
+     * Turns the fragment into a usable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    DocumentLink.prototype.asText = function(linkResolver) {
+        return this.url(linkResolver);
     };
 
     /**
@@ -96,33 +131,36 @@
          */
         this.value = data;
     }
-    WebLink.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
-        },
-        /**
-         * Returns the URL of the link.
-         *
-         * @returns {string} - the proper URL to use
-         */
-        url: function() {
-            return this.value.url;
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return this.url();
-         }
+    WebLink.prototype = Object.create(NoFragment.prototype);
+
+    WebLink.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    WebLink.prototype.asHtml = function () {
+        return "<a href=\""+this.url()+"\">"+this.url()+"</a>";
+    };
+    /**
+     * Returns the URL of the link.
+     *
+     * @returns {string} - the proper URL to use
+     */
+    WebLink.prototype.url = function() {
+        return this.value.url;
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    WebLink.prototype.asText = function() {
+        return this.url();
     };
 
     /**
@@ -138,33 +176,36 @@
          */
         this.value = data;
     }
-    FileLink.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<a href=\""+this.url()+"\">"+this.value.file.name+"</a>";
-        },
-        /**
-         * Returns the URL of the link.
-         *
-         * @returns {string} - the proper URL to use
-         */
-        url: function() {
-            return this.value.file.url;
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return this.url();
-         }
+    FileLink.prototype = Object.create(NoFragment.prototype);
+
+    FileLink.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    FileLink.prototype.asHtml = function () {
+        return "<a href=\""+this.url()+"\">"+this.value.file.name+"</a>";
+    };
+    /**
+     * Returns the URL of the link.
+     *
+     * @returns {string} - the proper URL to use
+     */
+    FileLink.prototype.url = function() {
+        return this.value.file.url;
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    FileLink.prototype.asText = function() {
+        return this.url();
     };
 
     /**
@@ -180,33 +221,36 @@
          */
         this.value = data;
     }
-    ImageLink.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<a href=\""+this.url()+"\"><img src=\""+this.url()+"\" alt=\"" + this.alt + "\"></a>";
-        },
-        /**
-         * Returns the URL of the link.
-         *
-         * @returns {string} - the proper URL to use
-         */
-        url: function() {
-            return this.value.image.url;
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return this.url();
-         }
+    ImageLink.prototype = Object.create(NoFragment.prototype);
+
+    ImageLink.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    ImageLink.prototype.asHtml = function () {
+        return "<a href=\""+this.url()+"\"><img src=\""+this.url()+"\" alt=\"" + this.alt + "\"></a>";
+    };
+    /**
+     * Returns the URL of the link.
+     *
+     * @returns {string} - the proper URL to use
+     */
+    ImageLink.prototype.url = function() {
+        return this.value.image.url;
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    ImageLink.prototype.asText = function() {
+        return this.url();
     };
 
     /**
@@ -222,25 +266,28 @@
          */
         this.value = data;
     }
-    Select.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<span>" + this.value + "</span>";
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return this.value;
-         }
+    Select.prototype = Object.create(NoFragment.prototype);
+
+    Select.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    Select.prototype.asHtml = function () {
+        return "<span>" + this.value + "</span>";
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    Select.prototype.asText = function() {
+        return this.value;
     };
 
     /**
@@ -256,25 +303,28 @@
          */
         this.value = data;
     }
-    Color.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<span>" + this.value + "</span>";
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return this.value;
-         }
+    Color.prototype = Object.create(NoFragment.prototype);
+
+    Color.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    Color.prototype.asHtml = function () {
+        return "<span>" + this.value + "</span>";
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    Color.prototype.asText = function() {
+        return this.value;
     };
 
     /**
@@ -296,25 +346,27 @@
         this.longitude = data.longitude;
     }
 
-    GeoPoint.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return '<div class="geopoint"><span class="latitude">' + this.latitude + '</span><span class="longitude">' + this.longitude + '</span></div>';
-        },
+    GeoPoint.prototype = Object.create(NoFragment.prototype);
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-        asText: function() {
-            return '(' + this.latitude + "," + this.longitude + ')';
-        }
+    GeoPoint.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    GeoPoint.prototype.asHtml = function () {
+        return '<div class="geopoint"><span class="latitude">' + this.latitude + '</span><span class="longitude">' + this.longitude + '</span></div>';
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    GeoPoint.prototype.asText = function() {
+        return '(' + this.latitude + "," + this.longitude + ')';
     };
 
     /**
@@ -330,25 +382,28 @@
          */
         this.value = data;
     }
-    Num.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<span>" + this.value + "</span>";
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return this.value.toString();
-         }
+    Num.prototype = Object.create(NoFragment.prototype);
+
+    Num.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    Num.prototype.asHtml = function () {
+        return "<span>" + this.value + "</span>";
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    Num.prototype.asText = function() {
+        return this.value.toString();
     };
 
     /**
@@ -365,25 +420,27 @@
         this.value = new Date(data);
     }
 
-    DateFragment.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<time>" + this.value + "</time>";
-        },
+    DateFragment.prototype = Object.create(NoFragment.prototype);
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return this.value.toString();
-         }
+    DateFragment.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    DateFragment.prototype.asHtml = function () {
+        return "<time>" + this.value + "</time>";
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    DateFragment.prototype.asText = function() {
+        return this.value.toString();
     };
 
     /**
@@ -402,25 +459,27 @@
         this.value = new Date(correctIso8601Date);
     }
 
-    Timestamp.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<time>" + this.value + "</time>";
-        },
+    Timestamp.prototype = Object.create(NoFragment.prototype);
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return this.value.toString();
-         }
+    Timestamp.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    Timestamp.prototype.asHtml = function () {
+        return "<time>" + this.value + "</time>";
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    Timestamp.prototype.asText = function() {
+        return this.value.toString();
     };
 
     /**
@@ -437,25 +496,27 @@
         this.value = data;
     }
 
-    Embed.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return this.value.oembed.html;
-        },
+    Embed.prototype = Object.create(NoFragment.prototype);
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return "";
-         }
+    Embed.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    Embed.prototype.asHtml = function () {
+        return this.value.oembed.html;
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    Embed.prototype.asText = function() {
+        return "";
     };
 
     /**
@@ -476,38 +537,42 @@
          */
         this.views = views || {};
     }
-    ImageEl.prototype = {
-        /**
-         * Gets the view of the image, from its name
-         *
-         * @param {string} name - the name of the view to get
-         * @returns {ImageView} - the proper view
-         */
-        getView: function(name) {
-            if (name === "main") {
-                return this.main;
-            } else {
-                return this.views[name];
-            }
-        },
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return this.main.asHtml();
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return "";
-         }
+    ImageEl.prototype = Object.create(NoFragment.prototype);
+
+    ImageEl.prototype.isDefined = function() { return true; };
+
+    /**
+     * Gets the view of the image, from its name
+     *
+     * @param {string} name - the name of the view to get
+     * @returns {ImageView} - the proper view
+     */
+    ImageEl.prototype.getView = function(name) {
+        if (name === "main") {
+            return this.main;
+        } else {
+            return this.views[name];
+        }
+    };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    ImageEl.prototype.asHtml = function () {
+        return this.main.asHtml();
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    ImageEl.prototype.asText = function() {
+        return "";
     };
 
     /**
@@ -538,28 +603,31 @@
          */
         this.alt = alt;
     }
-    ImageView.prototype = {
-        ratio: function () {
-            return this.width / this.height;
-        },
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function () {
-            return "<img src=\"" + this.url + "\" width=\"" + this.width + "\" height=\"" + this.height + "\" alt=\"" + this.alt + "\">";
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            return "";
-         }
+    ImageView.prototype = Object.create(NoFragment.prototype);
+
+    ImageView.prototype.isDefined = function() { return true; };
+
+    ImageView.prototype.ratio = function () {
+        return this.width / this.height;
+    };
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @returns {string} - basic HTML code for the fragment
+     */
+    ImageView.prototype.asHtml = function () {
+        return "<img src=\"" + this.url + "\" width=\"" + this.width + "\" height=\"" + this.height + "\" alt=\"" + this.alt + "\">";
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    ImageView.prototype.asText = function() {
+        return "";
     };
 
     /**
@@ -574,46 +642,56 @@
             this.value.push(new Global.Prismic.GroupDoc(data[i]));
         }
     }
-    Group.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         * @params {function} linkResolver - linkResolver function (please read prismic.io online documentation about this)
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function(linkResolver) {
-            var output = "";
-            for (var i = 0; i < this.value.length; i++) {
-                output += this.value[i].asHtml(linkResolver);
-            }
-            return output;
-        },
-        /**
-         * Turns the Group fragment into an array in order to access its items (groups of fragments),
-         * or to loop through them.
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
-         * @returns {array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
-         */
-        toArray: function(){
-            return this.value;
-        },
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-        asText: function(linkResolver) {
-            var output = "";
-            for (var i=0; i<this.value.length; i++) {
-                for (var fragmentName in this.value[i]) {
-                    output += this.value[i][fragmentName].asText(linkResolver);
-                }
-            }
-            return output;
+    Group.prototype = Object.create(NoFragment.prototype);
+
+    Group.prototype.isDefined = function() { return true; };
+
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     * @params {function} linkResolver - linkResolver function (please read prismic.io online documentation about this)
+     * @returns {string} - basic HTML code for the fragment
+     */
+    Group.prototype.asHtml = function(linkResolver) {
+        var output = "";
+        for (var i = 0; i < this.value.length; i++) {
+            output += this.value[i].asHtml(linkResolver);
         }
+        return output;
+    };
+    /**
+     * Turns the Group fragment into an array in order to access its items (groups of fragments),
+     * or to loop through them.
+     * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+     * @returns {Array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
+     */
+    Group.prototype.toArray = function(){
+        return this.value;
     };
 
+    /**
+     * Return the GroupDoc at the given index
+     * @param index
+     */
+    Group.prototype.get = function(index) {
+        return this.value[index];
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    Group.prototype.asText = function(linkResolver) {
+        var output = "";
+        for (var i=0; i<this.value.length; i++) {
+            for (var fragmentName in this.value[i]) {
+                output += this.value[i][fragmentName].asText(linkResolver);
+            }
+        }
+        return output;
+    };
 
     /**
      * Embodies a structured text fragment
@@ -622,160 +700,158 @@
      * @alias Fragments:StructuredText
      */
     function StructuredText(blocks) {
-
         this.blocks = blocks;
-
     }
 
-    StructuredText.prototype = {
+    StructuredText.prototype = Object.create(NoFragment.prototype);
 
-        /**
-         * @returns {object} the first heading block in the text
-         */
-        getTitle: function () {
-            for(var i=0; i<this.blocks.length; i++) {
-                var block = this.blocks[i];
-                if(block.type.indexOf('heading') === 0) {
-                    return block;
-                }
+    StructuredText.prototype.isDefined = function() { return true; };
+
+    /**
+     * @returns {object} the first heading block in the text
+     */
+    StructuredText.prototype.getTitle = function () {
+        for(var i=0; i<this.blocks.length; i++) {
+            var block = this.blocks[i];
+            if(block.type.indexOf('heading') === 0) {
+                return block;
             }
-        },
+        }
+    };
 
-        /**
-         * @returns {object} the first block of type paragraph
-         */
-        getFirstParagraph: function() {
-            for(var i=0; i<this.blocks.length; i++) {
-                var block = this.blocks[i];
-                if(block.type == 'paragraph') {
-                    return block;
-                }
+    /**
+     * @returns {object} the first block of type paragraph
+     */
+    StructuredText.prototype.getFirstParagraph = function() {
+        for(var i=0; i<this.blocks.length; i++) {
+            var block = this.blocks[i];
+            if(block.type == 'paragraph') {
+                return block;
             }
-        },
+        }
+    };
 
-        /**
-         * @returns {array} all paragraphs
-         */
-        getParagraphs: function() {
-            var paragraphs = [];
-            for(var i=0; i<this.blocks.length; i++) {
-                var block = this.blocks[i];
-                if(block.type == 'paragraph') {
-                    paragraphs.push(block);
-                }
+    /**
+     * @returns {array} all paragraphs
+     */
+    StructuredText.prototype.getParagraphs = function() {
+        var paragraphs = [];
+        for(var i=0; i<this.blocks.length; i++) {
+            var block = this.blocks[i];
+            if(block.type == 'paragraph') {
+                paragraphs.push(block);
             }
-            return paragraphs;
-        },
+        }
+        return paragraphs;
+    };
 
-        /**
-         * @returns {object} the nth paragraph
-         */
-        getParagraph: function(n) {
-            return this.getParagraphs()[n];
-        },
+    /**
+     * @returns {object} the nth paragraph
+     */
+    StructuredText.prototype.getParagraph = function(n) {
+        return this.getParagraphs()[n];
+    };
 
-        /**
-         * @returns {object}
-         */
-        getFirstImage: function() {
-            for(var i=0; i<this.blocks.length; i++) {
-                var block = this.blocks[i];
-                if(block.type == 'image') {
-                    return new ImageView(
-                        block.url,
-                        block.dimensions.width,
-                        block.dimensions.height,
-                        block.alt
-                    );
-                }
+    /**
+     * @returns {object}
+     */
+    StructuredText.prototype.getFirstImage = function() {
+        for(var i=0; i<this.blocks.length; i++) {
+            var block = this.blocks[i];
+            if(block.type == 'image') {
+                return new ImageView(
+                    block.url,
+                    block.dimensions.width,
+                    block.dimensions.height,
+                    block.alt
+                );
             }
-        },
+        }
+    };
 
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         * @params {function} linkResolver - please read prismic.io online documentation about link resolvers
-         * @params {function} htmlSerializer optional HTML serializer to customize the output
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function(linkResolver, htmlSerializer) {
-            var blockGroups = [],
-                blockGroup,
-                block,
-                html = [];
-            if (!isFunction(linkResolver)) {
-                // Backward compatibility with the old ctx argument
-                var ctx = linkResolver;
-                linkResolver = function(doc, isBroken) {
-                    return ctx.linkResolver(ctx, doc, isBroken);
-                };
-            }
-            if (Array.isArray(this.blocks)) {
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     * @params {function} linkResolver - please read prismic.io online documentation about link resolvers
+     * @params {function} htmlSerializer optional HTML serializer to customize the output
+     * @returns {string} - basic HTML code for the fragment
+     */
+    StructuredText.prototype.asHtml = function(linkResolver, htmlSerializer) {
+        var blockGroups = [],
+            blockGroup,
+            block,
+            html = [];
+        if (!isFunction(linkResolver)) {
+            // Backward compatibility with the old ctx argument
+            var ctx = linkResolver;
+            linkResolver = function(doc, isBroken) {
+                return ctx.linkResolver(ctx, doc, isBroken);
+            };
+        }
+        if (Array.isArray(this.blocks)) {
 
-                for(var i=0; i < this.blocks.length; i++) {
-                    block = this.blocks[i];
+            for(var i=0; i < this.blocks.length; i++) {
+                block = this.blocks[i];
 
-                    // Resolve image links
-                    if (block.type == "image" && block.linkTo) {
-                        var link = initField(block.linkTo);
-                        block.linkUrl = link.url(linkResolver);
-                    }
-
-                    if (block.type !== "list-item" && block.type !== "o-list-item") {
-                        // it's not a type that groups
-                        blockGroups.push(block);
-                        blockGroup = null;
-                    } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
-                        // it's a new type or no BlockGroup was set so far
-                        blockGroup = {
-                            type: "group-" + block.type,
-                            blocks: [block]
-                        };
-                        blockGroups.push(blockGroup);
-                    } else {
-                        // it's the same type as before, no touching blockGroup
-                        blockGroup.blocks.push(block);
-                    }
+                // Resolve image links
+                if (block.type == "image" && block.linkTo) {
+                    var link = initField(block.linkTo);
+                    block.linkUrl = link.url(linkResolver);
                 }
 
-                var blockContent = function(block) {
-                    var content = "";
-                    if (block.blocks) {
-                        block.blocks.forEach(function (block2) {
-                            content = content + serialize(block2, blockContent(block2), htmlSerializer);
-                        });
-                    } else {
-                        content = insertSpans(block.text, block.spans, linkResolver, htmlSerializer);
-                    }
-                    return content;
-                };
-
-                blockGroups.forEach(function (blockGroup) {
-                    html.push(serialize(blockGroup, blockContent(blockGroup), htmlSerializer));
-                });
-
-            }
-
-            return html.join('');
-
-        },
-
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function() {
-            var output = [];
-            for(var i=0; i<this.blocks.length; i++) {
-                var block = this.blocks[i];
-                if (block.text) {
-                    output.push(block.text);
+                if (block.type !== "list-item" && block.type !== "o-list-item") {
+                    // it's not a type that groups
+                    blockGroups.push(block);
+                    blockGroup = null;
+                } else if (!blockGroup || blockGroup.type != ("group-" + block.type)) {
+                    // it's a new type or no BlockGroup was set so far
+                    blockGroup = {
+                        type: "group-" + block.type,
+                        blocks: [block]
+                    };
+                    blockGroups.push(blockGroup);
+                } else {
+                    // it's the same type as before, no touching blockGroup
+                    blockGroup.blocks.push(block);
                 }
             }
-            return output.join(' ');
-         }
 
+            var blockContent = function(block) {
+                var content = "";
+                if (block.blocks) {
+                    block.blocks.forEach(function (block2) {
+                        content = content + serialize(block2, blockContent(block2), htmlSerializer);
+                    });
+                } else {
+                    content = insertSpans(block.text, block.spans, linkResolver, htmlSerializer);
+                }
+                return content;
+            };
+
+            blockGroups.forEach(function (blockGroup) {
+                html.push(serialize(blockGroup, blockContent(blockGroup), htmlSerializer));
+            });
+
+        }
+
+        return html.join('');
+
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    StructuredText.prototype.asText = function() {
+        var output = [];
+        for(var i=0; i<this.blocks.length; i++) {
+            var block = this.blocks[i];
+            if (block.text) {
+                output.push(block.text);
+            }
+        }
+        return output.join(' ');
     };
 
     function htmlEscape(input) {
@@ -1009,6 +1085,7 @@
         FileLink: FileLink,
         Group: Group,
         GeoPoint: GeoPoint,
+        NoFragment: NoFragment,
         initField: initField,
         insertSpans: insertSpans
     };

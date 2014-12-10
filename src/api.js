@@ -724,6 +724,7 @@
     Global.Prismic = {
         experimentCookie: "io.prismic.experiment",
         previewCookie: "io.prismic.preview",
+        nullSafety: false, // Default is false for backward compatibility, but it is recommended to set it to true
         Api: prismic
     };
 
