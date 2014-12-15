@@ -6,6 +6,7 @@ os:
 node_js:
 - '0.10'
 
+before_install: curl https://raw.github.com/creationix/nvm/master/install.sh | sh
 install: npm install
 script: gulp test
 

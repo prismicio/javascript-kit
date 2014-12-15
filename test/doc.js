@@ -87,15 +87,13 @@
 
         it('prismic-simplequery.js', function (done) {
             // startgist:f3f7d4b970e964131271:prismic-simplequery.js
-            Prismic.Api('https://lesbonneschoses.cdn.prismic.io/api', function (err, Api) {
+            Prismic.Api('http://lesbonneschoses-viryxlf5j38alu5p.wroom.dev/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 Api.form('everything')
                     .ref(Api.master())
+                    .set("fromId", "UjHjmsuvzUEC_yjm")
                     .query(Prismic.Predicates.at("document.type", "product")).submit(function (err, response) {
-                        if (err) {
-                            console.log(err);
-                            done();
-                        } // gisthide
+                        if (err) { console.log(err); done(); } // gisthide
                         // The documents object contains a Response object with all documents of type "product".
                         var page = response.page; // The current page number, the first one being 1
                         assert.equal(page, 1); // gisthide
