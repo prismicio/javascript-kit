@@ -42,9 +42,9 @@
         this.value = data;
         /**
          * @field
-         * @description the document link's JSON object, exactly as is returned in the JSON responses (see API documentation: https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#json-responses)
+         * @description the LinkedDocument
          */
-        this.document = data.document;
+        this.document = new Global.Prismic.LinkedDocument(data.document.id, data.document.slug, data.document.type, data.document.tags);
         /**
          * @field
          * @description true if the link is broken, false otherwise
@@ -592,7 +592,7 @@
          * Turns the Group fragment into an array in order to access its items (groups of fragments),
          * or to loop through them.
          * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
-         * @returns {array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
+         * @returns {Array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
          */
         toArray: function(){
             return this.value;

@@ -86,8 +86,8 @@
                         return;
                     }
                     var document = response.results[0];
-                    assert.equal(document.linkedDocuments.length, 1);
-                    assert.equal(document.linkedDocuments[0].id, 'U0w8OwEAACoAQEvB');
+                    assert.equal(document.linkedDocuments().length, 1);
+                    assert.equal(document.linkedDocuments()[0].id, 'U0w8OwEAACoAQEvB');
                     done();
                 });
             });
@@ -106,8 +106,8 @@
                         if (err) { console.log(err);
                         }
                         var document = response.results[0];
-                        assert.equal(document.linkedDocuments.length, 1);
-                        assert.equal(document.linkedDocuments[0].id, 'U0w8OwEAACoAQEvB');
+                        assert.equal(document.linkedDocuments().length, 1);
+                        assert.equal(document.linkedDocuments()[0].id, 'U0w8OwEAACoAQEvB');
                         done();
                     });
             });

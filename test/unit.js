@@ -125,11 +125,4 @@
         assert.equal(text.asHtml(getLinkResolver()), '<p>Here is some introductory text.</p><p>The following image is linked.</p><p class=\"block-img\"><a href=\"http://google.com/\"><img src=\"http://fpoimg.com/129x260\" alt=\"\"></a></p><p><strong>More important stuff</strong></p><p>The next is linked to a valid document:</p><p class=\"block-img\"><a href=\"/testing_url/UxCQFFFFFFFaaYAH/something-fantastic\"><img src=\"http://fpoimg.com/400x400\" alt=\"\"></a></p><p>The next is linked to a broken document:</p><p class=\"block-img\"><a href=\"#broken\"><img src=\"http://fpoimg.com/250x250\" alt=\"\"></a></p><p>One more image, this one is not linked:</p><p class=\"block-img\"><img src=\"http://fpoimg.com/199x300\" alt=\"\"></p>');
     });
 
-    function getLinkResolver(ref) {
-        return function (doc, isBroken) {
-            if (isBroken) return '#broken';
-            return "/testing_url/" + doc.id + "/" + doc.slug + (ref ? ('?ref=' + ref) : '');
-        };
-    }
-
 })(window.Prismic);

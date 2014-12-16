@@ -278,13 +278,6 @@
          * @returns {Document}
          */
         parseDoc: function(json) {
-            var linkedDocuments = [];
-            if(json.linked_documents) {
-                linkedDocuments = json.linked_documents.map(function(linkedDoc) {
-                    return new LinkedDocument(linkedDoc['id'], linkedDoc['slug'], linkedDoc['type'], linkedDoc['tags']);
-                });
-            }
-
             var fragments = {};
             for(var field in json.data[json.type]) {
                 fragments[json.type + '.' + field] = json.data[json.type][field];
@@ -303,7 +296,6 @@
                 json.href,
                 json.tags,
                 slugs,
-                linkedDocuments,
                 fragments
             );
         },
@@ -612,30 +604,6 @@
          * @type {Array}
          */
         this.results = results;
-    }
-
-    /**
-     * A link to a document as in "related document" (not a hyperlink).
-     * @constructor
-     * @global
-     */
-    function LinkedDocument(id, slug, type, tags) {
-        /**
-         * @type {string}
-         */
-        this.id = id;
-        /**
-         * @type {string}
-         */
-        this.slug = slug;
-        /**
-         * @type {string}
-         */
-        this.type = type;
-        /**
-         * @type {Array}
-         */
-        this.tags = tags;
     }
 
     /**
