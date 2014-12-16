@@ -299,13 +299,6 @@
          * @returns {Document}
          */
         parseDoc: function(json) {
-            var linkedDocuments = [];
-            if(json.linked_documents) {
-                linkedDocuments = json.linked_documents.map(function(linkedDoc) {
-                    return new LinkedDocument(linkedDoc['id'], linkedDoc['slug'], linkedDoc['type'], linkedDoc['tags']);
-                });
-            }
-
             var fragments = {};
             for(var field in json.data[json.type]) {
                 fragments[json.type + '.' + field] = json.data[json.type][field];
@@ -324,7 +317,6 @@
                 json.href,
                 json.tags,
                 slugs,
-                linkedDocuments,
                 fragments
             );
         },
@@ -636,30 +628,6 @@
     }
 
     /**
-     * A link to a document as in "related document" (not a hyperlink).
-     * @constructor
-     * @global
-     */
-    function LinkedDocument(id, slug, type, tags) {
-        /**
-         * @type {string}
-         */
-        this.id = id;
-        /**
-         * @type {string}
-         */
-        this.slug = slug;
-        /**
-         * @type {string}
-         */
-        this.type = type;
-        /**
-         * @type {Array}
-         */
-        this.tags = tags;
-    }
-
-    /**
      * Embodies a prismic.io ref (a past or future point in time you can query)
      * @constructor
      * @global
@@ -938,6 +906,30 @@
 (function (Global, undefined) {
 
     "use strict";
+
+    /**
+     * A link to a document as in "related document" (not a hyperlink).
+     * @constructor
+     * @global
+     */
+    function LinkedDocument(id, slug, type, tags) {
+        /**
+         * @type {string}
+         */
+        this.id = id;
+        /**
+         * @type {string}
+         */
+        this.slug = slug;
+        /**
+         * @type {string}
+         */
+        this.type = type;
+        /**
+         * @type {Array}
+         */
+        this.tags = tags;
+    }
 
     /**
      * Functions to access fragments: superclass for Document and Doc (from Group), not supposed to be created directly
@@ -1297,6 +1289,49 @@
             return texts.join('');
          },
 
+
+        /**
+         * Linked documents, as an array of {@link LinkedDocument}
+         * @returns {Array}
+         */
+        linkedDocuments: function() {
+            var i, j, link;
+            var result = [];
+            for (var field in this.fragments) {
+                var fragment = this.get(field);
+                if (fragment instanceof Global.Prismic.Fragments.DocumentLink) {
+                    result.push(fragment.document);
+                }
+                if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
+                    for (i = 0; i < fragment.blocks.length; i++) {
+                        var block = fragment.blocks[i];
+                        if (block.type == "image" && block.linkTo) {
+                            link = Global.Prismic.Fragments.initField(block.linkTo);
+                            if (link instanceof DocumentLink) {
+                                result.push(link.document);
+                            }
+                        }
+                        var spans = block.spans || [];
+                        for (j = 0; j < spans.length; j++) {
+                            var span = spans[j];
+                            if (span.type == "hyperlink") {
+                                link = Global.Prismic.Fragments.initField(span.data);
+                                if (link instanceof Global.Prismic.Fragments.DocumentLink) {
+                                    result.push(link.document);
+                                }
+                            }
+                        }
+                    }
+                }
+                if (fragment instanceof Global.Prismic.Fragments.Group) {
+                    for (i = 0; i < fragment.value.length; i++) {
+                        result = result.concat(fragment.value[i].linkedDocuments());
+                    }
+                }
+            }
+            return result;
+        },
+
         /**
          * An array of the fragments with the given fragment name.
          * The array is often a single-element array, expect when the fragment is a multiple fragment.
@@ -1325,7 +1360,7 @@
      * @global
      * @alias Doc
      */
-    function Document(id, type, href, tags, slugs, linkedDocuments, fragments) {
+    function Document(id, type, href, tags, slugs, fragments) {
 
         /**
          * The ID of the document
@@ -1357,11 +1392,7 @@
          * @type {array}
          */
         this.slugs = slugs;
-        /**
-         * Linked documents, as an array of {@link LinkedDocument}
-         * @type {array}
-         */
-        this.linkedDocuments = linkedDocuments;
+
         this.fragments = fragments;
     }
 
@@ -1382,6 +1413,7 @@
 
     // -- Export globally
 
+    Global.Prismic.LinkedDocument = LinkedDocument;
     Global.Prismic.Document = Document;
     Global.Prismic.GroupDoc = GroupDoc;
 
@@ -1432,9 +1464,9 @@
         this.value = data;
         /**
          * @field
-         * @description the document link's JSON object, exactly as is returned in the JSON responses (see API documentation: https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#json-responses)
+         * @description the LinkedDocument
          */
-        this.document = data.document;
+        this.document = new Global.Prismic.LinkedDocument(data.document.id, data.document.slug, data.document.type, data.document.tags);
         /**
          * @field
          * @description true if the link is broken, false otherwise
@@ -1982,7 +2014,7 @@
          * Turns the Group fragment into an array in order to access its items (groups of fragments),
          * or to loop through them.
          * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
-         * @returns {array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
+         * @returns {Array} - the array of groups, each group being a JSON object with subfragment name as keys, and subfragment as values
          */
         toArray: function(){
             return this.value;
@@ -2739,4 +2771,4 @@
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.0.27';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.0.28';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
