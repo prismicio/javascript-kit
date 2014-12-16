@@ -292,6 +292,7 @@
 
             return new Global.Prismic.Document(
                 json.id,
+                json.uid || null,
                 json.type,
                 json.href,
                 json.tags,

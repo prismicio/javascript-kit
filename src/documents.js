@@ -431,13 +431,18 @@
      * @global
      * @alias Doc
      */
-    function Document(id, type, href, tags, slugs, fragments) {
+    function Document(id, uid, type, href, tags, slugs, fragments) {
 
         /**
          * The ID of the document
          * @type {string}
          */
         this.id = id;
+        /**
+         * The User ID of the document, a human readable id
+         * @type {string|null}
+         */
+        this.uid = uid;
         /**
          * The type of the document, corresponds to a document mask defined in the repository
          * @type {string}

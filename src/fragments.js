@@ -40,11 +40,28 @@
      */
     function DocumentLink(data) {
         this.value = data;
+
+        this.document = data.document;
         /**
          * @field
-         * @description the LinkedDocument
+         * @description the linked document id
          */
-        this.document = new Global.Prismic.LinkedDocument(data.document.id, data.document.slug, data.document.type, data.document.tags);
+        this.id = data.document.id;
+        /**
+         * @field
+         * @description the linked document tags
+         */
+        this.tags = data.document.tags;
+        /**
+         * @field
+         * @description the linked document slug
+         */
+        this.slug = data.document.slug;
+        /**
+         * @field
+         * @description the linked document type
+         */
+        this.type = data.document.type;
         /**
          * @field
          * @description true if the link is broken, false otherwise
