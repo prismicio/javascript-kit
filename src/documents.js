@@ -3,30 +3,6 @@
     "use strict";
 
     /**
-     * A link to a document as in "related document" (not a hyperlink).
-     * @constructor
-     * @global
-     */
-    function LinkedDocument(id, slug, type, tags) {
-        /**
-         * @type {string}
-         */
-        this.id = id;
-        /**
-         * @type {string}
-         */
-        this.slug = slug;
-        /**
-         * @type {string}
-         */
-        this.type = type;
-        /**
-         * @type {Array}
-         */
-        this.tags = tags;
-    }
-
-    /**
      * Functions to access fragments: superclass for Document and Doc (from Group), not supposed to be created directly
      * @constructor
      */
@@ -386,7 +362,7 @@
 
 
         /**
-         * Linked documents, as an array of {@link LinkedDocument}
+         * Linked documents, as an array of {@link DocumentLink}
          * @returns {Array}
          */
         linkedDocuments: function() {
@@ -395,7 +371,7 @@
             for (var field in this.fragments) {
                 var fragment = this.get(field);
                 if (fragment instanceof Global.Prismic.Fragments.DocumentLink) {
-                    result.push(fragment.document);
+                    result.push(fragment);
                 }
                 if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                     for (i = 0; i < fragment.blocks.length; i++) {
@@ -403,7 +379,7 @@
                         if (block.type == "image" && block.linkTo) {
                             link = Global.Prismic.Fragments.initField(block.linkTo);
                             if (link instanceof DocumentLink) {
-                                result.push(link.document);
+                                result.push(link);
                             }
                         }
                         var spans = block.spans || [];
@@ -412,7 +388,7 @@
                             if (span.type == "hyperlink") {
                                 link = Global.Prismic.Fragments.initField(span.data);
                                 if (link instanceof Global.Prismic.Fragments.DocumentLink) {
-                                    result.push(link.document);
+                                    result.push(link);
                                 }
                             }
                         }
@@ -508,7 +484,6 @@
 
     // -- Export globally
 
-    Global.Prismic.LinkedDocument = LinkedDocument;
     Global.Prismic.Document = Document;
     Global.Prismic.GroupDoc = GroupDoc;
 
