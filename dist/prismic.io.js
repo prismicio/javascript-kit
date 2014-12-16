@@ -313,6 +313,7 @@
 
             return new Global.Prismic.Document(
                 json.id,
+                json.uid || null,
                 json.type,
                 json.href,
                 json.tags,
@@ -908,30 +909,6 @@
     "use strict";
 
     /**
-     * A link to a document as in "related document" (not a hyperlink).
-     * @constructor
-     * @global
-     */
-    function LinkedDocument(id, slug, type, tags) {
-        /**
-         * @type {string}
-         */
-        this.id = id;
-        /**
-         * @type {string}
-         */
-        this.slug = slug;
-        /**
-         * @type {string}
-         */
-        this.type = type;
-        /**
-         * @type {Array}
-         */
-        this.tags = tags;
-    }
-
-    /**
      * Functions to access fragments: superclass for Document and Doc (from Group), not supposed to be created directly
      * @constructor
      */
@@ -1291,7 +1268,7 @@
 
 
         /**
-         * Linked documents, as an array of {@link LinkedDocument}
+         * Linked documents, as an array of {@link DocumentLink}
          * @returns {Array}
          */
         linkedDocuments: function() {
@@ -1300,7 +1277,7 @@
             for (var field in this.fragments) {
                 var fragment = this.get(field);
                 if (fragment instanceof Global.Prismic.Fragments.DocumentLink) {
-                    result.push(fragment.document);
+                    result.push(fragment);
                 }
                 if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
                     for (i = 0; i < fragment.blocks.length; i++) {
@@ -1308,7 +1285,7 @@
                         if (block.type == "image" && block.linkTo) {
                             link = Global.Prismic.Fragments.initField(block.linkTo);
                             if (link instanceof DocumentLink) {
-                                result.push(link.document);
+                                result.push(link);
                             }
                         }
                         var spans = block.spans || [];
@@ -1317,7 +1294,7 @@
                             if (span.type == "hyperlink") {
                                 link = Global.Prismic.Fragments.initField(span.data);
                                 if (link instanceof Global.Prismic.Fragments.DocumentLink) {
-                                    result.push(link.document);
+                                    result.push(link);
                                 }
                             }
                         }
@@ -1360,13 +1337,18 @@
      * @global
      * @alias Doc
      */
-    function Document(id, type, href, tags, slugs, fragments) {
+    function Document(id, uid, type, href, tags, slugs, fragments) {
 
         /**
          * The ID of the document
          * @type {string}
          */
         this.id = id;
+        /**
+         * The User ID of the document, a human readable id
+         * @type {string|null}
+         */
+        this.uid = uid;
         /**
          * The type of the document, corresponds to a document mask defined in the repository
          * @type {string}
@@ -1413,7 +1395,6 @@
 
     // -- Export globally
 
-    Global.Prismic.LinkedDocument = LinkedDocument;
     Global.Prismic.Document = Document;
     Global.Prismic.GroupDoc = GroupDoc;
 
@@ -1462,11 +1443,28 @@
      */
     function DocumentLink(data) {
         this.value = data;
+
+        this.document = data.document;
         /**
          * @field
-         * @description the LinkedDocument
+         * @description the linked document id
          */
-        this.document = new Global.Prismic.LinkedDocument(data.document.id, data.document.slug, data.document.type, data.document.tags);
+        this.id = data.document.id;
+        /**
+         * @field
+         * @description the linked document tags
+         */
+        this.tags = data.document.tags;
+        /**
+         * @field
+         * @description the linked document slug
+         */
+        this.slug = data.document.slug;
+        /**
+         * @field
+         * @description the linked document type
+         */
+        this.type = data.document.type;
         /**
          * @field
          * @description true if the link is broken, false otherwise
@@ -2771,4 +2769,4 @@
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.0.28';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.0.29';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
