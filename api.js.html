@@ -218,6 +218,7 @@
                 master: master[0],
                 types: types,
                 tags: tags,
+                experiments: data.experiments,
                 oauthInitiate: data['oauth_initiate'],
                 oauthToken: data['oauth_token']
             };
@@ -304,25 +305,25 @@
          * @returns {Document}
          */
         parseDoc: function(json) {
-            var linkedDocuments = [];
-            if(json.linked_documents) {
-                linkedDocuments = json.linked_documents.map(function(linkedDoc) {
-                    return new LinkedDocument(linkedDoc['id'], linkedDoc['slug'], linkedDoc['type'], linkedDoc['tags']);
-                });
-            }
-
             var fragments = {};
             for(var field in json.data[json.type]) {
                 fragments[json.type + '.' + field] = json.data[json.type][field];
             }
 
+            var slugs = [];
+            if (json.slugs !== undefined) {
+                for (var i = 0; i &lt; json.slugs.length; i++) {
+                    slugs.push(decodeURIComponent(json.slugs[i]));
+                }
+            }
+
             return new Global.Prismic.Document(
                 json.id,
+                json.uid || null,
                 json.type,
                 json.href,
                 json.tags,
-                json.slugs,
-                linkedDocuments,
+                slugs,
                 fragments
             );
         },
@@ -353,7 +354,7 @@
                             if (response.results.length === 0) {
                                 callback(null, defaultUrl, xhr);
                             } else {
-                                callback(null, linkResolver(response.results[0], xhr));
+                                callback(null, linkResolver(response.results[0]), xhr);
                             }
                         });
                     }
@@ -503,11 +504,20 @@
         /**
          * Sets the orderings to query for this SearchForm. This is an optional method.
          *
-         * @param {string} orderings - The orderings
+         * @param {array} orderings - Array of string: list of fields, optionally followed by space and desc. Example: ['my.product.price desc', 'my.product.date']
          * @returns {SearchForm} - The SearchForm itself
          */
         orderings: function(orderings) {
-            return this.set("orderings", orderings);
+            if (typeof orderings === 'string') {
+                // Backward compatibility
+                return this.set("orderings", orderings);
+            } else if (!orderings) {
+                // Noop
+                return this;
+            } else {
+                // Normal usage
+                return this.set("orderings", "[" + orderings.join(",") + "]");
+            }
         },
 
         /**
@@ -625,30 +635,6 @@
     }
 
     /**
-     * A link to a document as in "related document" (not a hyperlink).
-     * @constructor
-     * @global
-     */
-    function LinkedDocument(id, slug, type, tags) {
-        /**
-         * @type {string}
-         */
-        this.id = id;
-        /**
-         * @type {string}
-         */
-        this.slug = slug;
-        /**
-         * @type {string}
-         */
-        this.type = type;
-        /**
-         * @type {Array}
-         */
-        this.tags = tags;
-    }
-
-    /**
      * Embodies a prismic.io ref (a past or future point in time you can query)
      * @constructor
      * @global
@@ -748,13 +734,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="LinkedDocument.html">LinkedDocument</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul>
+    <h2><a href="index.html">Index</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Color.html">Fragments:Color</a></li><li><a href="Date.html">Fragments:Date</a></li><li><a href="DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Embed.html">Fragments:Embed</a></li><li><a href="FileLink.html">Fragments:FileLink</a></li><li><a href="GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Group.html">Fragments:Group</a></li><li><a href="ImageEl.html">Fragments:ImageEl</a></li><li><a href="ImageLink.html">Fragments:ImageLink</a></li><li><a href="ImageView.html">Fragments:ImageView</a></li><li><a href="Num.html">Fragments:Num</a></li><li><a href="Select.html">Fragments:Select</a></li><li><a href="StructuredText.html">Fragments:StructuredText</a></li><li><a href="Text.html">Fragments:Text</a></li><li><a href="Timestamp.html">Fragments:Timestamp</a></li><li><a href="WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul>
 </nav>
 
 <br clear="both">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Thu Nov 13 2014 11:31:00 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a> on Tue Dec 16 2014 15:58:34 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
