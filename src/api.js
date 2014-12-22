@@ -472,7 +472,7 @@
          */
         fetch: function(fields) {
             if (fields instanceof Array) {
-                fields = fields.join(",")
+                fields = fields.join(",");
             }
             return this.set("fetch", fields);
         },
@@ -485,7 +485,7 @@
          */
         fetchLinks: function(fields) {
             if (fields instanceof Array) {
-                fields = fields.join(",")
+                fields = fields.join(",");
             }
             return this.set("fetchLinks", fields);
         },
