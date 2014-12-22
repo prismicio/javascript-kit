@@ -489,6 +489,7 @@
 
     // -- Export globally
 
+    Global.Prismic.WithFragments = WithFragments;
     Global.Prismic.Document = Document;
     Global.Prismic.GroupDoc = GroupDoc;
 

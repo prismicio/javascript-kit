@@ -465,6 +465,32 @@
         },
 
         /**
+         * Restrict the results document to the specified fields
+         *
+         * @param {string|array} fields - The list of fields, array or comma separated string
+         * @returns {SearchForm} - The SearchForm itself
+         */
+        fetch: function(fields) {
+            if (fields instanceof Array) {
+                fields = fields.join(",")
+            }
+            return this.set("fetch", fields);
+        },
+
+        /**
+         * Include the requested fields in the DocumentLink instances in the result
+         *
+         * @param {string|array} fields - The list of fields, array or comma separated string
+         * @returns {SearchForm} - The SearchForm itself
+         */
+        fetchLinks: function(fields) {
+            if (fields instanceof Array) {
+                fields = fields.join(",")
+            }
+            return this.set("fetchLinks", fields);
+        },
+
+        /**
          * Sets the page number to query for this SearchForm. This is an optional method.
          *
          * @param {number} p - The page number

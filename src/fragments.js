@@ -62,6 +62,18 @@
          * @description the linked document type
          */
         this.type = data.document.type;
+
+        var fragments = {};
+        if (data.document.data) {
+            for (var field in data.document.data[data.document.type]) {
+                fragments[data.document.type + '.' + field] = data.document.data[data.document.type][field];
+            }
+        }
+        /**
+         * @field
+         * @description the fragment list, if the fetchLinks parameter was used in at query time
+         */
+        this.fragments = fragments;
         /**
          * @field
          * @description true if the link is broken, false otherwise
@@ -69,35 +81,36 @@
         this.isBroken = data.isBroken;
     }
 
-    DocumentLink.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function (ctx) {
-            return "<a href=\""+this.url(ctx)+"\">"+this.url(ctx)+"</a>";
-        },
-        /**
-         * Returns the URL of the document link.
-         *
-         * @params {object} linkResolver - mandatory linkResolver function (please read prismic.io online documentation about this)
-         * @returns {string} - the proper URL to use
-         */
-        url: function (linkResolver) {
-            return linkResolver(this.document, this.isBroken);
-        },
+    DocumentLink.prototype = Object.create(Global.Prismic.WithFragments.prototype);
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function(linkResolver) {
-            return this.url(linkResolver);
-         }
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+     * @returns {string} - basic HTML code for the fragment
+     */
+    DocumentLink.prototype.asHtml = function (ctx) {
+        return "<a href=\""+this.url(ctx)+"\">"+this.url(ctx)+"</a>";
+    };
+
+    /**
+     * Returns the URL of the document link.
+     *
+     * @params {object} linkResolver - mandatory linkResolver function (please read prismic.io online documentation about this)
+     * @returns {string} - the proper URL to use
+     */
+    DocumentLink.prototype.url = function (linkResolver) {
+        return linkResolver(this.document, this.isBroken);
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    DocumentLink.prototype.asText = function(linkResolver) {
+        return this.url(linkResolver);
     };
 
     /**

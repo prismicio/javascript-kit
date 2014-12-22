@@ -249,6 +249,20 @@
             });
         });
 
+        it('Fetch additional fields in links with fetchLinks', function (done) {
+            Prismic.Api(testRepository, function (err, Api) {
+                if (err) throw err;
+                Api.form('everything')
+                    .ref(Api.master())
+                    .fetchLinks('blog-post.author')
+                    .query(Predicates.at('document.id', 'UlfoxUnM0wkXYXbt'))
+                    .submit(function (err, response) {
+                        var links = response.results[0].getAll('blog-post.relatedpost');
+                        assert.equal(links[0].getText('blog-post.author'), 'John M. Martelle, Fine Pastry Magazine');
+                        done();
+                    });
+            });
+        });
     });
 
     describe('Fragments', function() {

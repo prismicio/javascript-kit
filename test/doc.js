@@ -552,7 +552,7 @@
                 }
             };
 
-            Prismic.Api('https://lesbonneschoses.cdn.prismic.io/api', function (err, Api) {
+            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) return done(err); // gisthide
                 // The Api in this block will use the custom cache object
                 assert.notEqual(Api, null); // gisthide
