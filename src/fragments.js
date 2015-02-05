@@ -205,6 +205,7 @@
      */
     function ImageLink(data) {
         /**
+         *
          * @field
          * @description the JSON object exactly as is returned in the "data" field of the JSON responses (see API documentation: https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#json-responses)
          */

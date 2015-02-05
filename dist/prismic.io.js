@@ -486,6 +486,32 @@
         },
 
         /**
+         * Restrict the results document to the specified fields
+         *
+         * @param {string|array} fields - The list of fields, array or comma separated string
+         * @returns {SearchForm} - The SearchForm itself
+         */
+        fetch: function(fields) {
+            if (fields instanceof Array) {
+                fields = fields.join(",");
+            }
+            return this.set("fetch", fields);
+        },
+
+        /**
+         * Include the requested fields in the DocumentLink instances in the result
+         *
+         * @param {string|array} fields - The list of fields, array or comma separated string
+         * @returns {SearchForm} - The SearchForm itself
+         */
+        fetchLinks: function(fields) {
+            if (fields instanceof Array) {
+                fields = fields.join(",");
+            }
+            return this.set("fetchLinks", fields);
+        },
+
+        /**
          * Sets the page number to query for this SearchForm. This is an optional method.
          *
          * @param {number} p - The page number
@@ -1395,6 +1421,7 @@
 
     // -- Export globally
 
+    Global.Prismic.WithFragments = WithFragments;
     Global.Prismic.Document = Document;
     Global.Prismic.GroupDoc = GroupDoc;
 
@@ -1465,6 +1492,18 @@
          * @description the linked document type
          */
         this.type = data.document.type;
+
+        var fragments = {};
+        if (data.document.data) {
+            for (var field in data.document.data[data.document.type]) {
+                fragments[data.document.type + '.' + field] = data.document.data[data.document.type][field];
+            }
+        }
+        /**
+         * @field
+         * @description the fragment list, if the fetchLinks parameter was used in at query time
+         */
+        this.fragments = fragments;
         /**
          * @field
          * @description true if the link is broken, false otherwise
@@ -1472,35 +1511,36 @@
         this.isBroken = data.isBroken;
     }
 
-    DocumentLink.prototype = {
-        /**
-         * Turns the fragment into a useable HTML version of it.
-         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
-         *
-         * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
-         * @returns {string} - basic HTML code for the fragment
-         */
-        asHtml: function (ctx) {
-            return "<a href=\""+this.url(ctx)+"\">"+this.url(ctx)+"</a>";
-        },
-        /**
-         * Returns the URL of the document link.
-         *
-         * @params {object} linkResolver - mandatory linkResolver function (please read prismic.io online documentation about this)
-         * @returns {string} - the proper URL to use
-         */
-        url: function (linkResolver) {
-            return linkResolver(this.document, this.isBroken);
-        },
+    DocumentLink.prototype = Object.create(Global.Prismic.WithFragments.prototype);
 
-        /**
-         * Turns the fragment into a useable text version of it.
-         *
-         * @returns {string} - basic text version of the fragment
-         */
-         asText: function(linkResolver) {
-            return this.url(linkResolver);
-         }
+    /**
+     * Turns the fragment into a useable HTML version of it.
+     * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+     *
+     * @params {object} ctx - mandatory ctx object, with a useable linkResolver function (please read prismic.io online documentation about this)
+     * @returns {string} - basic HTML code for the fragment
+     */
+    DocumentLink.prototype.asHtml = function (ctx) {
+        return "<a href=\""+this.url(ctx)+"\">"+this.url(ctx)+"</a>";
+    };
+
+    /**
+     * Returns the URL of the document link.
+     *
+     * @params {object} linkResolver - mandatory linkResolver function (please read prismic.io online documentation about this)
+     * @returns {string} - the proper URL to use
+     */
+    DocumentLink.prototype.url = function (linkResolver) {
+        return linkResolver(this.document, this.isBroken);
+    };
+
+    /**
+     * Turns the fragment into a useable text version of it.
+     *
+     * @returns {string} - basic text version of the fragment
+     */
+    DocumentLink.prototype.asText = function(linkResolver) {
+        return this.url(linkResolver);
     };
 
     /**
@@ -1595,6 +1635,7 @@
      */
     function ImageLink(data) {
         /**
+         *
          * @field
          * @description the JSON object exactly as is returned in the "data" field of the JSON responses (see API documentation: https://developers.prismic.io/documentation/UjBe8bGIJ3EKtgBZ/api-documentation#json-responses)
          */
@@ -2769,4 +2810,4 @@
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.0.29';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.0.30';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
