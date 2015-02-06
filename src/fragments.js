@@ -49,6 +49,11 @@
         this.id = data.document.id;
         /**
          * @field
+         * @description the linked document uid
+         */
+        this.uid = data.document.uid;
+        /**
+         * @field
          * @description the linked document tags
          */
         this.tags = data.document.tags;
@@ -101,7 +106,7 @@
      * @returns {string} - the proper URL to use
      */
     DocumentLink.prototype.url = function (linkResolver) {
-        return linkResolver(this.document, this.isBroken);
+        return linkResolver(this, this.isBroken);
     };
 
     /**
