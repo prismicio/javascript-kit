@@ -453,7 +453,7 @@
                 var predicates = [].slice.apply(arguments); // Convert to a real JS array
                 var stringQueries = [];
                 predicates.forEach(function (predicate) {
-                    var firstArg = (predicate[1].indexOf("my.") === 0 || predicate[1].indexOf("document.") === 0) ? predicate[1]
+                    var firstArg = (predicate[1].indexOf("my.") === 0 || predicate[1].indexOf("document") === 0) ? predicate[1]
                         : '"' + predicate[1] + '"';
                     stringQueries.push("[:d = " + predicate[0] + "(" + firstArg + ", " + (function() {
                         return predicate.slice(2).map(function(p) {
@@ -2815,4 +2815,4 @@
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.1.0';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.1.2';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
