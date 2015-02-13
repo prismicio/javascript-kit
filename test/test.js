@@ -372,15 +372,21 @@
         it('Test cache', function (done) {
             Prismic.Api(testRepository, function (err, Api) {
                 if (err) return done(err);
-                var form = Api.form('products').ref(Api.master()).query('');
+                var form = Api.form('products').ref(Api.master()).query('[[:d = at(my.product.flavour, "Caramel")]]');
+                var olderKeys = Object.keys(Api.apiCache.cache);
                 form.submit(function (err, response) {
                     if (err) {
                         console.log(err);
                         return done(err);
                     }
 
-                    var keys = Object.keys(Api.apiCache.cache);
-                    var key = keys[0] === 'https://lesbonneschoses.prismic.io/api' ? keys[1] : keys[0];
+                    var key = null;
+                    Object.keys(Api.apiCache.cache).forEach(function (candidate) {
+                        if (olderKeys.indexOf(candidate) == -1) {
+                            key = candidate;
+                        }
+                    });
+
                     Api.apiCache.get(key, function (err, value) {
                         assert.equal(value.results.length, response.results.length);
                         done();

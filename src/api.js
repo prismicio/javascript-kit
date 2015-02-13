@@ -207,7 +207,7 @@
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
             this.requestHandler = maybeRequestHandler || Global.Prismic.Utils.request();
-            this.apiCache = maybeApiCache || new ApiCache();
+            this.apiCache = maybeApiCache || globalCache();
             this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
             this.apiDataTTL = maybeApiDataTTL || 5;
             return this;
@@ -667,52 +667,18 @@
     }
     Ref.prototype = {};
 
-    /**
-     * Api cache
-     */
-    function ApiCache() {
-        this.cache = {};
-        this.states = {};
-    }
-
-    ApiCache.prototype = {
-
-        get: function(key, cb) {
-            var maybeEntry = this.cache[key];
-            if(maybeEntry && !this.isExpired(key)) {
-                return cb(null, maybeEntry.data);
-            }
-            return cb();
-        },
-
-        set: function(key, value, ttl, cb) {
-            this.cache[key] = {
-                data: value,
-                expiredIn: ttl ? (Date.now() + (ttl * 1000)) : 0
-            };
-
-            return cb();
-        },
-
-        isExpired: function(key) {
-            var entry = this.cache[key];
-            if(entry) {
-                return entry.expiredIn !== 0 && entry.expiredIn < Date.now();
-            } else {
-                return false;
-            }
-        },
-
-        remove: function(key, cb) {
-            delete this.cache[key];
-            return cb();
-        },
-
-        clear: function(key, cb) {
-            this.cache = {};
-            return cb();
+    function globalCache() {
+        var g;
+        if (typeof global == 'object') {
+            g = global; // NodeJS
+        } else {
+            g = window; // browser
         }
-    };
+        if (!g.prismicCache) {
+            g.prismicCache = new Global.Prismic.ApiCache();
+        }
+        return g.prismicCache;
+    }
 
     // -- Export Globally
 
