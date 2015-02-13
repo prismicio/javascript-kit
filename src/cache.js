@@ -5,15 +5,14 @@
     /**
      * Api cache
      */
-    function ApiCache() {
-        this.cache = {};
-        this.states = {};
+    function ApiCache(limit) {
+        this.lru = new LRUCache(limit);
     }
 
     ApiCache.prototype = {
 
         get: function(key, cb) {
-            var maybeEntry = this.cache[key];
+            var maybeEntry = this.lru.get(key);
             if(maybeEntry && !this.isExpired(key)) {
                 return cb(null, maybeEntry.data);
             }
@@ -21,16 +20,17 @@
         },
 
         set: function(key, value, ttl, cb) {
-            this.cache[key] = {
+            this.lru.remove(key);
+            this.lru.put(key, {
                 data: value,
                 expiredIn: ttl ? (Date.now() + (ttl * 1000)) : 0
-            };
+            });
 
             return cb();
         },
 
         isExpired: function(key) {
-            var entry = this.cache[key];
+            var entry = this.lru.find(key);
             if(entry) {
                 return entry.expiredIn !== 0 && entry.expiredIn < Date.now();
             } else {
@@ -39,12 +39,12 @@
         },
 
         remove: function(key, cb) {
-            delete this.cache[key];
+            this.lru.remove(key);
             return cb();
         },
 
-        clear: function(key, cb) {
-            this.cache = {};
+        clear: function(cb) {
+            this.lru.removeAll();
             return cb();
         }
     };

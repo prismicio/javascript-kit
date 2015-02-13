@@ -373,7 +373,7 @@
             Prismic.Api(testRepository, function (err, Api) {
                 if (err) return done(err);
                 var form = Api.form('products').ref(Api.master()).query('[[:d = at(my.product.flavour, "Caramel")]]');
-                var olderKeys = Object.keys(Api.apiCache.cache);
+                var olderKeys = Api.apiCache.lru.keys();
                 form.submit(function (err, response) {
                     if (err) {
                         console.log(err);
@@ -381,7 +381,7 @@
                     }
 
                     var key = null;
-                    Object.keys(Api.apiCache.cache).forEach(function (candidate) {
+                    Api.apiCache.lru.keys().forEach(function (candidate) {
                         if (olderKeys.indexOf(candidate) == -1) {
                             key = candidate;
                         }
