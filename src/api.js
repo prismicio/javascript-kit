@@ -336,6 +336,40 @@
                     callback(e, defaultUrl, xhr);
                 }
             });
+        },
+
+        /**
+         * Fetch a URL corresponding to a query, and parse the response as a Response object
+         */
+        request: function(url, callback) {
+            var cacheKey = url + (this.accessToken ? ('#' + this.accessToken) : '');
+            var cache = this.apiCache;
+            this.requestHandler(url, function (err, documents, xhr, ttl) {
+                if (err) {
+                    callback(err, null, xhr);
+                    return;
+                }
+                var results = documents.results.map(prismic.fn.parseDoc);
+                var response = new Response(
+                    documents.page,
+                    documents.results_per_page,
+                    documents.results_size,
+                    documents.total_results_size,
+                    documents.total_pages,
+                    documents.next_page,
+                    documents.prev_page,
+                    results || []);
+                if (ttl) {
+                    cache.set(cacheKey, response, ttl, function (err) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        return callback(null, response);
+                    });
+                } else {
+                    return callback(null, response);
+                }
+            });
         }
 
     };
@@ -545,42 +579,9 @@
                 }
             }
 
-            var cacheKey = url + (this.api.accessToken ? ('#' + this.api.accessToken) : '');
-            var cache = this.api.apiCache;
-            var self = this;
-
-            cache.get(cacheKey, function (err, value) {
-                if (err) { return callback(err); }
-                if (value) { return callback(null, value); }
-
-                // The cache isn't really useful for in-browser usage because we already have the browser cache,
-                // but it is there for Node.js and other server-side implementations
-                self.api.requestHandler(url, function (err, documents, xhr, ttl) {
-                    if (err) { callback(err, null, xhr); return; }
-                    var results = documents.results.map(prismic.fn.parseDoc);
-                    var response = new Response(
-                            documents.page,
-                            documents.results_per_page,
-                            documents.results_size,
-                            documents.total_results_size,
-                            documents.total_pages,
-                            documents.next_page,
-                            documents.prev_page,
-                                results || []);
-
-                    if (ttl) {
-                        cache.set(cacheKey, response, ttl, function (err) {
-                            if (err) { return callback(err); }
-                            return callback(null, response);
-                        });
-                    } else {
-                        return callback(null, response);
-                    }
-                });
-            });
+            this.api.request(url, callback);
         }
     };
-
 
     /**
      * Embodies the response of a SearchForm query as returned by the API.
