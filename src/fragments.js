@@ -642,9 +642,7 @@
         asText: function(linkResolver) {
             var output = "";
             for (var i=0; i<this.value.length; i++) {
-                for (var fragmentName in this.value[i]) {
-                    output += this.value[i][fragmentName].asText(linkResolver);
-                }
+                output += this.value[i].asText(linkResolver) + '\n';
             }
             return output;
         }
@@ -908,6 +906,84 @@
     }
 
     /**
+     * Embodies a Slice fragment
+     * @constructor
+     * @global
+     * @alias Fragments:Slice
+     */
+    function Slice(sliceType, value) {
+        this.sliceType = sliceType;
+        this.value = value;
+    }
+
+    Slice.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function (linkResolver) {
+            return this.value.asHtml(linkResolver);
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value.asText();
+         }
+    };
+
+    /**
+     * Embodies a SliceZone fragment
+     * @constructor
+     * @global
+     * @alias Fragments:SliceZone
+     */
+    function SliceZone(data) {
+        this.value = [];
+        for (var i = 0; i < data.length; i++) {
+            var sliceType = data[i]['slice_type'];
+            var fragment = initField(data[i]['value']);
+            if (sliceType && fragment) {
+                this.value.push(new Slice(sliceType, fragment));
+            }
+        }
+    }
+
+    SliceZone.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function (linkResolver) {
+            var output = "";
+            for (var i = 0; i < this.value.length; i++) {
+                output += this.value[i].asHtml(linkResolver);
+            }
+            return output;
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            var output = "";
+            for (var i = 0; i < this.value.length; i++) {
+                output += this.value[i].asText() + '\n';
+            }
+            return output;
+         }
+    };
+
+    /**
      * From a fragment's name, casts it into the proper object type (like Prismic.Fragments.StructuredText)
      *
      * @private
@@ -930,7 +1006,8 @@
             "Link.web": WebLink,
             "Link.file": FileLink,
             "Link.image": ImageLink,
-            "Group": Group
+            "Group": Group,
+            "SliceZone": SliceZone
         };
 
         if (classForType[field.type]) {
@@ -1045,6 +1122,8 @@
         FileLink: FileLink,
         Group: Group,
         GeoPoint: GeoPoint,
+        Slice: Slice,
+        SliceZone: SliceZone,
         initField: initField,
         insertSpans: insertSpans
     };

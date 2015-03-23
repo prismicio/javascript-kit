@@ -291,6 +291,23 @@
         },
 
         /**
+         * Gets the SliceZone fragment in the current Document object, for further manipulation.
+         *
+         * @example document.getSliceZone('product.gallery').asHtml(linkResolver).
+         *
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
+         * @returns {Group} - The SliceZone fragment to manipulate.
+         */
+        getSliceZone: function(name) {
+            var fragment = this.get(name);
+
+            if (fragment instanceof Global.Prismic.Fragments.SliceZone) {
+                return fragment;
+            }
+            return null;
+        },
+
+        /**
          * Shortcut to get the HTML output of the fragment in the current document.
          * This is the same as writing document.get(fragment).asHtml(linkResolver);
          *
@@ -359,7 +376,6 @@
             }
             return texts.join('');
          },
-
 
         /**
          * Linked documents, as an array of {@link DocumentLink}
