@@ -911,8 +911,9 @@
      * @global
      * @alias Fragments:Slice
      */
-    function Slice(sliceType, value) {
+    function Slice(sliceType, label, value) {
         this.sliceType = sliceType;
+        this.label = label;
         this.value = value;
     }
 
@@ -948,8 +949,9 @@
         for (var i = 0; i < data.length; i++) {
             var sliceType = data[i]['slice_type'];
             var fragment = initField(data[i]['value']);
+            var label = data[i]['slice_label'] || null;
             if (sliceType && fragment) {
-                this.value.push(new Slice(sliceType, fragment));
+                this.value.push(new Slice(sliceType, label, fragment));
             }
         }
     }
