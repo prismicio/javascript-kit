@@ -609,6 +609,40 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
                     callback(e, defaultUrl, xhr);
                 }
             });
+        },
+
+        /**
+         * Fetch a URL corresponding to a query, and parse the response as a Response object
+         */
+        request: function(url, callback) {
+            var cacheKey = url + (this.accessToken ? ('#' + this.accessToken) : '');
+            var cache = this.apiCache;
+            this.requestHandler(url, function (err, documents, xhr, ttl) {
+                if (err) {
+                    callback(err, null, xhr);
+                    return;
+                }
+                var results = documents.results.map(prismic.fn.parseDoc);
+                var response = new Response(
+                    documents.page,
+                    documents.results_per_page,
+                    documents.results_size,
+                    documents.total_results_size,
+                    documents.total_pages,
+                    documents.next_page,
+                    documents.prev_page,
+                    results || []);
+                if (ttl) {
+                    cache.set(cacheKey, response, ttl, function (err) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        return callback(null, response);
+                    });
+                } else {
+                    return callback(null, response);
+                }
+            });
         }
 
     };
@@ -818,42 +852,9 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
                 }
             }
 
-            var cacheKey = url + (this.api.accessToken ? ('#' + this.api.accessToken) : '');
-            var cache = this.api.apiCache;
-            var self = this;
-
-            cache.get(cacheKey, function (err, value) {
-                if (err) { return callback(err); }
-                if (value) { return callback(null, value); }
-
-                // The cache isn't really useful for in-browser usage because we already have the browser cache,
-                // but it is there for Node.js and other server-side implementations
-                self.api.requestHandler(url, function (err, documents, xhr, ttl) {
-                    if (err) { callback(err, null, xhr); return; }
-                    var results = documents.results.map(prismic.fn.parseDoc);
-                    var response = new Response(
-                            documents.page,
-                            documents.results_per_page,
-                            documents.results_size,
-                            documents.total_results_size,
-                            documents.total_pages,
-                            documents.next_page,
-                            documents.prev_page,
-                                results || []);
-
-                    if (ttl) {
-                        cache.set(cacheKey, response, ttl, function (err) {
-                            if (err) { return callback(err); }
-                            return callback(null, response);
-                        });
-                    } else {
-                        return callback(null, response);
-                    }
-                });
-            });
+            this.api.request(url, callback);
         }
     };
-
 
     /**
      * Embodies the response of a SearchForm query as returned by the API.
@@ -995,7 +996,7 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
         },
 
         isExpired: function(key) {
-            var entry = this.lru.find(key);
+            var entry = this.lru.get(key);
             if(entry) {
                 return entry.expiredIn !== 0 && entry.expiredIn < Date.now();
             } else {
@@ -1017,6 +1018,7 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
     Global.Prismic.ApiCache = ApiCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+
 (function (Global, undefined) {
 
     "use strict";
@@ -1495,6 +1497,23 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
         },
 
         /**
+         * Gets the SliceZone fragment in the current Document object, for further manipulation.
+         *
+         * @example document.getSliceZone('product.gallery').asHtml(linkResolver).
+         *
+         * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
+         * @returns {Group} - The SliceZone fragment to manipulate.
+         */
+        getSliceZone: function(name) {
+            var fragment = this.get(name);
+
+            if (fragment instanceof Global.Prismic.Fragments.SliceZone) {
+                return fragment;
+            }
+            return null;
+        },
+
+        /**
          * Shortcut to get the HTML output of the fragment in the current document.
          * This is the same as writing document.get(fragment).asHtml(linkResolver);
          *
@@ -1563,7 +1582,6 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
             }
             return texts.join('');
          },
-
 
         /**
          * Linked documents, as an array of {@link DocumentLink}
@@ -2344,9 +2362,7 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
         asText: function(linkResolver) {
             var output = "";
             for (var i=0; i<this.value.length; i++) {
-                for (var fragmentName in this.value[i]) {
-                    output += this.value[i][fragmentName].asText(linkResolver);
-                }
+                output += this.value[i].asText(linkResolver) + '\n';
             }
             return output;
         }
@@ -2610,6 +2626,86 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
     }
 
     /**
+     * Embodies a Slice fragment
+     * @constructor
+     * @global
+     * @alias Fragments:Slice
+     */
+    function Slice(sliceType, label, value) {
+        this.sliceType = sliceType;
+        this.label = label;
+        this.value = value;
+    }
+
+    Slice.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function (linkResolver) {
+            return this.value.asHtml(linkResolver);
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            return this.value.asText();
+         }
+    };
+
+    /**
+     * Embodies a SliceZone fragment
+     * @constructor
+     * @global
+     * @alias Fragments:SliceZone
+     */
+    function SliceZone(data) {
+        this.value = [];
+        for (var i = 0; i < data.length; i++) {
+            var sliceType = data[i]['slice_type'];
+            var fragment = initField(data[i]['value']);
+            var label = data[i]['slice_label'] || null;
+            if (sliceType && fragment) {
+                this.value.push(new Slice(sliceType, label, fragment));
+            }
+        }
+    }
+
+    SliceZone.prototype = {
+        /**
+         * Turns the fragment into a useable HTML version of it.
+         * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+         *
+         * @returns {string} - basic HTML code for the fragment
+         */
+        asHtml: function (linkResolver) {
+            var output = "";
+            for (var i = 0; i < this.value.length; i++) {
+                output += this.value[i].asHtml(linkResolver);
+            }
+            return output;
+        },
+
+        /**
+         * Turns the fragment into a useable text version of it.
+         *
+         * @returns {string} - basic text version of the fragment
+         */
+         asText: function() {
+            var output = "";
+            for (var i = 0; i < this.value.length; i++) {
+                output += this.value[i].asText() + '\n';
+            }
+            return output;
+         }
+    };
+
+    /**
      * From a fragment's name, casts it into the proper object type (like Prismic.Fragments.StructuredText)
      *
      * @private
@@ -2632,7 +2728,8 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
             "Link.web": WebLink,
             "Link.file": FileLink,
             "Link.image": ImageLink,
-            "Group": Group
+            "Group": Group,
+            "SliceZone": SliceZone
         };
 
         if (classForType[field.type]) {
@@ -2747,6 +2844,8 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
         FileLink: FileLink,
         Group: Group,
         GeoPoint: GeoPoint,
+        Slice: Slice,
+        SliceZone: SliceZone,
         initField: initField,
         insertSpans: insertSpans
     };
@@ -3087,4 +3186,4 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.1.3';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.1.4';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
