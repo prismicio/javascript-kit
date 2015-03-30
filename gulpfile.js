@@ -26,9 +26,9 @@ function string_src(filename, string) {
     var src = require('stream').Readable({ objectMode: true });
     src._read = function () {
         this.push(new gutil.File({ cwd: "", base: "", path: filename, contents: new Buffer(string) }));
-        this.push(null)
+        this.push(null);
     };
-    return src
+    return src;
 }
 
 /**
@@ -45,26 +45,26 @@ gulp.task('version', function () {
 gulp.task('concat', ['version'], function() {
     return gulp.src(SOURCES.concat('src/version.js'))
         .pipe(concat('prismic.io.js'))
-        .pipe(gulp.dest('dist'))
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('minify', ['version'], function() {
     return gulp.src(SOURCES.concat('src/version.js'))
         .pipe(concat('prismic.io.min.js'))
         .pipe(uglify())
-        .pipe(gulp.dest('dist'))
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('copy', ['test', 'version'], function() {
     return gulp.src(SOURCES.concat('src/version.js'))
         .pipe(concat('prismic.io-%VERSION%.min.js'.replace('%VERSION%', pkg.version)))
         .pipe(uglify())
-        .pipe(gulp.dest('dist'))
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('doc', function() {
     return gulp.src(SOURCES.concat(['README.md']))
-        .pipe(jsdoc('doc'))
+        .pipe(jsdoc('doc'));
 });
 
 gulp.task('deploy:doc', ['doc'], function () {
@@ -91,27 +91,27 @@ gulp.task('jshint', function() {
     return gulp.src(SOURCES)
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
-        .pipe(jshint.reporter('fail'))
+        .pipe(jshint.reporter('fail'));
 });
 
 gulp.task('test:int', function() {
     return gulp.src('./test/test.html')
-        .pipe(mocha(mocha_options))
+        .pipe(mocha(mocha_options));
 });
 
 gulp.task('test:unit', function() {
     return gulp.src('./test/unit.html')
-        .pipe(mocha(mocha_options))
+        .pipe(mocha(mocha_options));
 });
 
 gulp.task('test:fragments', function() {
     return gulp.src('./test/fragments.html')
-        .pipe(mocha(mocha_options))
+        .pipe(mocha(mocha_options));
 });
 
 gulp.task('test:doc', function() {
     return gulp.src('./test/doc.html')
-        .pipe(mocha(mocha_options))
+        .pipe(mocha(mocha_options));
 });
 
 

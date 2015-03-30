@@ -16,19 +16,19 @@
     describe('Previews', function() {
 
         it('preview-js', function() {
-            // startgist:d271f9c4a863c35995d0:preview-js.js
+            // startgist:51f9c95c4ea58e7e3877:preview-js.js
             // todo
             // endgist
         });
 
         it('endpoint-js', function() {
-            // startgist:ee4c46bcc635829e286f:endpoint-js.js
+            // startgist:563d0601f954aa7b492c:endpoint-js.js
             // todo
             // endgist
         });
 
         it('preview-ref', function() {
-            // startgist:6ad513d7d0f784de36d9:preview-ref.js
+            // startgist:fc7786d7c1cec52f0d36:preview-ref.js
             // todo
             // endgist
         });
@@ -38,7 +38,7 @@
     describe('API', function() {
 
         it('prismic-api.js', function (done) {
-            // startgist:b253d8fddfdd4cceef7a:prismic-api.js
+            // startgist:1af7b5cb53a5d7cc8561:prismic-api.js
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 // You can use the Api object inside this block
@@ -50,7 +50,7 @@
         });
 
         it('prismic-apiPrivate.js', function (done) {
-            // startgist:1b2552233271e329b785:prismic-apiPrivate.js
+            // startgist:6ad513d7d0f784de36d9:prismic-apiPrivate.js
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 // This will fail because the token is invalid, but this is how to access a private API
                 assert.equal(err.message, "Unexpected status code [401] on URL https://lesbonneschoses.prismic.io/api?access_token=MC5-XXXXXXX-vRfvv70"); // gisthide
@@ -60,7 +60,7 @@
         });
 
         it('prismic-references.js', function (done) {
-            // startgist:11cb93472bc660d423f6:prismic-references.js
+            // startgist:c737c4588742c328026f:prismic-references.js
             var previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70';
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
@@ -86,7 +86,7 @@
     describe('Query', function() {
 
         it('prismic-simplequery.js', function (done) {
-            // startgist:f3f7d4b970e964131271:prismic-simplequery.js
+            // startgist:9b6ff487190a429d7fbc:prismic-simplequery.js
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 Api.form('everything')
@@ -112,7 +112,7 @@
         });
 
         it('prismic-orderings.js', function (done) {
-            // startgist:55eb59485855e40680c9:prismic-orderings.js
+            // startgist:92bdec9ace554b9f95c0:prismic-orderings.js
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 Api.form('everything')
@@ -131,7 +131,7 @@
         });
 
         it('prismic-predicates.js', function (done) {
-            // startgist:2bdf83055d57f35d5d85:prismic-predicates.js
+            // startgist:c90d98f6c77ef6505094:prismic-predicates.js
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 Api.form('everything').ref(Api.master()).query(
@@ -148,7 +148,7 @@
         });
 
         it('prismic-allPredicates.js', function () {
-            // startgist:ebec155a66db3c1a29b6:prismic-allPredicates.js
+            // startgist:1650e3b498d99076f65b:prismic-allPredicates.js
             // "at" predicate: equality of a fragment to a value.
             var at = Predicates.at("document.type", "article");
             assert.deepEqual(at, ["at", "document.type", "article"]); // gisthide
@@ -174,7 +174,7 @@
                     .ref(Api.master()).submit(function (err, documents) {
                         if (err) throw err;
                         var doc = documents.results[0];
-                        // startgist:3e125676868b16fa91b9:prismic-htmlSerializer.js
+                        // startgist:ad67f185eefe842e4a12:prismic-htmlSerializer.js
                         var htmlSerializer = function (element, content) {
                             // Don't wrap images in a <p> tag
                             if (element.type == "image") {
@@ -223,7 +223,7 @@
                 Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err; // gisthide
                     var doc = documents.results[0];
-                    // startgist:897048416603f89272bf:prismic-getText.js
+                    // startgist:39e5df50e5f10c574fde:prismic-getText.js
                     var author = doc.getText("blog-post.author");
                     if (!author) author = "Anonymous";
                     assert.equal(author, "John M. Martelle, Fine Pastry Magazine"); // gisthide
@@ -239,7 +239,7 @@
                 Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
                     var doc = documents.results[0];
-                    // startgist:ea2f95a70621f3e83032:prismic-getNumber.js
+                    // startgist:17fab0179019f272f947:prismic-getNumber.js
                     // Number predicates
                     var gt = Predicates.gt("my.product.price", 10);
                     var lt = Predicates.lt("my.product.price", 20);
@@ -260,7 +260,7 @@
                 Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
                     var doc = documents.results[0];
-                    // startgist:fb48d850fd28f61fc0fb:prismic-images.js
+                    // startgist:a7be4722af6671f87797:prismic-images.js
                     // Accessing image fields
                     var image = doc.getImage("product.image");
                     // Most of the time you will be using the "main" view
@@ -278,7 +278,7 @@
                 Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
                     var doc = documents.results[0];
-                    // startgist:812b109562731b03cb58:prismic-dateTimestamp.js
+                    // startgist:1c9514ef4f31701732ac:prismic-dateTimestamp.js
                     // Date and Timestamp predicates
                     var dateBefore = Predicates.dateBefore("my.product.releaseDate", new Date(2014, 6, 1));
                     var dateAfter = Predicates.dateAfter("my.product.releaseDate", new Date(2014, 1, 1));
@@ -361,7 +361,7 @@
                     }
                 }
             });
-            // startgist:fa204a2784c0747d552b:prismic-group.js
+            // startgist:1c9514ef4f31701732ac:prismic-group.js
             var group = doc.getGroup("article.documents");
             var docs = group ? group.toArray() : [];
             for (var i = 0; i < docs.length; i++) {
@@ -397,7 +397,7 @@
                     }
                 }
             });
-            // startgist:fa26d9095df192027edf:prismic-link.js
+            // startgist:0c86d1fe3471baf52f59:prismic-link.js
             var resolver = function (doc, isBroken) {
                 if (isBroken) return '#broken';
                 return "/testing_url/" + doc.id + "/" + doc.slug;
@@ -438,7 +438,7 @@
                     }
                 }
             });
-            // startgist:67b2d5f4094c54f3f5c0:prismic-embed.js
+            // startgist:407c6960a6a7bb407c88:prismic-embed.js
             var video = doc.get("article.video");
             // Html is the code to include to embed the object, and depends on the embedded service
             var html = video ? video.asHtml() : "";
@@ -463,7 +463,7 @@
                 return { css: function (y, z) {
                 } };
             };
-            // startgist:9f56474f0946af8ff135:prismic-color.js
+            // startgist:4d5072768603847ede43:prismic-color.js
             var bgcolor = doc.getColor("article.background");
             $("#article").css("background-color", bgcolor);
             // endgist
@@ -486,7 +486,7 @@
                     }
                 }
             });
-            // startgist:1cf4d536f00bb13f1178:prismic-geopoint.js
+            // startgist:6eb5436349a2e7fc9f5a:prismic-geopoint.js
             // "near" predicate for GeoPoint fragments
             var near = Predicates.near("my.store.location", 48.8768767, 2.3338802, 10);
 
@@ -511,7 +511,7 @@
                         console.log(err);
                         done();
                     }
-                    // startgist:63183c7f26038f884f45:prismic-asHtml.js
+                    // startgist:6bf3785fbacac021c7ee:prismic-asHtml.js
                     var doc = response.results[0];
                     var html = doc.getStructuredText('blog-post.body').asHtml({
                         linkResolver: function (ctx, doc, isBroken) {
@@ -531,7 +531,7 @@
     describe('Cache', function() {
 
         it('prismic-cache.js', function(done) {
-            // startgist:647bde5c458c44af0981:prismic-cache.js
+            // startgist:6bf3785fbacac021c7ee:prismic-cache.js
             var cache = {
                 get: function (key, cb) {
                     // Retrieve a value from the key
