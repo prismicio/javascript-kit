@@ -30,7 +30,7 @@
         },
 
         isExpired: function(key) {
-            var entry = this.lru.find(key);
+            var entry = this.lru.get(key);
             if(entry) {
                 return entry.expiredIn !== 0 && entry.expiredIn < Date.now();
             } else {
