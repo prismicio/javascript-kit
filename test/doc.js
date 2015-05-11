@@ -3,7 +3,6 @@
     // Test snippets for the documentation, and keep them in sync with Gist
 
     var testRepository = 'https://lesbonneschoses.prismic.io/api',
-        Predicates = Prismic.Predicates,
         assert = chai.assert;
 
     function getLinkResolver(ref) {
@@ -135,8 +134,8 @@
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 Api.form('everything').ref(Api.master()).query(
-                    Predicates.at("document.type", "blog-post"),
-                    Predicates.dateAfter("my.blog-post.date", new Date(2014, 6, 1))
+                    Prismic.Predicates.at("document.type", "blog-post"),
+                    Prismic.Predicates.dateAfter("my.blog-post.date", new Date(2014, 6, 1))
                 ).submit(function (err, response) {
                         if (err) throw err; // gisthide
                         // All documents of type "product", updated after June 1st, 2014
@@ -150,17 +149,17 @@
         it('prismic-allPredicates.js', function () {
             // startgist:1650e3b498d99076f65b:prismic-allPredicates.js
             // "at" predicate: equality of a fragment to a value.
-            var at = Predicates.at("document.type", "article");
+            var at = Prismic.Predicates.at("document.type", "article");
             assert.deepEqual(at, ["at", "document.type", "article"]); // gisthide
             // "any" predicate: equality of a fragment to a value.
-            var any = Predicates.any("document.type", ["article", "blog-post"]);
+            var any = Prismic.Predicates.any("document.type", ["article", "blog-post"]);
             assert.deepEqual(any, ["any", "document.type", ["article", "blog-post"]]); // gisthide
 
             // "fulltext" predicate: fulltext search in a fragment.
-            var fulltext = Predicates.fulltext("my.article.body", "sausage");
+            var fulltext = Prismic.Predicates.fulltext("my.article.body", "sausage");
 
             // "similar" predicate, with a document id as reference
-            var similar = Predicates.similar("UXasdFwe42D", 10);
+            var similar = Prismic.Predicates.similar("UXasdFwe42D", 10);
             // endgist
         });
 
@@ -170,7 +169,7 @@
         it('prismic-htmlSerializer.js', function (done) {
             Prismic.Api(testRepository, function (err, Api) {
                 if (err) throw err;
-                Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl"))
+                Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbl"))
                     .ref(Api.master()).submit(function (err, documents) {
                         if (err) throw err;
                         var doc = documents.results[0];
@@ -220,7 +219,7 @@
         it('prismic-getText.js', function (done) {
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
-                Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
+                Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err; // gisthide
                     var doc = documents.results[0];
                     // startgist:39e5df50e5f10c574fde:prismic-getText.js
@@ -236,14 +235,14 @@
         it('prismic-getNumber.js', function (done) {
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err;
-                Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
+                Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
                     var doc = documents.results[0];
                     // startgist:17fab0179019f272f947:prismic-getNumber.js
                     // Number predicates
-                    var gt = Predicates.gt("my.product.price", 10);
-                    var lt = Predicates.lt("my.product.price", 20);
-                    var inRange = Predicates.inRange("my.product.price", 10, 20);
+                    var gt = Prismic.Predicates.gt("my.product.price", 10);
+                    var lt = Prismic.Predicates.lt("my.product.price", 20);
+                    var inRange = Prismic.Predicates.inRange("my.product.price", 10, 20);
 
                     // Accessing number fields
                     var price = doc.getNumber("product.price");
@@ -257,7 +256,7 @@
         it('prismic-images.js', function (done) {
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err;
-                Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
+                Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
                     var doc = documents.results[0];
                     // startgist:a7be4722af6671f87797:prismic-images.js
@@ -275,10 +274,11 @@
         it('prismic-dateTimestamp.js', function (done) {
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err;
-                Api.form('everything').query(Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
+                Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
                     var doc = documents.results[0];
                     // startgist:1c9514ef4f31701732ac:prismic-dateTimestamp.js
+                    var Predicates = Prismic.Predicates;
                     // Date and Timestamp predicates
                     var dateBefore = Predicates.dateBefore("my.product.releaseDate", new Date(2014, 6, 1));
                     var dateAfter = Predicates.dateAfter("my.product.releaseDate", new Date(2014, 1, 1));
@@ -488,7 +488,7 @@
             });
             // startgist:6eb5436349a2e7fc9f5a:prismic-geopoint.js
             // "near" predicate for GeoPoint fragments
-            var near = Predicates.near("my.store.location", 48.8768767, 2.3338802, 10);
+            var near = Prismic.Predicates.near("my.store.location", 48.8768767, 2.3338802, 10);
 
             // Accessing GeoPoint fragments
             var place = doc.getGeoPoint("article.location");
