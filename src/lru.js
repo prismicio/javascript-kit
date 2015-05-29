@@ -1,3 +1,5 @@
+(function (Global, undefined) {
+
 /**
  * A doubly linked list-based Least Recently Used (LRU) cache. Will keep most
  * recently used items while discarding least recently used items when its limit
@@ -248,4 +250,8 @@ LRUCache.prototype.toString = function() {
 };
 
 // Export ourselves
-if (typeof this === 'object') this.LRUCache = LRUCache;
+Global.Prismic.LRUCache = LRUCache;
+
+
+}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+

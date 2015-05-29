@@ -6,7 +6,7 @@
      * Api cache
      */
     function ApiCache(limit) {
-        this.lru = new LRUCache(limit);
+        this.lru = new Global.Prismic.LRUCache(limit);
     }
 
     ApiCache.prototype = {
