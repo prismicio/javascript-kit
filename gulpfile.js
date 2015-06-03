@@ -10,8 +10,8 @@ var gulp = require('gulp'),
 
 var SOURCES = [
     'src/polyfill.js',
-    'src/lru.js',
     'src/api.js',
+    'src/lru.js',
     'src/cache.js',
     'src/utils.js',
     'src/documents.js',
