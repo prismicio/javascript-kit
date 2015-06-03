@@ -206,8 +206,8 @@
         init: function(url, accessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
-            this.requestHandler = maybeRequestHandler || Global.Prismic.Utils.request();
             this.apiCache = maybeApiCache || globalCache();
+            this.requestHandler = maybeRequestHandler || Global.Prismic.Utils.request();
             this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
             this.apiDataTTL = maybeApiDataTTL || 5;
             return this;
@@ -342,33 +342,38 @@
          * Fetch a URL corresponding to a query, and parse the response as a Response object
          */
         request: function(url, callback) {
+            var api = this;
             var cacheKey = url + (this.accessToken ? ('#' + this.accessToken) : '');
             var cache = this.apiCache;
-            this.requestHandler(url, function (err, documents, xhr, ttl) {
-                if (err) {
-                    callback(err, null, xhr);
-                    return;
-                }
-                var results = documents.results.map(prismic.fn.parseDoc);
-                var response = new Response(
-                    documents.page,
-                    documents.results_per_page,
-                    documents.results_size,
-                    documents.total_results_size,
-                    documents.total_pages,
-                    documents.next_page,
-                    documents.prev_page,
-                    results || []);
-                if (ttl) {
-                    cache.set(cacheKey, response, ttl, function (err) {
-                        if (err) {
-                            return callback(err);
-                        }
+            cache.get(cacheKey, function (err, value) {
+                if (err) { return callback(err); }
+                if (value) { return callback(null, value); }
+                api.requestHandler(url, function (err, documents, xhr, ttl) {
+                    if (err) {
+                        callback(err, null, xhr);
+                        return;
+                    }
+                    var results = documents.results.map(prismic.fn.parseDoc);
+                    var response = new Response(
+                        documents.page,
+                        documents.results_per_page,
+                        documents.results_size,
+                        documents.total_results_size,
+                        documents.total_pages,
+                        documents.next_page,
+                        documents.prev_page,
+                        results || []);
+                    if (ttl) {
+                        cache.set(cacheKey, response, ttl, function (err) {
+                            if (err) {
+                                return callback(err);
+                            }
+                            return callback(null, response);
+                        });
+                    } else {
                         return callback(null, response);
-                    });
-                } else {
-                    return callback(null, response);
-                }
+                    }
+                });
             });
         }
 
