@@ -19,6 +19,8 @@
     }
 
 })();
+(function (Global, undefined) {
+
 /**
  * A doubly linked list-based Least Recently Used (LRU) cache. Will keep most
  * recently used items while discarding least recently used items when its limit
@@ -269,7 +271,11 @@ LRUCache.prototype.toString = function() {
 };
 
 // Export ourselves
-if (typeof this === 'object') this.LRUCache = LRUCache;
+Global.Prismic.LRUCache = LRUCache;
+
+
+}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
+
 
 (function (Global, undefined) {
 
@@ -972,7 +978,7 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
      * Api cache
      */
     function ApiCache(limit) {
-        this.lru = new LRUCache(limit);
+        this.lru = new Global.Prismic.LRUCache(limit);
     }
 
     ApiCache.prototype = {
@@ -3186,4 +3192,4 @@ if (typeof this === 'object') this.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.1.4';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.1.5';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
