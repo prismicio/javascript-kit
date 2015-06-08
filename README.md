@@ -76,7 +76,7 @@ If you feel an existing area of code is lacking documentation, feel free to writ
 
 If you find existing code that is not optimally documented and wish to make it better, we really appreciate it; but you should document it on its own branch and its own pull request.
 
-### Licence
+### License
 
 This software is licensed under the Apache 2 license, quoted below.
 
