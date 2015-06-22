@@ -290,10 +290,26 @@
                         console.log(err);
                         return;
                     }
-                    assert.equal(documents.results.length, 0);
+                    assert.equal(0, documents.results.length);
                     done();
                 });
             });
+        });
+
+        it('"has" predicates', function (done) {
+          Prismic.Api(microRepository, function (err, Api) {
+            if (err) throw err;
+            Api.form('everything').ref(Api.master()).query(
+              Predicates.has("my.doc.title")
+            ).submit(function (err, documents) {
+              if (err) {
+                console.log(err);
+                return;
+              }
+              assert.equal(0, documents.results.length);
+              done();
+            });
+          });
         });
 
         it('Multiple predicates', function (done) {

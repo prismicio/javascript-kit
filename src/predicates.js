@@ -20,6 +20,24 @@
         at: function(fragment, value) { return ["at", fragment, value]; },
 
         /**
+         * Build a "missing" predicate: documents where the requested field is empty
+         *
+         * @example Predicates.missing("my.blog-post.author")
+         * @param fragment {String}
+         * @returns {Array} an array corresponding to the predicate
+         */
+        missing: function(fragment) { return ["missing", fragment]; },
+
+        /**
+         * Build a "has" predicate: documents where the requested field is defined
+         *
+         * @example Predicates.has("my.blog-post.author")
+         * @param fragment {String}
+         * @returns {Array} an array corresponding to the predicate
+         */
+        has: function(fragment) { return ["has", fragment]; },
+
+        /**
          * Build an "any" predicate: equality of a fragment to a value.
          *
          * @example Predicates.any("document.type", ["article", "blog-post"])

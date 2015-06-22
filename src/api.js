@@ -480,7 +480,9 @@
                 predicates.forEach(function (predicate) {
                     var firstArg = (predicate[1].indexOf("my.") === 0 || predicate[1].indexOf("document") === 0) ? predicate[1]
                         : '"' + predicate[1] + '"';
-                    stringQueries.push("[:d = " + predicate[0] + "(" + firstArg + ", " + (function() {
+                  stringQueries.push("[:d = " + predicate[0] + "(" + firstArg +
+                                     (predicate.length > 2 ? ", " : "") +
+                                     (function() {
                         return predicate.slice(2).map(function(p) {
                             if (typeof p === 'string') {
                                 return '"' + p + '"';

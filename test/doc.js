@@ -154,6 +154,10 @@
             // "any" predicate: equality of a fragment to a value.
             var any = Prismic.Predicates.any("document.type", ["article", "blog-post"]);
             assert.deepEqual(any, ["any", "document.type", ["article", "blog-post"]]); // gisthide
+            // "missing" predicate: documents having a non-empty field
+            var missing = Prismic.Predicates.missing("my.article.author");
+            // "has" predicate: documents having a non-empty field
+            var has = Prismic.Predicates.has("my.article.author");
 
             // "fulltext" predicate: fulltext search in a fragment.
             var fulltext = Prismic.Predicates.fulltext("my.article.body", "sausage");
