@@ -345,10 +345,17 @@
                         callback(null, defaultUrl, xhr);
                     } else {
                         api.form("everything").query(Predicates.at("document.id", mainDocumentId)).ref(token).submit(function(err, response) {
-                            if (response.results.length === 0) {
-                                callback(null, defaultUrl, xhr);
-                            } else {
-                                callback(null, linkResolver(response.results[0]), xhr);
+                            if (err) {
+                                callback(err);
+                            }
+                            try {
+                                if (response.results.length === 0) {
+                                    callback(null, defaultUrl, xhr);
+                                } else {
+                                    callback(null, linkResolver(response.results[0]), xhr);
+                                }
+                            } catch (e) {
+                                callback(e);
                             }
                         });
                     }
@@ -494,7 +501,9 @@
                 predicates.forEach(function (predicate) {
                     var firstArg = (predicate[1].indexOf("my.") === 0 || predicate[1].indexOf("document") === 0) ? predicate[1]
                         : '"' + predicate[1] + '"';
-                    stringQueries.push("[:d = " + predicate[0] + "(" + firstArg + ", " + (function() {
+                  stringQueries.push("[:d = " + predicate[0] + "(" + firstArg +
+                                     (predicate.length > 2 ? ", " : "") +
+                                     (function() {
                         return predicate.slice(2).map(function(p) {
                             if (typeof p === 'string') {
                                 return '"' + p + '"';
@@ -2885,6 +2894,24 @@ Global.Prismic.LRUCache = LRUCache;
         at: function(fragment, value) { return ["at", fragment, value]; },
 
         /**
+         * Build a "missing" predicate: documents where the requested field is empty
+         *
+         * @example Predicates.missing("my.blog-post.author")
+         * @param fragment {String}
+         * @returns {Array} an array corresponding to the predicate
+         */
+        missing: function(fragment) { return ["missing", fragment]; },
+
+        /**
+         * Build a "has" predicate: documents where the requested field is defined
+         *
+         * @example Predicates.has("my.blog-post.author")
+         * @param fragment {String}
+         * @returns {Array} an array corresponding to the predicate
+         */
+        has: function(fragment) { return ["has", fragment]; },
+
+        /**
          * Build an "any" predicate: equality of a fragment to a value.
          *
          * @example Predicates.any("document.type", ["article", "blog-post"])
@@ -3197,4 +3224,4 @@ Global.Prismic.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.1.7';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.1.8';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
