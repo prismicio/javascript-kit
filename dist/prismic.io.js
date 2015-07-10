@@ -2665,7 +2665,12 @@ Global.Prismic.LRUCache = LRUCache;
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function (linkResolver) {
-            return this.value.asHtml(linkResolver);
+            var classes = ['slice'];
+            if (this.label) classes.push(this.label);
+            return '<div data-slicetype="' + this.sliceType + '" class="' + classes.join(' ') + '">' +
+                   this.value.asHtml(linkResolver) +
+                   '</div>';
+
         },
 
         /**
@@ -3224,4 +3229,4 @@ Global.Prismic.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.1.8';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.2.0';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));

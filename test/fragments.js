@@ -407,7 +407,7 @@
             });
             var slices = doc.getSliceZone('article.blocks');
             assert.equal(slices.asText(getLinkResolver()), "c'est un bloc features\n\nC'est un bloc content\n");
-            assert.equal(slices.asHtml(getLinkResolver()), '<section data-field="illustration"><img src="https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg" width="4285" height="709" alt=""></section><section data-field="title"><span>c\'est un bloc features</span></section><p>C\'est un bloc content</p>');
+            assert.equal(slices.asHtml(getLinkResolver()), '<div data-slicetype="features" class="slice"><section data-field="illustration"><img src="https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg" width="4285" height="709" alt=""></section><section data-field="title"><span>c\'est un bloc features</span></section></div><div data-slicetype="text" class="slice"><p>C\'est un bloc content</p></div>');
         });
     });
 

@@ -925,7 +925,12 @@
          * @returns {string} - basic HTML code for the fragment
          */
         asHtml: function (linkResolver) {
-            return this.value.asHtml(linkResolver);
+            var classes = ['slice'];
+            if (this.label) classes.push(this.label);
+            return '<div data-slicetype="' + this.sliceType + '" class="' + classes.join(' ') + '">' +
+                   this.value.asHtml(linkResolver) +
+                   '</div>';
+
         },
 
         /**
