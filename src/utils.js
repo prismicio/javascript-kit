@@ -122,7 +122,7 @@
                         }
                     };
 
-                h.get(options, function(response) {
+                var request = h.get(options, function(response) {
                     if(response.statusCode && response.statusCode == 200) {
                         var jsonStr = '';
 
@@ -142,6 +142,13 @@
                         callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
                     }
                 });
+
+                // properly handle timeouts
+                request.on('error', function(err) {
+                    callback(new Error("Unexpected error on URL "+requestUrl), null, err);
+                });
+
+
             };
         }
     });
