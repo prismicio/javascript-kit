@@ -84,7 +84,7 @@
                     if (err) { return callback(err, null, xhr); }
 
                     var parsed = self.parse(data);
-                    ttl = ttl | self.apiDataTTL;
+                    ttl = ttl || self.apiDataTTL;
 
                     self.apiCache.set(cacheKey, parsed, ttl, function (err) {
                         if (err) { return callback(err, null, xhr); }
