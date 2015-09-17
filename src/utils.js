@@ -60,11 +60,11 @@
 
                 // Called on success
                 var resolve = function() {
-                    var ttl, cacheControl = /max-age\s*=\s*(\d+)/.exec(
+                    var ttl;/*, cacheControl = /max-age\s*=\s*(\d+)/.exec(
                         xhr.getResponseHeader('Cache-Control'));
                     if (cacheControl && cacheControl.length > 1) {
                         ttl = parseInt(cacheControl[1], 10);
-                    }
+                    }*/
                     callback(null, JSON.parse(xdr.responseText), xdr, ttl);
                 };
 
