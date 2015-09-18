@@ -105,7 +105,7 @@
                     if (err) { return callback(err, null, xhr); }
 
                     var parsed = self.parse(data);
-                    ttl = ttl | self.apiDataTTL;
+                    ttl = ttl || self.apiDataTTL;
 
                     self.apiCache.set(cacheKey, parsed, ttl, function (err) {
                         if (err) { return callback(err, null, xhr); }
@@ -1094,19 +1094,14 @@ Global.Prismic.LRUCache = LRUCache;
     });
 
     var xdomainRequest = (function() {
-        if(typeof XDomainRequest != 'undefined') {
+        if(typeof XDomainRequest != 'undefined') { // Internet Explorer
             return function(url, callback) {
 
                 var xdr = new XDomainRequest();
 
                 // Called on success
                 var resolve = function() {
-                    var ttl, cacheControl = /max-age\s*=\s*(\d+)/.exec(
-                        xhr.getResponseHeader('Cache-Control'));
-                    if (cacheControl && cacheControl.length > 1) {
-                        ttl = parseInt(cacheControl[1], 10);
-                    }
-                    callback(null, JSON.parse(xdr.responseText), xdr, ttl);
+                    callback(null, JSON.parse(xdr.responseText), xdr, 0);
                 };
 
                 // Called on error
@@ -3236,4 +3231,4 @@ Global.Prismic.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.2.0';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.2.1';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));

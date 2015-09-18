@@ -55,7 +55,7 @@ gulp.task('minify', ['version'], function() {
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task('copy', ['test', 'version'], function() {
+gulp.task('copy', ['version'], function() {
     return gulp.src(SOURCES.concat('src/version.js'))
         .pipe(concat('prismic.io-%VERSION%.min.js'.replace('%VERSION%', pkg.version)))
         .pipe(uglify())
