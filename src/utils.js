@@ -53,19 +53,14 @@
     });
 
     var xdomainRequest = (function() {
-        if(typeof XDomainRequest != 'undefined') {
+        if(typeof XDomainRequest != 'undefined') { // Internet Explorer
             return function(url, callback) {
 
                 var xdr = new XDomainRequest();
 
                 // Called on success
                 var resolve = function() {
-                    var ttl, cacheControl = /max-age\s*=\s*(\d+)/.exec(
-                        xhr.getResponseHeader('Cache-Control'));
-                    if (cacheControl && cacheControl.length > 1) {
-                        ttl = parseInt(cacheControl[1], 10);
-                    }
-                    callback(null, JSON.parse(xdr.responseText), xdr, ttl);
+                    callback(null, JSON.parse(xdr.responseText), xdr, 0);
                 };
 
                 // Called on error
