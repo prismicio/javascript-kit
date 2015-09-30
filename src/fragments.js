@@ -68,17 +68,17 @@
          */
         this.type = data.document.type;
 
-        var fragments = {};
+        var fragmentsData = {};
         if (data.document.data) {
             for (var field in data.document.data[data.document.type]) {
-                fragments[data.document.type + '.' + field] = data.document.data[data.document.type][field];
+                fragmentsData[data.document.type + '.' + field] = data.document.data[data.document.type][field];
             }
         }
         /**
          * @field
          * @description the fragment list, if the fetchLinks parameter was used in at query time
          */
-        this.fragments = fragments;
+        this.fragments = parseFragments(fragmentsData);
         /**
          * @field
          * @description true if the link is broken, false otherwise
@@ -1053,6 +1053,23 @@
 
     }
 
+    function parseFragments(json) {
+        var result = {};
+        for (var key in json) {
+            if (json.hasOwnProperty(key)) {
+                if (Array.isArray(json[key])) {
+                    result[key] = json[key].map(function (fragment) {
+                        return initField(fragment);
+                    });
+                } else {
+                    result[key] = initField(json[key]);
+                }
+            }
+        }
+        return result;
+    }
+
+
     function isFunction(f) {
         var getType = {};
         return f && getType.toString.call(f) === '[object Function]';
@@ -1137,6 +1154,7 @@
         Slice: Slice,
         SliceZone: SliceZone,
         initField: initField,
+        parseFragments: parseFragments,
         insertSpans: insertSpans
     };
 

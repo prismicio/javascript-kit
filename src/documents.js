@@ -19,7 +19,7 @@
          */
         get: function(name) {
             var frags = this._getFragments(name);
-            return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
+            return frags.length ? frags[0] : null;
         },
 
         /**
@@ -29,9 +29,7 @@
          * @returns {array} - An array of each JavaScript fragment object to manipulate.
          */
         getAll: function(name) {
-            return this._getFragments(name).map(function (fragment) {
-                return Global.Prismic.Fragments.initField(fragment);
-            }, this);
+            return this._getFragments(name);
         },
 
         /**
@@ -367,7 +365,7 @@
         linkedDocuments: function() {
             var i, j, link;
             var result = [];
-            for (var field in this.fragments) {
+            for (var field in this.data) {
                 var fragment = this.get(field);
                 if (fragment instanceof Global.Prismic.Fragments.DocumentLink) {
                     result.push(fragment);
@@ -413,15 +411,16 @@
             }
 
             if (Array.isArray(this.fragments[name])) {
+              if (name === 'blog-post.author') console.log("yes array");
                 return this.fragments[name];
             } else {
+              if (name === 'blog-post.author') console.log("no narray: ", this.fragments[name]);
                 return [this.fragments[name]];
             }
 
         }
 
     };
-
 
     /**
      * Embodies a document as returned by the API.
@@ -430,8 +429,7 @@
      * @global
      * @alias Doc
      */
-    function Document(id, uid, type, href, tags, slugs, fragments) {
-
+    function Document(id, uid, type, href, tags, slugs, data) {
         /**
          * The ID of the document
          * @type {string}
@@ -467,8 +465,14 @@
          * @type {array}
          */
         this.slugs = slugs;
-
-        this.fragments = fragments;
+        /**
+         * The original JSON data from the API
+         */
+        this.data = data;
+        /**
+         * Fragments, converted to business objects
+         */
+        this.fragments = Global.Prismic.Fragments.parseFragments(data);
     }
 
     Document.prototype = Object.create(WithFragments.prototype);
@@ -490,8 +494,15 @@
         return null;
     };
 
-    function GroupDoc(fragments) {
-        this.fragments = fragments;
+    function GroupDoc(data) {
+      /**
+       * The original JSON data from the API
+       */
+      this.data = data;
+      /**
+       * Fragments, converted to business objects
+       */
+      this.fragments = Global.Prismic.Fragments.parseFragments(data);
     }
 
     GroupDoc.prototype = Object.create(WithFragments.prototype);
