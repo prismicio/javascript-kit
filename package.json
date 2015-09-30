@@ -19,7 +19,7 @@
     "gulp-concat": "~2.6.0",
     "chai": "*",
     "mocha": "*",
-    "gulp-mocha-phantomjs": "~0.8.1",
+    "gulp-mocha-phantomjs": "git://github.com/erwan/gulp-mocha-phantomjs.git#phantomjs198",
     "gulp-jsdoc": "~0.1.4",
     "gulp-jshint": "~1.11.2",
     "gulp-gist": "~1.0.3",
