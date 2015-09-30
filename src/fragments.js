@@ -673,6 +673,7 @@
                     return block;
                 }
             }
+            return null;
         },
 
         /**
@@ -685,6 +686,7 @@
                     return block;
                 }
             }
+            return null;
         },
 
         /**
@@ -723,6 +725,7 @@
                     );
                 }
             }
+            return null;
         },
 
         /**
@@ -879,7 +882,7 @@
                             url = fragment.url(linkResolver);
                         } else {
                             if (console && console.error) console.error('Impossible to convert span.data as a Fragment', span);
-                            return '';
+                            return;
                         }
                         span.url = url;
                     }
@@ -1046,6 +1049,7 @@
         }
 
         if (console && console.log) console.log("Fragment type not supported: ", field.type);
+        return null;
 
     }
 
