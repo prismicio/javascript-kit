@@ -1247,7 +1247,7 @@ Global.Prismic.LRUCache = LRUCache;
          */
         get: function(name) {
             var frags = this._getFragments(name);
-            return frags.length ? Global.Prismic.Fragments.initField(frags[0]) : null;
+            return frags.length ? frags[0] : null;
         },
 
         /**
@@ -1257,9 +1257,7 @@ Global.Prismic.LRUCache = LRUCache;
          * @returns {array} - An array of each JavaScript fragment object to manipulate.
          */
         getAll: function(name) {
-            return this._getFragments(name).map(function (fragment) {
-                return Global.Prismic.Fragments.initField(fragment);
-            }, this);
+            return this._getFragments(name);
         },
 
         /**
@@ -1519,23 +1517,6 @@ Global.Prismic.LRUCache = LRUCache;
         },
 
         /**
-         * Gets the SliceZone fragment in the current Document object, for further manipulation.
-         *
-         * @example document.getSliceZone('product.gallery').asHtml(linkResolver).
-         *
-         * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
-         * @returns {Group} - The SliceZone fragment to manipulate.
-         */
-        getSliceZone: function(name) {
-            var fragment = this.get(name);
-
-            if (fragment instanceof Global.Prismic.Fragments.SliceZone) {
-                return fragment;
-            }
-            return null;
-        },
-
-        /**
          * Shortcut to get the HTML output of the fragment in the current document.
          * This is the same as writing document.get(fragment).asHtml(linkResolver);
          *
@@ -1612,7 +1593,7 @@ Global.Prismic.LRUCache = LRUCache;
         linkedDocuments: function() {
             var i, j, link;
             var result = [];
-            for (var field in this.fragments) {
+            for (var field in this.data) {
                 var fragment = this.get(field);
                 if (fragment instanceof Global.Prismic.Fragments.DocumentLink) {
                     result.push(fragment);
@@ -1658,15 +1639,16 @@ Global.Prismic.LRUCache = LRUCache;
             }
 
             if (Array.isArray(this.fragments[name])) {
+              if (name === 'blog-post.author') console.log("yes array");
                 return this.fragments[name];
             } else {
+              if (name === 'blog-post.author') console.log("no narray: ", this.fragments[name]);
                 return [this.fragments[name]];
             }
 
         }
 
     };
-
 
     /**
      * Embodies a document as returned by the API.
@@ -1675,8 +1657,7 @@ Global.Prismic.LRUCache = LRUCache;
      * @global
      * @alias Doc
      */
-    function Document(id, uid, type, href, tags, slugs, fragments) {
-
+    function Document(id, uid, type, href, tags, slugs, data) {
         /**
          * The ID of the document
          * @type {string}
@@ -1712,14 +1693,44 @@ Global.Prismic.LRUCache = LRUCache;
          * @type {array}
          */
         this.slugs = slugs;
-
-        this.fragments = fragments;
+        /**
+         * The original JSON data from the API
+         */
+        this.data = data;
+        /**
+         * Fragments, converted to business objects
+         */
+        this.fragments = Global.Prismic.Fragments.parseFragments(data);
     }
 
     Document.prototype = Object.create(WithFragments.prototype);
 
-    function GroupDoc(fragments) {
-        this.fragments = fragments;
+    /**
+      * Gets the SliceZone fragment in the current Document object, for further manipulation.
+      *
+      * @example document.getSliceZone('product.gallery').asHtml(linkResolver).
+      *
+      * @param {string} name - The name of the fragment to get, with its type; for instance, "product.gallery"
+      * @returns {Group} - The SliceZone fragment to manipulate.
+      */
+    Document.prototype.getSliceZone = function(name) {
+        var fragment = this.get(name);
+
+        if (fragment instanceof Global.Prismic.Fragments.SliceZone) {
+            return fragment;
+        }
+        return null;
+    };
+
+    function GroupDoc(data) {
+      /**
+       * The original JSON data from the API
+       */
+      this.data = data;
+      /**
+       * Fragments, converted to business objects
+       */
+      this.fragments = Global.Prismic.Fragments.parseFragments(data);
     }
 
     GroupDoc.prototype = Object.create(WithFragments.prototype);
@@ -1810,17 +1821,17 @@ Global.Prismic.LRUCache = LRUCache;
          */
         this.type = data.document.type;
 
-        var fragments = {};
+        var fragmentsData = {};
         if (data.document.data) {
             for (var field in data.document.data[data.document.type]) {
-                fragments[data.document.type + '.' + field] = data.document.data[data.document.type][field];
+                fragmentsData[data.document.type + '.' + field] = data.document.data[data.document.type][field];
             }
         }
         /**
          * @field
          * @description the fragment list, if the fetchLinks parameter was used in at query time
          */
-        this.fragments = fragments;
+        this.fragments = parseFragments(fragmentsData);
         /**
          * @field
          * @description true if the link is broken, false otherwise
@@ -2248,12 +2259,6 @@ Global.Prismic.LRUCache = LRUCache;
          * @description the main ImageView for this image
          */
         this.main = main;
-
-        /**
-         * @field
-         * @description the url of the main ImageView for this image
-         */
-        this.url = main.url;
         /**
          * @field
          * @description an array of all the other ImageViews for this image
@@ -2421,6 +2426,7 @@ Global.Prismic.LRUCache = LRUCache;
                     return block;
                 }
             }
+            return null;
         },
 
         /**
@@ -2433,6 +2439,7 @@ Global.Prismic.LRUCache = LRUCache;
                     return block;
                 }
             }
+            return null;
         },
 
         /**
@@ -2471,6 +2478,7 @@ Global.Prismic.LRUCache = LRUCache;
                     );
                 }
             }
+            return null;
         },
 
         /**
@@ -2627,7 +2635,7 @@ Global.Prismic.LRUCache = LRUCache;
                             url = fragment.url(linkResolver);
                         } else {
                             if (console && console.error) console.error('Impossible to convert span.data as a Fragment', span);
-                            return '';
+                            return;
                         }
                         span.url = url;
                     }
@@ -2736,6 +2744,7 @@ Global.Prismic.LRUCache = LRUCache;
             }
             return output;
          }
+
     };
 
     /**
@@ -2793,8 +2802,26 @@ Global.Prismic.LRUCache = LRUCache;
         }
 
         if (console && console.log) console.log("Fragment type not supported: ", field.type);
+        return null;
 
     }
+
+    function parseFragments(json) {
+        var result = {};
+        for (var key in json) {
+            if (json.hasOwnProperty(key)) {
+                if (Array.isArray(json[key])) {
+                    result[key] = json[key].map(function (fragment) {
+                        return initField(fragment);
+                    });
+                } else {
+                    result[key] = initField(json[key]);
+                }
+            }
+        }
+        return result;
+    }
+
 
     function isFunction(f) {
         var getType = {};
@@ -2880,6 +2907,7 @@ Global.Prismic.LRUCache = LRUCache;
         Slice: Slice,
         SliceZone: SliceZone,
         initField: initField,
+        parseFragments: parseFragments,
         insertSpans: insertSpans
     };
 
@@ -3237,4 +3265,4 @@ Global.Prismic.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.2.1';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.3.0';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
