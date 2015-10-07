@@ -2,6 +2,12 @@
 
     "use strict";
 
+    var createError = function(status, message) {
+        var err = new Error(message);
+        err.status = status;
+        return err;
+    };
+
     // -- Request handlers
 
     var ajaxRequest = (function() {
@@ -23,7 +29,7 @@
                 // Called on error
                 var reject = function() {
                     var status = xhr.status;
-                    callback(new Error("Unexpected status code [" + status + "] on URL "+url), null, xhr);
+                    callback(createError(status, "Unexpected status code [" + status + "] on URL "+url), null, xhr);
                 };
 
                 // Bind the XHR finished callback
@@ -134,7 +140,7 @@
                           callback(null, json, response, ttl);
                         });
                     } else {
-                        callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
+                        callback(createError(response.statusCode, "Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
                     }
                 });
 
