@@ -1043,6 +1043,12 @@ Global.Prismic.LRUCache = LRUCache;
 
     "use strict";
 
+    var createError = function(status, message) {
+        var err = new Error(message);
+        err.status = status;
+        return err;
+    };
+
     // -- Request handlers
 
     var ajaxRequest = (function() {
@@ -1064,7 +1070,7 @@ Global.Prismic.LRUCache = LRUCache;
                 // Called on error
                 var reject = function() {
                     var status = xhr.status;
-                    callback(new Error("Unexpected status code [" + status + "] on URL "+url), null, xhr);
+                    callback(createError(status, "Unexpected status code [" + status + "] on URL "+url), null, xhr);
                 };
 
                 // Bind the XHR finished callback
@@ -1175,7 +1181,7 @@ Global.Prismic.LRUCache = LRUCache;
                           callback(null, json, response, ttl);
                         });
                     } else {
-                        callback(new Error("Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
+                        callback(createError(response.statusCode, "Unexpected status code [" + response.statusCode + "] on URL "+requestUrl), null, response);
                     }
                 });
 
@@ -2259,6 +2265,14 @@ Global.Prismic.LRUCache = LRUCache;
          * @description the main ImageView for this image
          */
         this.main = main;
+
+
+        /**
+         * @field
+         * @description the url of the main ImageView for this image
+         */
+        this.url = main.url;
+
         /**
          * @field
          * @description an array of all the other ImageViews for this image
@@ -3265,4 +3279,4 @@ Global.Prismic.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.3.0';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.3.1';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
