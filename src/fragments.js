@@ -506,6 +506,14 @@
          * @description the main ImageView for this image
          */
         this.main = main;
+
+
+        /**
+         * @field
+         * @description the url of the main ImageView for this image
+         */
+        this.url = main.url;
+
         /**
          * @field
          * @description an array of all the other ImageViews for this image
