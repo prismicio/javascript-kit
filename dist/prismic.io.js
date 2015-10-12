@@ -3279,4 +3279,4 @@ Global.Prismic.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.3.1';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.3.3';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
