@@ -1144,6 +1144,7 @@
     }
 
     Global.Prismic.Fragments = {
+        Embed: Embed,
         Image: ImageEl,
         ImageView: ImageView,
         Text: Text,
