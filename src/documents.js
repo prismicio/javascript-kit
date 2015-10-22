@@ -411,10 +411,8 @@
             }
 
             if (Array.isArray(this.fragments[name])) {
-              if (name === 'blog-post.author') console.log("yes array");
                 return this.fragments[name];
             } else {
-              if (name === 'blog-post.author') console.log("no narray: ", this.fragments[name]);
                 return [this.fragments[name]];
             }
 
