@@ -970,6 +970,7 @@
                 this.value.push(new Slice(sliceType, label, fragment));
             }
         }
+        this.slices = this.value;
     }
 
     SliceZone.prototype = {
