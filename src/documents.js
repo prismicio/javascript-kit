@@ -67,6 +67,19 @@
             });
         },
 
+
+        getFirstImage: function() {
+            var fragments = this.fragments
+            var firstImage = Object.keys(fragments).reduce(function(firstImage, key) {
+                if (firstImage) {
+                    return firstImage;
+                } else {
+                    this.getImage(fragments[key])
+                }
+            })
+            return firstImage;
+        },
+
         /**
          * Gets the view within the image fragment in the current Document object, for further manipulation.
          *

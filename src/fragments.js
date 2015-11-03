@@ -653,6 +653,11 @@
                 output += this.value[i].asText(linkResolver) + '\n';
             }
             return output;
+        },
+
+        getFirstImage: function() {
+            return this.toArray().map(function(elem) {return elem.getFirstImage()})
+              .filter(function(elem) {return !!elem})[0]
         }
     };
 
@@ -801,7 +806,7 @@
 
             }
 
-            return html.join('');
+            return html.join('\n');
 
         },
 
@@ -964,19 +969,7 @@
                     if (firstImage) {
                         return firstImage;
                     } else {
-                        var elementFirstImage = Object.keys(withFragments.fragments).reduce(function(firstImage, key) {
-                            if (firstImage) {
-                                return firstImage;
-                            } else {
-                                var element = withFragments.fragments[key]
-                                if (element instanceof Global.Prismic.Fragments.StructuredText) {
-                                    return element.getFirstImage()
-                                } else if (element instanceof Global.Prismic.Fragments.Image) {
-                                    return element
-                                }
-                            }
-                        })
-                        return elementFirstImage;
+                        return withFragments.getFirstImage()
                     }
                 })
                 return groupFirstImage;
