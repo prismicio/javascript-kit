@@ -960,20 +960,27 @@
         getFirstImage: function() {
             var fragment = this.value
             if(fragment instanceof  Global.Prismic.Fragments.Group) {
-                var groupImages = fragment.toArray().map(function (withFragments) {
-                    var images = Object.keys(withFragments.fragments).map(function(key) {
-                        var element = withFragments.fragments[key]
-                        if (element instanceof Global.Prismic.Fragments.StructuredText) {
-                            return element.getFirstImage()
-
-                        } else if (element instanceof Global.Prismic.Fragments.Image) {
-                            return element
-
-                        } else return null;
-                    })
-                    return images[0];
+                var groupFirstImage = fragment.toArray().reduce(function (firstImage, withFragments) {
+                    if (firstImage) {
+                        return firstImage;
+                    } else {
+                        var elementFirstImage = Object.keys(withFragments.fragments).reduce(function(firstImage, key) {
+                            if (firstImage) {
+                                return firstImage;
+                            } else {
+                                var element = withFragments.fragments[key]
+                                if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                                    return element.getFirstImage()
+                                } else if (element instanceof Global.Prismic.Fragments.Image) {
+                                    return element
+                                }
+                            }
+                        })
+                        return elementFirstImage;
+                    }
                 })
-                return groupImages[0]
+                return groupFirstImage;
+
             } else if (fragment instanceof  Global.Prismic.Fragments.StructuredText) {
                 return fragment.getFirstImage()
 
@@ -1022,14 +1029,19 @@
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function() {
+        asText: function() {
             var output = "";
             for (var i = 0; i < this.value.length; i++) {
                 output += this.value[i].asText() + '\n';
             }
             return output;
-         }
-
+        },
+        getFirstImage: function() {
+            var images = this.value.filter(function(slice) {
+                return !!slice.getFirstImage()
+            })
+            return images[0]
+        }
     };
 
     /**
