@@ -660,9 +660,9 @@
             return this.toArray().reduce(function(image, fragment) {
                 if (image) return image;
                 else {
-                    return fragment.getFirstImage()
+                    return fragment.getFirstImage();
                 }
-            }, null)
+            }, null);
         }
     };
 
@@ -968,15 +968,15 @@
          * @returns {object}
          */
         getFirstImage: function() {
-            var fragment = this.value
+            var fragment = this.value;
             if(fragment instanceof  Global.Prismic.Fragments.Group) {
                 return fragment.getFirstImage();
 
             } else if (fragment instanceof  Global.Prismic.Fragments.StructuredText) {
-                return fragment.getFirstImage()
+                return fragment.getFirstImage();
 
             } else if (fragment instanceof  Global.Prismic.Fragments.Image) {
-                return fragment
+                return fragment;
             } else return null;
         }
     };
@@ -1028,8 +1028,8 @@
             return output;
         },
         getFirstImage: function() {
-            return this.value.map(function(slice) {return slice.getFirstImage()})
-              .filter(function(image) {return !!image})[0]
+            return this.value.map(function(slice) {return slice.getFirstImage();})
+              .filter(function(image) {return !!image;})[0];
         }
     };
 
