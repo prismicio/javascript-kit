@@ -969,12 +969,8 @@
          */
         getFirstImage: function() {
             var fragment = this.value;
-            if(fragment instanceof  Global.Prismic.Fragments.Group) {
+            if(typeof fragment.getFirstImage === "function") {
                 return fragment.getFirstImage();
-
-            } else if (fragment instanceof  Global.Prismic.Fragments.StructuredText) {
-                return fragment.getFirstImage();
-
             } else if (fragment instanceof  Global.Prismic.Fragments.Image) {
                 return fragment;
             } else return null;
