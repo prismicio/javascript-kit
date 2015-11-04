@@ -67,6 +67,27 @@
             });
         },
 
+
+        getFirstImage: function() {
+            var fragments = this.fragments
+
+            var firstImage = Object.keys(fragments).reduce(function(image, key) {
+                if (image) {
+                    return image;
+                } else {
+                    var element = fragments[key]
+                    if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                        return element.getFirstImage()
+
+                    } else if (element instanceof Global.Prismic.Fragments.Image) {
+                        return element
+
+                    } else return null;
+                }
+            }, null)
+            return firstImage;
+        },
+
         /**
          * Gets the view within the image fragment in the current Document object, for further manipulation.
          *

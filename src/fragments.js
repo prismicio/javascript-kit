@@ -653,6 +653,16 @@
                 output += this.value[i].asText(linkResolver) + '\n';
             }
             return output;
+        },
+
+        getFirstImage: function() {
+
+            return this.toArray().reduce(function(image, fragment) {
+                if (image) return image;
+                else {
+                    return fragment.getFirstImage()
+                }
+            }, null)
         }
     };
 
@@ -949,9 +959,26 @@
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function() {
+        asText: function() {
             return this.value.asText();
-         }
+        },
+
+        /**
+         * Get the first Image in slice.
+         * @returns {object}
+         */
+        getFirstImage: function() {
+            var fragment = this.value
+            if(fragment instanceof  Global.Prismic.Fragments.Group) {
+                return fragment.getFirstImage();
+
+            } else if (fragment instanceof  Global.Prismic.Fragments.StructuredText) {
+                return fragment.getFirstImage()
+
+            } else if (fragment instanceof  Global.Prismic.Fragments.Image) {
+                return fragment
+            } else return null;
+        }
     };
 
     /**
@@ -993,14 +1020,17 @@
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function() {
+        asText: function() {
             var output = "";
             for (var i = 0; i < this.value.length; i++) {
                 output += this.value[i].asText() + '\n';
             }
             return output;
-         }
-
+        },
+        getFirstImage: function() {
+            return this.value.map(function(slice) {return slice.getFirstImage()})
+              .filter(function(image) {return !!image})[0]
+        }
     };
 
     /**
