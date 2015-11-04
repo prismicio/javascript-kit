@@ -811,7 +811,7 @@
 
             }
 
-            return html.join('\n');
+            return html.join('');
 
         },
 

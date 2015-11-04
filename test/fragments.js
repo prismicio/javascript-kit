@@ -127,7 +127,7 @@
                                             "type":"Image",
                                             "value":{
                                                 "main":{
-                                                    "url":"https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg",
+                                                    "url":"https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall_first_in_slice.jpg",
                                                     "alt":"",
                                                     "copyright":"",
                                                     "dimensions":{"width":4285,"height":709}
@@ -157,8 +157,46 @@
                     }
                 }
             });
+            var sliceSingleElem = Prismic.Api("").parseDoc({
+                "id":"VQ_hV31Za5EAy02H",
+                "uid":null,
+                "type":"article",
+                "href":"http://toto.wroom.dev/api/documents/search?ref=VQ_uWX1Za0oCy46m&q=%5B%5B%3Ad+%3D+at%28document.id%2C+%22VQ_hV31Za5EAy02H%22%29+%5D%5D",
+                "tags":[],
+                "slugs":["une-activite"],
+                "linked_documents":[],
+                "data":{
+                    "article":{
+                        "blocks":{
+                            "type":"SliceZone",
+                            "value":[{
+                                "type":"Slice",
+                                "slice_type": "features",
+                                "value": {
+                                    "type":"Image",
+                                    "value":{
+                                        "main":{
+                                            "url":"https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall_slice_single.jpg",
+                                            "alt":"",
+                                            "copyright":"",
+                                            "dimensions":{"width":4285,"height":709}
+                                        },
+                                        "views":{}
+                                    }
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+
+
             var slices = doc.getSliceZone('article.blocks');
-            assert.equal(slices.getFirstImage().getView('main').url, "https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg");
+            assert.equal(slices.getFirstImage().getView('main').url, "https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall_first_in_slice.jpg");
+
+
+            var slicesWithSingleElem = sliceSingleElem.getSliceZone('article.blocks');
+            assert.equal(slicesWithSingleElem.getFirstImage().getView('main').url, "https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall_slice_single.jpg");
             done();
         });
     });
