@@ -58,6 +58,111 @@
 
     });
 
+    describe('Multiple fragment level global test', function() {
+
+        it('getFirstImageFromSliceZone works', function (done) {
+            var doc = Prismic.Api("").parseDoc({
+                "id":"VQ_hV31Za5EAy02H",
+                "uid":null,
+                "type":"article",
+                "href":"http://toto.wroom.dev/api/documents/search?ref=VQ_uWX1Za0oCy46m&q=%5B%5B%3Ad+%3D+at%28document.id%2C+%22VQ_hV31Za5EAy02H%22%29+%5D%5D",
+                "tags":[],
+                "slugs":["une-activite"],
+                "linked_documents":[],
+                "data":{
+                    "article":{
+                        "activities":{
+                            "type":"Group",
+                            "value":[{
+                                "title":{
+                                    "type":"StructuredText",
+                                    "value":[{
+                                        "type":"paragraph",
+                                        "text":"Une activité",
+                                        "spans":[]
+                                    }]
+                                },
+                                "image":{
+                                    "type":"Image",
+                                    "value":{
+                                        "main":{
+                                            "url":"https://wroomdev.s3.amazonaws.com/toto/ce3f52b933c4934a13422e09ed0ff6ad03a29621_hsf_evilsquall.jpg",
+                                            "alt":"",
+                                            "copyright":"",
+                                            "dimensions":{"width":860,"height":640}
+                                        },
+                                        "views":{
+                                            "headline":{
+                                                "url":"https://wroomdev.s3.amazonaws.com/toto/5445d2dcd2b0c541b0406ca867ab3d07b309c944_hsf_evilsquall.jpg",
+                                                "alt":"",
+                                                "copyright":"",
+                                                "dimensions":{"width":570,"height":400}
+                                            }
+                                        }
+                                    }
+                                },
+                                "body":{
+                                    "type":"StructuredText",
+                                    "value":[{
+                                        "type":"paragraph",
+                                        "text":"elle est bien",
+                                        "spans":[]
+                                    }]
+                                }
+                            }]
+                        },
+                        "un_champ_texte":{
+                            "type":"Text",
+                            "value":"stuffgg"
+                        },
+                        "blocks":{
+                            "type":"SliceZone",
+                            "value":[{
+                                "type":"Slice",
+                                "slice_type": "features",
+                                "value":{
+                                    "type":"Group",
+                                    "value":[{
+                                        "illustration":{
+                                            "type":"Image",
+                                            "value":{
+                                                "main":{
+                                                    "url":"https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg",
+                                                    "alt":"",
+                                                    "copyright":"",
+                                                    "dimensions":{"width":4285,"height":709}
+                                                },
+                                                "views":{}
+                                            }
+                                        },
+                                        "title":{
+                                            "type":"Text",
+                                            "value":"c'est un bloc features"
+                                        }
+                                    }]
+                                }
+                            },{
+                                "type":"Slice",
+                                "slice_type":"text",
+                                "value":{
+                                    "type":"StructuredText",
+                                    "value":[{
+                                        "type":"paragraph",
+                                        "text":"C'est un bloc content",
+                                        "spans":[]
+                                    }]
+                                }
+                            }]
+                        }
+                    }
+                }
+            });
+            var slices = doc.getSliceZone('article.blocks');
+            assert.equal(slices.getFirstImage().getView('main').url, "https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg");
+            done();
+        });
+    });
+
     describe('StructuredText', function() {
 
         it('asHtml handles embeds and lists', function (done) {

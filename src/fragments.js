@@ -656,8 +656,13 @@
         },
 
         getFirstImage: function() {
-            return this.toArray().map(function(elem) {return elem.getFirstImage()})
-              .filter(function(elem) {return !!elem})[0]
+
+            return this.toArray().reduce(function(image, fragment) {
+                if (image) return image;
+                else {
+                    return fragment.getFirstImage()
+                }
+            }, null)
         }
     };
 
@@ -965,14 +970,7 @@
         getFirstImage: function() {
             var fragment = this.value
             if(fragment instanceof  Global.Prismic.Fragments.Group) {
-                var groupFirstImage = fragment.toArray().reduce(function (firstImage, withFragments) {
-                    if (firstImage) {
-                        return firstImage;
-                    } else {
-                        return withFragments.getFirstImage()
-                    }
-                })
-                return groupFirstImage;
+                return fragment.getFirstImage();
 
             } else if (fragment instanceof  Global.Prismic.Fragments.StructuredText) {
                 return fragment.getFirstImage()
@@ -1030,10 +1028,8 @@
             return output;
         },
         getFirstImage: function() {
-            var images = this.value.filter(function(slice) {
-                return !!slice.getFirstImage()
-            })
-            return images[0]
+            return this.value.map(function(slice) {return slice.getFirstImage()})
+              .filter(function(image) {return !!image})[0]
         }
     };
 

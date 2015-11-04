@@ -70,13 +70,21 @@
 
         getFirstImage: function() {
             var fragments = this.fragments
-            var firstImage = Object.keys(fragments).reduce(function(firstImage, key) {
-                if (firstImage) {
-                    return firstImage;
+
+            var firstImage = Object.keys(fragments).reduce(function(image, key) {
+                if (image) {
+                    return image;
                 } else {
-                    this.getImage(fragments[key])
+                    var element = fragments[key]
+                    if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                        return element.getFirstImage()
+
+                    } else if (element instanceof Global.Prismic.Fragments.Image) {
+                        return element
+
+                    } else return null;
                 }
-            })
+            }, null)
             return firstImage;
         },
 
