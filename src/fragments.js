@@ -656,11 +656,28 @@
         },
 
         getFirstImage: function() {
-
             return this.toArray().reduce(function(image, fragment) {
                 if (image) return image;
                 else {
                     return fragment.getFirstImage();
+                }
+            }, null);
+        },
+
+        getFirstTitle: function() {
+            return this.toArray().reduce(function(st, fragment) {
+                if (st) return st;
+                else {
+                    return fragment.getFirstTitle();
+                }
+            }, null);
+        },
+
+        getFirstParagraph: function() {
+            return this.toArray().reduce(function(st, fragment) {
+                if (st) return st;
+                else {
+                    return fragment.getFirstParagraph();
                 }
             }, null);
         }
@@ -974,6 +991,22 @@
             } else if (fragment instanceof  Global.Prismic.Fragments.Image) {
                 return fragment;
             } else return null;
+        },
+
+        getFirstTitle: function() {
+            var fragment = this.value;
+            if(typeof fragment.getFirstTitle === "function") {
+                return fragment.getFirstTitle();
+            } else if (fragment instanceof  Global.Prismic.Fragments.StructuredText) {
+                return fragment.getTitle();
+            } else return null;
+        },
+
+        getFirstParagraph: function() {
+            var fragment = this.value;
+            if(typeof fragment.getFirstParagraph === "function") {
+                return fragment.getFirstParagraph();
+            } else return null;
         }
     };
 
@@ -1023,9 +1056,20 @@
             }
             return output;
         },
+
         getFirstImage: function() {
             return this.value.map(function(slice) {return slice.getFirstImage();})
               .filter(function(image) {return !!image;})[0];
+        },
+
+        getFirstTitle: function() {
+            return this.value.map(function(slice) {return slice.getFirstTitle();})
+              .filter(function(title) {return !!title;})[0];
+        },
+
+        getFirstParagraph: function() {
+            return this.value.map(function(slice) {return slice.getFirstParagraph();})
+              .filter(function(paragraph) {return !!paragraph;})[0];
         }
     };
 

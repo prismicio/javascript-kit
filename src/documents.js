@@ -88,6 +88,38 @@
             return firstImage;
         },
 
+        getFirstTitle: function() {
+            var fragments = this.fragments;
+
+            var firstTitle = Object.keys(fragments).reduce(function(st, key) {
+                if (st) {
+                    return st;
+                } else {
+                    var element = fragments[key];
+                    if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                        return element.getTitle();
+                    } else return null;
+                }
+            }, null);
+            return firstTitle;
+        },
+
+        getFirstParagraph: function() {
+            var fragments = this.fragments;
+
+            var firstParagraph = Object.keys(fragments).reduce(function(st, key) {
+                if (st) {
+                    return st;
+                } else {
+                    var element = fragments[key];
+                    if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                        return element.getFirstParagraph();
+                    } else return null;
+                }
+            }, null);
+            return firstParagraph;
+        },
+
         /**
          * Gets the view within the image fragment in the current Document object, for further manipulation.
          *
