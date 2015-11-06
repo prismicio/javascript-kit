@@ -300,7 +300,7 @@
                 }
             });
 
-            // Testing get First text on doc level.
+            // Testing get First title on doc level.
             assert.equal(doc.getFirstTitle().text, "As seen by fine pastry as a field");
 
             var slices = doc.getSliceZone('article.blocks');
