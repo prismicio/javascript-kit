@@ -1058,18 +1058,30 @@
         },
 
         getFirstImage: function() {
-            return this.value.map(function(slice) {return slice.getFirstImage();})
-              .filter(function(image) {return !!image;})[0];
+            return this.value.reduce(function(image, slice) {
+                if (image) return image;
+                else {
+                    return slice.getFirstImage();
+                }
+            }, null);
         },
 
         getFirstTitle: function() {
-            return this.value.map(function(slice) {return slice.getFirstTitle();})
-              .filter(function(title) {return !!title;})[0];
+            return this.value.reduce(function(text, slice) {
+                if (text) return text;
+                else {
+                    return slice.getFirstTitle();
+                }
+            }, null);
         },
 
         getFirstParagraph: function() {
-            return this.value.map(function(slice) {return slice.getFirstParagraph();})
-              .filter(function(paragraph) {return !!paragraph;})[0];
+            return this.value.reduce(function(paragraph, slice) {
+                if (paragraph) return paragraph;
+                else {
+                    return slice.getFirstParagraph();
+                }
+            }, null);
         }
     };
 
