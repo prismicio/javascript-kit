@@ -190,10 +190,13 @@
                 }
             });
 
+            // Testing get First Image on doc level.
+            assert.equal(doc.getFirstImage().getView('main').url, "https://wroomdev.s3.amazonaws.com/toto/ce3f52b933c4934a13422e09ed0ff6ad03a29621_hsf_evilsquall.jpg");
 
+
+            // Testing get First Image on slice level.
             var slices = doc.getSliceZone('article.blocks');
             assert.equal(slices.getFirstImage().getView('main').url, "https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall_first_in_slice.jpg");
-
 
             var slicesWithSingleElem = sliceSingleElem.getSliceZone('article.blocks');
             assert.equal(slicesWithSingleElem.getFirstImage().getView('main').url, "https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall_slice_single.jpg");
@@ -297,6 +300,8 @@
                 }
             });
 
+            // Testing get First text on doc level.
+            assert.equal(doc.getFirstTitle().text, "As seen by fine pastry as a field");
 
             var slices = doc.getSliceZone('article.blocks');
             assert.equal(slices.getFirstTitle().text, "As seen by fine pastry as a field");
@@ -405,10 +410,11 @@
                 }
             });
 
+            // Testing get First paragraph on doc level.
+            assert.equal(doc.getFirstParagraph().text, "C'est un bloc content");
 
             var slices = doc.getSliceZone('article.blocks');
             assert.equal(slices.getFirstParagraph().text, "C'est un bloc content");
-
             var slicesWithSingleElem = sliceSingleElem.getSliceZone('article.blocks');
             assert.equal(slicesWithSingleElem.getFirstParagraph().text, "C'est un bloc content");
             done();

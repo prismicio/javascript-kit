@@ -76,9 +76,8 @@
                     return image;
                 } else {
                     var element = fragments[key];
-                    if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                    if(typeof element.getFirstImage === "function") {
                         return element.getFirstImage();
-
                     } else if (element instanceof Global.Prismic.Fragments.Image) {
                         return element;
 
@@ -96,7 +95,9 @@
                     return st;
                 } else {
                     var element = fragments[key];
-                    if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                    if(typeof element.getFirstTitle === "function") {
+                        return element.getFirstTitle();
+                    } else if (element instanceof Global.Prismic.Fragments.StructuredText) {
                         return element.getTitle();
                     } else return null;
                 }
@@ -112,7 +113,7 @@
                     return st;
                 } else {
                     var element = fragments[key];
-                    if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                    if(typeof element.getFirstParagraph === "function") {
                         return element.getFirstParagraph();
                     } else return null;
                 }
