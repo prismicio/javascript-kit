@@ -76,9 +76,8 @@
                     return image;
                 } else {
                     var element = fragments[key];
-                    if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                    if(typeof element.getFirstImage === "function") {
                         return element.getFirstImage();
-
                     } else if (element instanceof Global.Prismic.Fragments.Image) {
                         return element;
 
@@ -86,6 +85,40 @@
                 }
             }, null);
             return firstImage;
+        },
+
+        getFirstTitle: function() {
+            var fragments = this.fragments;
+
+            var firstTitle = Object.keys(fragments).reduce(function(st, key) {
+                if (st) {
+                    return st;
+                } else {
+                    var element = fragments[key];
+                    if(typeof element.getFirstTitle === "function") {
+                        return element.getFirstTitle();
+                    } else if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                        return element.getTitle();
+                    } else return null;
+                }
+            }, null);
+            return firstTitle;
+        },
+
+        getFirstParagraph: function() {
+            var fragments = this.fragments;
+
+            var firstParagraph = Object.keys(fragments).reduce(function(st, key) {
+                if (st) {
+                    return st;
+                } else {
+                    var element = fragments[key];
+                    if(typeof element.getFirstParagraph === "function") {
+                        return element.getFirstParagraph();
+                    } else return null;
+                }
+            }, null);
+            return firstParagraph;
         },
 
         /**
