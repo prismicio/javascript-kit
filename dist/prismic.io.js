@@ -1301,6 +1301,60 @@ Global.Prismic.LRUCache = LRUCache;
             });
         },
 
+
+        getFirstImage: function() {
+            var fragments = this.fragments;
+
+            var firstImage = Object.keys(fragments).reduce(function(image, key) {
+                if (image) {
+                    return image;
+                } else {
+                    var element = fragments[key];
+                    if(typeof element.getFirstImage === "function") {
+                        return element.getFirstImage();
+                    } else if (element instanceof Global.Prismic.Fragments.Image) {
+                        return element;
+
+                    } else return null;
+                }
+            }, null);
+            return firstImage;
+        },
+
+        getFirstTitle: function() {
+            var fragments = this.fragments;
+
+            var firstTitle = Object.keys(fragments).reduce(function(st, key) {
+                if (st) {
+                    return st;
+                } else {
+                    var element = fragments[key];
+                    if(typeof element.getFirstTitle === "function") {
+                        return element.getFirstTitle();
+                    } else if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                        return element.getTitle();
+                    } else return null;
+                }
+            }, null);
+            return firstTitle;
+        },
+
+        getFirstParagraph: function() {
+            var fragments = this.fragments;
+
+            var firstParagraph = Object.keys(fragments).reduce(function(st, key) {
+                if (st) {
+                    return st;
+                } else {
+                    var element = fragments[key];
+                    if(typeof element.getFirstParagraph === "function") {
+                        return element.getFirstParagraph();
+                    } else return null;
+                }
+            }, null);
+            return firstParagraph;
+        },
+
         /**
          * Gets the view within the image fragment in the current Document object, for further manipulation.
          *
@@ -1645,10 +1699,8 @@ Global.Prismic.LRUCache = LRUCache;
             }
 
             if (Array.isArray(this.fragments[name])) {
-              if (name === 'blog-post.author') console.log("yes array");
                 return this.fragments[name];
             } else {
-              if (name === 'blog-post.author') console.log("no narray: ", this.fragments[name]);
                 return [this.fragments[name]];
             }
 
@@ -2412,6 +2464,33 @@ Global.Prismic.LRUCache = LRUCache;
                 output += this.value[i].asText(linkResolver) + '\n';
             }
             return output;
+        },
+
+        getFirstImage: function() {
+            return this.toArray().reduce(function(image, fragment) {
+                if (image) return image;
+                else {
+                    return fragment.getFirstImage();
+                }
+            }, null);
+        },
+
+        getFirstTitle: function() {
+            return this.toArray().reduce(function(st, fragment) {
+                if (st) return st;
+                else {
+                    return fragment.getFirstTitle();
+                }
+            }, null);
+        },
+
+        getFirstParagraph: function() {
+            return this.toArray().reduce(function(st, fragment) {
+                if (st) return st;
+                else {
+                    return fragment.getFirstParagraph();
+                }
+            }, null);
         }
     };
 
@@ -2708,9 +2787,38 @@ Global.Prismic.LRUCache = LRUCache;
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function() {
+        asText: function() {
             return this.value.asText();
-         }
+        },
+
+        /**
+         * Get the first Image in slice.
+         * @returns {object}
+         */
+        getFirstImage: function() {
+            var fragment = this.value;
+            if(typeof fragment.getFirstImage === "function") {
+                return fragment.getFirstImage();
+            } else if (fragment instanceof  Global.Prismic.Fragments.Image) {
+                return fragment;
+            } else return null;
+        },
+
+        getFirstTitle: function() {
+            var fragment = this.value;
+            if(typeof fragment.getFirstTitle === "function") {
+                return fragment.getFirstTitle();
+            } else if (fragment instanceof  Global.Prismic.Fragments.StructuredText) {
+                return fragment.getTitle();
+            } else return null;
+        },
+
+        getFirstParagraph: function() {
+            var fragment = this.value;
+            if(typeof fragment.getFirstParagraph === "function") {
+                return fragment.getFirstParagraph();
+            } else return null;
+        }
     };
 
     /**
@@ -2729,6 +2837,7 @@ Global.Prismic.LRUCache = LRUCache;
                 this.value.push(new Slice(sliceType, label, fragment));
             }
         }
+        this.slices = this.value;
     }
 
     SliceZone.prototype = {
@@ -2751,14 +2860,40 @@ Global.Prismic.LRUCache = LRUCache;
          *
          * @returns {string} - basic text version of the fragment
          */
-         asText: function() {
+        asText: function() {
             var output = "";
             for (var i = 0; i < this.value.length; i++) {
                 output += this.value[i].asText() + '\n';
             }
             return output;
-         }
+        },
 
+        getFirstImage: function() {
+            return this.value.reduce(function(image, slice) {
+                if (image) return image;
+                else {
+                    return slice.getFirstImage();
+                }
+            }, null);
+        },
+
+        getFirstTitle: function() {
+            return this.value.reduce(function(text, slice) {
+                if (text) return text;
+                else {
+                    return slice.getFirstTitle();
+                }
+            }, null);
+        },
+
+        getFirstParagraph: function() {
+            return this.value.reduce(function(paragraph, slice) {
+                if (paragraph) return paragraph;
+                else {
+                    return slice.getFirstParagraph();
+                }
+            }, null);
+        }
     };
 
     /**
@@ -2903,6 +3038,7 @@ Global.Prismic.LRUCache = LRUCache;
     }
 
     Global.Prismic.Fragments = {
+        Embed: Embed,
         Image: ImageEl,
         ImageView: ImageView,
         Text: Text,
@@ -2949,6 +3085,16 @@ Global.Prismic.LRUCache = LRUCache;
         at: function(fragment, value) { return ["at", fragment, value]; },
 
         /**
+         * Build an "not" predicate: inequality of a fragment to a value.
+         *
+         * @example Predicates.not("document.type", "article")
+         * @param fragment {String}
+         * @param value {String}
+         * @returns {Array} an array corresponding to the predicate
+         */
+        not: function(fragment, value) { return ["not", fragment, value]; },
+
+        /**
          * Build a "missing" predicate: documents where the requested field is empty
          *
          * @example Predicates.missing("my.blog-post.author")
@@ -2975,6 +3121,16 @@ Global.Prismic.LRUCache = LRUCache;
          * @returns {Array} an array corresponding to the predicate
          */
         any: function(fragment, values) { return ["any", fragment, values]; },
+
+        /**
+         * Build an "in" predicate: equality of a fragment to a value.
+         *
+         * @example Predicates.in("my.product.price", [4, 5])
+         * @param fragment {String}
+         * @param values {Array}
+         * @returns {Array} an array corresponding to the predicate
+         */
+        in: function(fragment, values) { return ["in", fragment, values]; },
 
         /**
          * Build a "fulltext" predicate: fulltext search in a fragment.
@@ -3279,4 +3435,4 @@ Global.Prismic.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.3.3';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.3.4';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));

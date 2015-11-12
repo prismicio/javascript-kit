@@ -20,6 +20,16 @@
         at: function(fragment, value) { return ["at", fragment, value]; },
 
         /**
+         * Build an "not" predicate: inequality of a fragment to a value.
+         *
+         * @example Predicates.not("document.type", "article")
+         * @param fragment {String}
+         * @param value {String}
+         * @returns {Array} an array corresponding to the predicate
+         */
+        not: function(fragment, value) { return ["not", fragment, value]; },
+
+        /**
          * Build a "missing" predicate: documents where the requested field is empty
          *
          * @example Predicates.missing("my.blog-post.author")
@@ -46,6 +56,16 @@
          * @returns {Array} an array corresponding to the predicate
          */
         any: function(fragment, values) { return ["any", fragment, values]; },
+
+        /**
+         * Build an "in" predicate: equality of a fragment to a value.
+         *
+         * @example Predicates.in("my.product.price", [4, 5])
+         * @param fragment {String}
+         * @param values {Array}
+         * @returns {Array} an array corresponding to the predicate
+         */
+        in: function(fragment, values) { return ["in", fragment, values]; },
 
         /**
          * Build a "fulltext" predicate: fulltext search in a fragment.
