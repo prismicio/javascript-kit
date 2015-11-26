@@ -30,7 +30,7 @@
     "url": "http://github.com/prismicio/javascript-kit.git"
   },
   "main": "dist/prismic.io",
-  "scripts:": {
+  "scripts": {
     "test": "gulp test"
   }
 }
