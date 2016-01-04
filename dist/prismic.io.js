@@ -323,6 +323,84 @@
         },
 
         /**
+         * Query the repository
+         * @param {string|array|Predicate} the query itself
+         * @param {object} additional parameters
+				 * @param {function} callback(err, response)
+         */
+        query: function(q, options, callback) {
+            var form = this.form('everything');
+            for (var key in options) {
+                form = form.set(key, options[key]);
+            }
+            if (!options['ref']) {
+                form = form.ref(this.master());
+            }
+            return form.query(q).submit(callback);
+        },
+
+				/**
+				 * Retrieve the document with the given id
+				 * @param {string} id
+         * @param {object} additional parameters
+				 * @param {function} callback(err, response)
+				 */
+				getByID: function(id, options, callback) {
+            var Predicates = Global.Prismic.Predicates;
+						return this.query(Predicates.at('document.id', id), options, function(err, response) {
+								if (response && response.results.length > 0) {
+										callback(err, response.results[0]);
+								} else {
+										callback(err, null);
+								}
+						});
+				},
+
+				/**
+				 * Retrieve multiple documents from an array of id
+				 * @param {array} ids
+         * @param {object} additional parameters
+				 * @param {function} callback(err, response)
+				 */
+				getByIDs: function(ids, options, callback) {
+						return this.query(['in', 'document.id', ids], options, callback);
+				},
+
+				/**
+				 * Retrieve the document with the given uid
+				 * @param {string} type the custom type of the document
+				 * @param {string} uid
+         * @param {object} additional parameters
+				 * @param {function} callback(err, response)
+				 */
+				getByUID: function(type, uid, options, callback) {
+            var Predicates = Global.Prismic.Predicates;
+						return this.query(Predicates.at('my.'+type+'.uid', uid), options, function(err, response) {
+								if (response && response.results.length > 0) {
+										callback(err, response.results[0]);
+								} else {
+										callback(err, null);
+								}
+						});
+				},
+
+				/**
+				 * Retrieve the document with the given uid
+				 * @param {string} type the custom type of the document
+				 * @param {string} uid
+         * @param {object} additional parameters
+				 * @param {function} callback(err, response)
+				 */
+				getBookmark: function(bookmark, options, callback) {
+						var id = this.bookmarks[bookmark];
+						if (id) {
+								this.getById(this.bookmarks[bookmark], options, callback);
+						} else {
+								callback(new Error("Error retrieving bookmarked id"));
+						}
+				},
+
+        /**
          * Return the URL to display a given preview
          * @param {string} token as received from Prismic server to identify the content to preview
          * @param {function} linkResolver the link resolver to build URL for your site
@@ -496,7 +574,12 @@
             if (typeof query === 'string') {
                 return this.set("q", query);
             } else {
-                var predicates = [].slice.apply(arguments); // Convert to a real JS array
+                var predicates;
+                if (query.constructor === Array && query.length > 0 && query[0].constructor === Array) {
+                    predicates = query;
+                } else {
+                    predicates = [].slice.apply(arguments); // Convert to a real JS array
+                }
                 var stringQueries = [];
                 predicates.forEach(function (predicate) {
                     var firstArg = (predicate[1].indexOf("my.") === 0 || predicate[1].indexOf("document") === 0) ? predicate[1]
@@ -3435,4 +3518,4 @@ Global.Prismic.LRUCache = LRUCache;
 
 }(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
 
-(function (Global, undefined) {Global.Prismic.version = '1.3.4';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global, undefined) {Global.Prismic.version = '1.4.0';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
