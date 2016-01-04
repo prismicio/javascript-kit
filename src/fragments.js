@@ -1,6 +1,8 @@
-(function (Global, undefined) {
 
-    "use strict";
+"use strict";
+
+import { WithFragments } from './documents';
+
 
     /**
      * Embodies a plain text fragment (beware: not a structured text)
@@ -86,7 +88,7 @@
         this.isBroken = data.isBroken;
     }
 
-    DocumentLink.prototype = Object.create(Global.Prismic.WithFragments.prototype);
+    DocumentLink.prototype = Object.create(WithFragments.prototype);
 
     /**
      * Turns the fragment into a useable HTML version of it.
@@ -1226,7 +1228,7 @@
         return "<!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;
     }
 
-    Global.Prismic.Fragments = {
+    export default {
         Embed: Embed,
         Image: ImageEl,
         ImageView: ImageView,
@@ -1250,4 +1252,3 @@
         insertSpans: insertSpans
     };
 
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));

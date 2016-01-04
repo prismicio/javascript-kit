@@ -1,24 +1,16 @@
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
-    concat = require('gulp-concat'),
+    babel = require('babelify'),
+    browserify = require('browserify'),
     uglify = require('gulp-uglify'),
     mocha = require('gulp-mocha-phantomjs'),
     jsdoc = require('gulp-jsdoc'),
     jshint = require('gulp-jshint'),
     gist = require('gulp-gist'),
+    sourcemaps = require('gulp-sourcemaps'),
+    source = require('vinyl-source-stream'),
+    buffer = require('vinyl-buffer'),
     deploy = require("gulp-gh-pages");
-
-var SOURCES = [
-    'src/polyfill.js',
-    'src/api.js',
-    'src/lru.js',
-    'src/cache.js',
-    'src/utils.js',
-    'src/documents.js',
-    'src/fragments.js',
-    'src/predicates.js',
-    'src/experiments.js'
-];
 
 var pkg = require('./package.json');
 
@@ -42,28 +34,37 @@ gulp.task('version', function () {
         .pipe(gulp.dest('src/'));
 });
 
-gulp.task('concat', ['version'], function() {
-    return gulp.src(SOURCES.concat('src/version.js'))
-        .pipe(concat('prismic.io.js'))
-        .pipe(gulp.dest('dist'));
+gulp.task('build', function () {
+  browserify('src/api.js', {debug: true })
+    .transform(babel, {presets: ["es2015"]})
+    .bundle()
+    .on('error', function(err) {
+      console.log(err.message);
+      process.exit(1);
+    })
+    .pipe(source('./prismic.io.js'))
+    .pipe(buffer())
+    .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('minify', ['version'], function() {
-    return gulp.src(SOURCES.concat('src/version.js'))
-        .pipe(concat('prismic.io.min.js'))
-        .pipe(uglify())
-        .pipe(gulp.dest('dist'));
+gulp.task('minify', function() {
+  browserify('src/api.js', {debug: true })
+    .transform(babel, {presets: ["es2015"]})
+    .bundle()
+    .on('error', function(err) {
+      console.log(err.message);
+      process.exit(1);
+    })
+    .pipe(source('./prismic.io.min.js'))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({loadMaps: true})) // loads map from browserify file
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./')) // writes .map file
+    .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('copy', ['version'], function() {
-    return gulp.src(SOURCES.concat('src/version.js'))
-        .pipe(concat('prismic.io-%VERSION%.min.js'.replace('%VERSION%', pkg.version)))
-        .pipe(uglify())
-        .pipe(gulp.dest('dist'));
-});
-
-gulp.task('doc', function() {
-    return gulp.src(SOURCES.concat(['README.md']))
+gulp.task('doc', ['build'], function() {
+    return gulp.src('./dist/prismic.io.js')
         .pipe(jsdoc('doc'));
 });
 
@@ -77,7 +78,7 @@ gulp.task('deploy:gist', ['test:doc'], function (cb) {
         .pipe(gist());
 });
 
-gulp.task('dist', ['doc', 'concat', 'minify', 'copy']);
+gulp.task('dist', ['build', 'minify']);
 
 /**
  * Tests
@@ -94,28 +95,28 @@ gulp.task('jshint', function() {
         .pipe(jshint.reporter('fail'));
 });
 
-gulp.task('test:int', function() {
-    return gulp.src('./test/test.html')
+gulp.task('test:int', ['build'], function() {
+    return gulp.src('./test/test.js')
         .pipe(mocha(mocha_options));
 });
 
-gulp.task('test:unit', function() {
-    return gulp.src('./test/unit.html')
+gulp.task('test:unit', ['build'], function() {
+    return gulp.src('./test/unit.js')
         .pipe(mocha(mocha_options));
 });
 
-gulp.task('test:fragments', function() {
-    return gulp.src('./test/fragments.html')
+gulp.task('test:fragments', ['build'], function() {
+    return gulp.src('./test/fragments.js')
         .pipe(mocha(mocha_options));
 });
 
-gulp.task('test:doc', function() {
-    return gulp.src('./test/doc.html')
+gulp.task('test:doc', ['build'], function() {
+    return gulp.src('./test/doc.js')
         .pipe(mocha(mocha_options));
 });
 
 
-gulp.task('test', ['jshint', 'test:int', 'test:unit', 'test:doc', 'test:fragments']);
+gulp.task('test', ['test:int', 'test:unit', 'test:doc', 'test:fragments']);
 
 /**
  * Default task

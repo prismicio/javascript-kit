@@ -1,4 +1,3 @@
-(function (Global, undefined) {
 
     "use strict";
 
@@ -7,7 +6,7 @@
      * @namespace
      * @alias Predicates
      */
-    var predicates = {
+    const predicates = {
 
         /**
          * Build an "at" predicate: equality of a fragment to a value.
@@ -280,6 +279,5 @@
 
     };
 
-    Global.Prismic.Predicates = predicates;
+export default predicates;
 
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));

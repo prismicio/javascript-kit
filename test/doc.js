@@ -1,4 +1,5 @@
-(function(Prismic) {
+var Prismic = require('../dist/prismic.io.js');
+var chai = require('chai');
 
     // Test snippets for the documentation, and keep them in sync with Gist
 
@@ -565,6 +566,3 @@
 
     });
 
-
-
-}(window.Prismic));

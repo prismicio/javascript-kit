@@ -1,4 +1,3 @@
-(function (Global, undefined) {
 
     "use strict";
 
@@ -184,9 +183,8 @@
         };
     };
 
-    Global.Prismic.Utils = {
+    export default {
         MAX_CONNECTIONS: 20, // Number of maximum simultaneous connections to the prismic server
         request: request
     };
 
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));

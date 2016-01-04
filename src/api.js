@@ -1,119 +1,124 @@
-(function (Global, undefined) {
+"use strict";
 
-    "use strict";
+import Experiments from './experiments';
+import Predicates from './predicates';
+import Utils from './utils';
+import Fragments from './fragments';
+import ApiCache from './cache.js';
+import { Document, GroupDoc } from './documents';
 
-    /**
-     * The kit's main entry point; initialize your API like this: Prismic.Api(url, callback, accessToken, maybeRequestHandler)
-     *
-     * @global
-     * @alias Api
-     * @constructor
-     * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
-     * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
-     * @param {string} maybeAccessToken - The accessToken for an OAuth2 connection
-     * @param {function} maybeRequestHandler - Environment specific HTTP request handling function
-     * @param {object} maybeApiCache - A cache object with get/set functions for caching API responses
-     * @param {int} maybeApiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
-     * @returns {Api} - The Api object that can be manipulated
-     */
-    var prismic = function(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
-        var api = new prismic.fn.init(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL);
-        //Use cached api data if available
-        api.get(function (err, data) {
-            if (callback && err) { return callback(err); }
+/**
+ * The kit's main entry point; initialize your API like this: Prismic.Api(url, callback, accessToken, maybeRequestHandler)
+ *
+ * @global
+ * @alias Api
+ * @constructor
+ * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
+ * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
+ * @param {string} maybeAccessToken - The accessToken for an OAuth2 connection
+ * @param {function} maybeRequestHandler - Environment specific HTTP request handling function
+ * @param {object} maybeApiCache - A cache object with get/set functions for caching API responses
+ * @param {int} maybeApiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
+ * @returns {Api} - The Api object that can be manipulated
+ */
+var prismic = function(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+  var api = new prismic.fn.init(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL);
+  //Use cached api data if available
+  api.get(function (err, data) {
+    if (callback && err) { return callback(err); }
 
-            if (data) {
-                api.data = data;
-                api.bookmarks = data.bookmarks;
-                api.experiments = new Global.Prismic.Experiments(data.experiments);
-            }
+    if (data) {
+      api.data = data;
+      api.bookmarks = data.bookmarks;
+      api.experiments = new Experiments(data.experiments);
+    }
 
-            if (callback) { return callback(null, api); }
+    if (callback) { return callback(null, api); }
+  });
+
+  return api;
+};
+// note that the prismic variable is later affected as "Api" while exporting
+
+// Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
+prismic.fn = prismic.prototype = {
+
+  // Predicates
+  AT: "at",
+  ANY: "any",
+  SIMILAR: "similar",
+  FULLTEXT: "fulltext",
+  NUMBER: {
+    GT: "number.gt",
+    LT: "number.lt"
+  },
+  DATE: {
+    // Other date operators are available: see the documentation.
+    AFTER: "date.after",
+    BEFORE: "date.before",
+    BETWEEN: "date.between"
+  },
+
+  // Fragment: usable as the second element of a query array on most predicates (except SIMILAR).
+  // You can also use "my.*" for your custom fields.
+  DOCUMENT: {
+    ID: "document.id",
+    TYPE: "document.type",
+    TAGS: "document.tags"
+  },
+
+  constructor: prismic,
+  data: null,
+
+  /**
+   * Fetches data used to construct the api client, from cache if it's
+   * present, otherwise from calling the prismic api endpoint (which is
+   * then cached).
+   *
+   * @param {function} callback - Callback to receive the data
+   */
+  get: function(callback) {
+    var self = this;
+    var cacheKey = this.apiCacheKey;
+
+    this.apiCache.get(cacheKey, function (err, value) {
+      if (err) { return callback(err); }
+      if (value) { return callback(null, value); }
+
+      self.requestHandler(self.url, function(err, data, xhr, ttl) {
+        if (err) { return callback(err, null, xhr); }
+
+        var parsed = self.parse(data);
+        ttl = ttl || self.apiDataTTL;
+
+        self.apiCache.set(cacheKey, parsed, ttl, function (err) {
+          if (err) { return callback(err, null, xhr); }
+          return callback(null, parsed, xhr);
         });
+      });
+    });
+  },
 
-        return api;
-    };
-    // note that the prismic variable is later affected as "Api" while exporting
+  /**
+   * Cleans api data from the cache and fetches an up to date copy.
+   *
+   * @param {function} callback - Optional callback function that is called after the data has been refreshed
+   */
+  refresh: function (callback) {
+    var self = this;
+    var cacheKey = this.apiCacheKey;
+ 
+    this.apiCache.remove(cacheKey, function (err) {
+      if (callback && err) { return callback(err); }
+      if (!callback && err) { throw err; }
 
-    // Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
-    prismic.fn = prismic.prototype = {
-
-        // Predicates
-        AT: "at",
-        ANY: "any",
-        SIMILAR: "similar",
-        FULLTEXT: "fulltext",
-        NUMBER: {
-            GT: "number.gt",
-            LT: "number.lt"
-        },
-        DATE: {
-            // Other date operators are available: see the documentation.
-            AFTER: "date.after",
-            BEFORE: "date.before",
-            BETWEEN: "date.between"
-        },
-
-        // Fragment: usable as the second element of a query array on most predicates (except SIMILAR).
-        // You can also use "my.*" for your custom fields.
-        DOCUMENT: {
-            ID: "document.id",
-            TYPE: "document.type",
-            TAGS: "document.tags"
-        },
-
-        constructor: prismic,
-        data: null,
-
-        /**
-         * Fetches data used to construct the api client, from cache if it's
-         * present, otherwise from calling the prismic api endpoint (which is
-         * then cached).
-         *
-         * @param {function} callback - Callback to receive the data
-         */
-        get: function(callback) {
-            var self = this;
-            var cacheKey = this.apiCacheKey;
-
-            this.apiCache.get(cacheKey, function (err, value) {
-                if (err) { return callback(err); }
-                if (value) { return callback(null, value); }
-
-                self.requestHandler(self.url, function(err, data, xhr, ttl) {
-                    if (err) { return callback(err, null, xhr); }
-
-                    var parsed = self.parse(data);
-                    ttl = ttl || self.apiDataTTL;
-
-                    self.apiCache.set(cacheKey, parsed, ttl, function (err) {
-                        if (err) { return callback(err, null, xhr); }
-                        return callback(null, parsed, xhr);
-                    });
-                });
-            });
-        },
-
-        /**
-         * Cleans api data from the cache and fetches an up to date copy.
-         *
-         * @param {function} callback - Optional callback function that is called after the data has been refreshed
-         */
-        refresh: function (callback) {
-            var self = this;
-            var cacheKey = this.apiCacheKey;
-
-            this.apiCache.remove(cacheKey, function (err) {
-                if (callback && err) { return callback(err); }
-                if (!callback && err) { throw err; }
-
-                self.get(function (err, data, xhr) {
+self.get(function (err, data, xhr) {
                     if (callback && err) { return callback(err); }
                     if (!callback && err) { throw err; }
 
                     self.data = data;
                     self.bookmarks = data.bookmarks;
-                    self.experiments = new Global.Prismic.Experiments(data.experiments);
+                    self.experiments = new Experiments(data.experiments);
 
                     if (callback) { return callback(); }
                 });
@@ -207,7 +212,7 @@
             this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
             this.accessToken = accessToken;
             this.apiCache = maybeApiCache || globalCache();
-            this.requestHandler = maybeRequestHandler || Global.Prismic.Utils.request();
+            this.requestHandler = maybeRequestHandler || Utils.request();
             this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
             this.apiDataTTL = maybeApiDataTTL || 5;
             return this;
@@ -765,25 +770,26 @@
     }
     Ref.prototype = {};
 
-    function globalCache() {
-        var g;
-        if (typeof global == 'object') {
-            g = global; // NodeJS
-        } else {
-            g = window; // browser
-        }
-        if (!g.prismicCache) {
-            g.prismicCache = new Global.Prismic.ApiCache();
-        }
-        return g.prismicCache;
-    }
+function globalCache() {
+  var g;
+  if (typeof global == 'object') {
+    g = global; // NodeJS
+  } else {
+    g = window; // browser
+  }
+  if (!g.prismicCache) {
+    g.prismicCache = new Global.Prismic.ApiCache();
+  }
+  return g.prismicCache;
+}
 
-    // -- Export Globally
+module.exports = {
+  experimentCookie: "io.prismic.experiment",
+  previewCookie: "io.prismic.preview",
+  Api: prismic,
+  Experiments,
+  Predicates,
+  Fragments,
+  ApiCache
+};
 
-    Global.Prismic = {
-        experimentCookie: "io.prismic.experiment",
-        previewCookie: "io.prismic.preview",
-        Api: prismic
-    };
-
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));

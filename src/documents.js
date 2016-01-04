@@ -1,6 +1,6 @@
-(function (Global, undefined) {
+"use strict";
 
-    "use strict";
+import Fragments from './fragments';
 
     /**
      * Functions to access fragments: superclass for Document and Doc (from Group), not supposed to be created directly
@@ -42,10 +42,10 @@
          */
         getImage: function(fragment) {
             var img = this.get(fragment);
-            if (img instanceof Global.Prismic.Fragments.Image) {
+            if (img instanceof Fragments.Image) {
                 return img;
             }
-            if (img instanceof Global.Prismic.Fragments.StructuredText) {
+            if (img instanceof Fragments.StructuredText) {
                 // find first image in st.
                 return img;
             }
@@ -57,10 +57,10 @@
             var images = this.getAll(fragment);
 
             return images.map(function (image) {
-                if (image instanceof Global.Prismic.Fragments.Image) {
+                if (image instanceof Fragments.Image) {
                     return image;
                 }
-                if (image instanceof Global.Prismic.Fragments.StructuredText) {
+                if (image instanceof Fragments.StructuredText) {
                     throw new Error("Not done.");
                 }
                 return null;
@@ -78,7 +78,7 @@
                     var element = fragments[key];
                     if(typeof element.getFirstImage === "function") {
                         return element.getFirstImage();
-                    } else if (element instanceof Global.Prismic.Fragments.Image) {
+                    } else if (element instanceof Fragments.Image) {
                         return element;
 
                     } else return null;
@@ -97,7 +97,7 @@
                     var element = fragments[key];
                     if(typeof element.getFirstTitle === "function") {
                         return element.getFirstTitle();
-                    } else if (element instanceof Global.Prismic.Fragments.StructuredText) {
+                    } else if (element instanceof Fragments.StructuredText) {
                         return element.getTitle();
                     } else return null;
                 }
@@ -131,10 +131,10 @@
          */
         getImageView: function(name, view) {
             var fragment = this.get(name);
-            if (fragment instanceof Global.Prismic.Fragments.Image) {
+            if (fragment instanceof Fragments.Image) {
                 return fragment.getView(view);
             }
-            if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
+            if (fragment instanceof Fragments.StructuredText) {
                 for(var i=0; i<fragment.blocks.length; i++) {
                     if(fragment.blocks[i].type == 'image') {
                         return fragment.blocks[i];
@@ -162,7 +162,7 @@
         getTimestamp: function(name) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Global.Prismic.Fragments.Timestamp) {
+            if (fragment instanceof Fragments.Timestamp) {
                 return fragment.value;
             }
         },
@@ -178,7 +178,7 @@
         getDate: function(name) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Global.Prismic.Fragments.Date) {
+            if (fragment instanceof Fragments.Date) {
                 return fragment.value;
             }
         },
@@ -210,7 +210,7 @@
         getText: function(name, after) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
+            if (fragment instanceof Fragments.StructuredText) {
                 return fragment.blocks.map(function(block) {
                     if(block.text) {
                         return block.text + (after ? after : '');
@@ -218,25 +218,25 @@
                 }).join('\n');
             }
 
-            if (fragment instanceof Global.Prismic.Fragments.Text) {
+            if (fragment instanceof Fragments.Text) {
                 if(fragment.value) {
                     return fragment.value + (after ? after : '');
                 }
             }
 
-            if (fragment instanceof Global.Prismic.Fragments.Number) {
+            if (fragment instanceof Fragments.Number) {
                 if(fragment.value) {
                     return fragment.value + (after ? after : '');
                 }
             }
 
-            if (fragment instanceof Global.Prismic.Fragments.Select) {
+            if (fragment instanceof Fragments.Select) {
                 if(fragment.value) {
                     return fragment.value + (after ? after : '');
                 }
             }
 
-            if (fragment instanceof Global.Prismic.Fragments.Color) {
+            if (fragment instanceof Fragments.Color) {
                 if(fragment.value) {
                     return fragment.value + (after ? after : '');
                 }
@@ -253,7 +253,7 @@
         getStructuredText: function(name) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
+            if (fragment instanceof Fragments.StructuredText) {
                 return fragment;
             }
             return null;
@@ -269,9 +269,9 @@
         getLink: function(name) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Global.Prismic.Fragments.WebLink ||
-                fragment instanceof Global.Prismic.Fragments.DocumentLink ||
-                fragment instanceof Global.Prismic.Fragments.ImageLink) {
+            if (fragment instanceof Fragments.WebLink ||
+                fragment instanceof Fragments.DocumentLink ||
+                fragment instanceof Fragments.ImageLink) {
                 return fragment;
             }
             return null;
@@ -287,7 +287,7 @@
         getNumber: function(name) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Global.Prismic.Fragments.Number) {
+            if (fragment instanceof Fragments.Number) {
                 return fragment.value;
             }
             return null;
@@ -303,7 +303,7 @@
         getColor: function(name) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Global.Prismic.Fragments.Color) {
+            if (fragment instanceof Fragments.Color) {
                 return fragment.value;
             }
             return null;
@@ -319,7 +319,7 @@
         getGeoPoint: function(name) {
             var fragment = this.get(name);
 
-            if(fragment instanceof Global.Prismic.Fragments.GeoPoint) {
+            if(fragment instanceof Fragments.GeoPoint) {
                 return fragment;
             }
             return null;
@@ -336,7 +336,7 @@
         getGroup: function(name) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Global.Prismic.Fragments.Group) {
+            if (fragment instanceof Fragments.Group) {
                 return fragment;
             }
             return null;
@@ -421,14 +421,14 @@
             var result = [];
             for (var field in this.data) {
                 var fragment = this.get(field);
-                if (fragment instanceof Global.Prismic.Fragments.DocumentLink) {
+                if (fragment instanceof Fragments.DocumentLink) {
                     result.push(fragment);
                 }
-                if (fragment instanceof Global.Prismic.Fragments.StructuredText) {
+                if (fragment instanceof Fragments.StructuredText) {
                     for (i = 0; i < fragment.blocks.length; i++) {
                         var block = fragment.blocks[i];
                         if (block.type == "image" && block.linkTo) {
-                            link = Global.Prismic.Fragments.initField(block.linkTo);
+                            link = Fragments.initField(block.linkTo);
                             if (link instanceof DocumentLink) {
                                 result.push(link);
                             }
@@ -437,15 +437,15 @@
                         for (j = 0; j < spans.length; j++) {
                             var span = spans[j];
                             if (span.type == "hyperlink") {
-                                link = Global.Prismic.Fragments.initField(span.data);
-                                if (link instanceof Global.Prismic.Fragments.DocumentLink) {
+                                link = Fragments.initField(span.data);
+                                if (link instanceof Fragments.DocumentLink) {
                                     result.push(link);
                                 }
                             }
                         }
                     }
                 }
-                if (fragment instanceof Global.Prismic.Fragments.Group) {
+                if (fragment instanceof Fragments.Group) {
                     for (i = 0; i < fragment.value.length; i++) {
                         result = result.concat(fragment.value[i].linkedDocuments());
                     }
@@ -524,7 +524,7 @@
         /**
          * Fragments, converted to business objects
          */
-        this.fragments = Global.Prismic.Fragments.parseFragments(data);
+        this.fragments = Fragments.parseFragments(data);
     }
 
     Document.prototype = Object.create(WithFragments.prototype);
@@ -540,7 +540,7 @@
     Document.prototype.getSliceZone = function(name) {
         var fragment = this.get(name);
 
-        if (fragment instanceof Global.Prismic.Fragments.SliceZone) {
+        if (fragment instanceof Fragments.SliceZone) {
             return fragment;
         }
         return null;
@@ -554,7 +554,7 @@
       /**
        * Fragments, converted to business objects
        */
-      this.fragments = Global.Prismic.Fragments.parseFragments(data);
+      this.fragments = Fragments.parseFragments(data);
     }
 
     GroupDoc.prototype = Object.create(WithFragments.prototype);
@@ -566,11 +566,10 @@
         return f && getType.toString.call(f) === '[object Function]';
     }
 
-    // -- Export globally
+module.exports = {
+  WithFragments: WithFragments,
+  Document: Document,
+  GroupDoc: GroupDoc
+}
 
-    Global.Prismic.WithFragments = WithFragments;
-    Global.Prismic.Document = Document;
-    Global.Prismic.GroupDoc = GroupDoc;
 
-
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));

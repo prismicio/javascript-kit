@@ -12,7 +12,7 @@
 You can install a stable version using __npm__:
 
 ```sh
-npm install prismic.io
+npm install prismic.io --save
 ```
 
 Or using __bower__:

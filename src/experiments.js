@@ -1,4 +1,3 @@
-(function (Global, undefined) {
 
     "use strict";
 
@@ -78,8 +77,7 @@
         return this.data.label;
     };
 
-    Global.Prismic.Experiments = Experiments;
-    Global.Prismic.Experiment = Experiment;
-    Global.Prismic.Variation = Variation;
+export default {
+  Experiments, Variation
+}
 
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));

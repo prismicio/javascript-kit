@@ -1,4 +1,3 @@
-(function (Global, undefined) {
 
     "use strict";
 
@@ -49,6 +48,5 @@
         }
     };
 
-    Global.Prismic.ApiCache = ApiCache;
+export default ApiCache;
 
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
