@@ -65,18 +65,18 @@
                 if (err) throw err; // gisthide
                 var stPatrickRef = Api.ref("St-Patrick specials");
                 // Now we'll use this reference for all our calls
-                Api.form('everything')
-                    .ref(stPatrickRef)
-                    .query(Prismic.Predicates.at("document.type", "product")).submit(function (err, response) {
-                        if (err) {
-                            console.log(err);
-                            done();
-                        } // gisthide
-                        // The documents object contains a Response object with all documents of type "product"
-                        // including the new "Saint-Patrick's Cupcake"
-                        assert.equal(response.results.length, 17); // gisthide
-                        done(); // gisthide
-                    });
+              Api.query(Prismic.Predicates.at("document.type", "product"), {
+                  ref: stPatrickRef
+              }, function (err, response) {
+                  if (err) {
+                      console.log(err);
+                      done();
+                  } // gisthide
+                  // The documents object contains a Response object with all documents of type "product"
+                  // including the new "Saint-Patrick's Cupcake"
+                  assert.equal(response.results.length, 17); // gisthide
+                  done(); // gisthide
+              });
             }, previewToken);
             // endgist
         });
@@ -88,24 +88,22 @@
             // startgist:9b6ff487190a429d7fbc:prismic-simplequery.js
             Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
-                Api.form('everything')
-                    .ref(Api.master())
-                    .query(Prismic.Predicates.at("document.type", "product")).submit(function (err, response) {
-                        if (err) { console.log(err); done(); } // gisthide
-                        // The documents object contains a Response object with all documents of type "product".
-                        var page = response.page; // The current page number, the first one being 1
-                        assert.equal(page, 1); // gisthide
-                        var results = response.results; // An array containing the results of the current page;
-                        // you may need to retrieve more pages to get all results
-                        assert.equal(results.length, 16); // gisthide
-                        var prev_page = response.prev_page; // the URL of the previous page (may be null)
-                        var next_page = response.next_page; // the URL of the next page (may be null)
-                        var results_per_page = response.results_per_page; // max number of results per page
-                        var results_size = response.results_size; // the size of the current page
-                        var total_pages = response.total_pages; // the number of pages
-                        var total_results_size = response.total_results_size; // the total size of results across all pages
-                        done(); // gisthide
-                    });
+                Api.query(Prismic.Predicates.at("document.type", "product"), {}, function (err, response) {
+                    if (err) { console.log(err); done(); } // gisthide
+                    // The documents object contains a Response object with all documents of type "product".
+                    var page = response.page; // The current page number, the first one being 1
+                    assert.equal(page, 1); // gisthide
+                    var results = response.results; // An array containing the results of the current page;
+                    // you may need to retrieve more pages to get all results
+                    assert.equal(results.length, 16); // gisthide
+                    var prev_page = response.prev_page; // the URL of the previous page (may be null)
+                    var next_page = response.next_page; // the URL of the next page (may be null)
+                    var results_per_page = response.results_per_page; // max number of results per page
+                    var results_size = response.results_size; // the size of the current page
+                    var total_pages = response.total_pages; // the number of pages
+                    var total_results_size = response.total_results_size; // the total size of results across all pages
+                    done(); // gisthide
+                });
             });
             // endgist
         });

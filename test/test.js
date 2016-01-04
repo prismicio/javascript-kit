@@ -113,6 +113,26 @@
             });
         });
 
+        it('Use getByID', function(done) {
+            Prismic.Api(testRepository, function (err, Api) {
+                if (err) throw err;
+                Api.getByID('UlfoxUnM0wkXYXbt', {}, function (err, document) {
+                    assert.equal(document.id, 'UlfoxUnM0wkXYXbt');
+                    done();
+                });
+            });
+        });
+
+        it('Use getByIDs', function(done) {
+            Prismic.Api(testRepository, function (err, Api) {
+                if (err) throw err;
+                Api.getByIDs(['UlfoxUnM0wkXYXbt', 'UlfoxUnM0wkXYXbj'], {}, function (err, res) {
+                    assert.equal(res.results.length, 2);
+                    done();
+                });
+            });
+        });
+
         it('Submit the `everything` form with an ordering', function (done) {
             Prismic.Api(testRepository, function (err, Api) {
                 if (err) {
