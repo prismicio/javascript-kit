@@ -23,7 +23,6 @@
     "gulp-gist": "~1.0.3",
     "gulp-jsdoc": "~0.1.4",
     "gulp-mocha": "^2.2.0",
-    "gulp-mocha-phantomjs": "git://github.com/erwan/gulp-mocha-phantomjs.git#phantomjs198",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "~1.2.0",
     "gulp-util": "~3.0.6",
