@@ -46,7 +46,7 @@ gulp.task('build', () => {
 });
 
 gulp.task('minify', () => {
-  browserify('src/browser.js', {debug: true })
+  browserify('lib/browser.js', {debug: true })
     .transform(babel, {presets: ["es2015"]})
     .bundle()
     .on('error', function(err) {

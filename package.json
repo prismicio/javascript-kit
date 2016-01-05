@@ -33,9 +33,9 @@
     "type": "git",
     "url": "http://github.com/prismicio/javascript-kit.git"
   },
-  "main": "src/api.js",
+  "main": "lib/api.js",
   "scripts": {
     "test": "mocha",
-    "lint": "eslint src"
+    "lint": "eslint lib"
   }
 }

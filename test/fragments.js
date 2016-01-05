@@ -1,4 +1,4 @@
-var Prismic = require('../src/api.js');
+var Prismic = require('../lib/prismic.js');
 var chai = require('chai');
 
     var assert = chai.assert,
@@ -17,7 +17,7 @@ var chai = require('chai');
     describe('Document manipulation', function() {
 
         it('Stores and retrieves all document slugs well', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbg")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -29,7 +29,7 @@ var chai = require('chai');
         });
 
         it('Render a document to Html', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -42,7 +42,7 @@ var chai = require('chai');
         });
 
         it('Render a document to Text', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -426,7 +426,7 @@ var chai = require('chai');
     describe('StructuredText', function() {
 
         it('asHtml handles embeds and lists', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -437,7 +437,7 @@ var chai = require('chai');
         });
 
         it('asText works', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -448,7 +448,7 @@ var chai = require('chai');
         });
 
         it('asHtml handles preformatted', function (done) {
-            Prismic.getApi(microRepository, function (err, Api) {
+            Prismic.api(microRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UrDejAEAAFwMyrW9")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -461,7 +461,7 @@ var chai = require('chai');
         });
 
         it('Test backward-compatibility with passing a ctx instead of just a linkResolver', function (done) {
-            Prismic.getApi(microRepository, function (err, Api) {
+            Prismic.api(microRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UrDejAEAAFwMyrW9")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -484,7 +484,7 @@ var chai = require('chai');
         });
 
         it('asHtml handles spans', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbt")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -495,7 +495,7 @@ var chai = require('chai');
         });
 
         it('asHtml handles span Link.web', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbW")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -506,7 +506,7 @@ var chai = require('chai');
         });
 
         it('asHtml handles span Link.document', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -517,7 +517,7 @@ var chai = require('chai');
         });
 
         it('asHtml with custom serializer', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -558,7 +558,7 @@ var chai = require('chai');
         });
 
         it('getFirstImage works', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
                     assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().url, "https://prismic-io.s3.amazonaws.com/lesbonneschoses/c38f9e5a1a6c43aa7aae516c154013a2cee2bc75.jpg");
@@ -594,7 +594,7 @@ var chai = require('chai');
     describe('Various fragment types', function() {
 
         it('Handles multiple fields', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -605,7 +605,7 @@ var chai = require('chai');
         });
 
         it('ImageViews are well retrieved', function (done) {
-            Prismic.getApi(testRepository, function (err, Api) {
+            Prismic.api(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbO")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -617,7 +617,7 @@ var chai = require('chai');
         });
 
         it('GeoPoint is retrieved', function (done) {
-            Prismic.getApi(microRepository, function (err, Api) {
+            Prismic.api(microRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "U9pjvjQAADAAehbf")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -643,7 +643,7 @@ var chai = require('chai');
         });
 
         it('Block fragments are accessible, loopable, and serializable', function (done) {
-            Prismic.getApi(microRepository, function (err, Api) {
+            Prismic.api(microRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UrDndQEAALQMyrXF")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;

@@ -1,4 +1,4 @@
-var Prismic = require('../src/api.js');
+var Prismic = require('../lib/prismic.js');
 var chai = require('chai');
 
     var assert = chai.assert;
