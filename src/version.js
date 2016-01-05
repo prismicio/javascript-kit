@@ -1,1 +1,1 @@
-(function (Global, undefined) {Global.Prismic.version = '1.4.0';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));
+(function (Global) {Global.Prismic.version = '1.4.0';}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));

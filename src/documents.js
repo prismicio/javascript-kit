@@ -440,7 +440,7 @@ WithFragments.prototype = {
           var block = fragment.blocks[i];
           if (block.type == "image" && block.linkTo) {
             link = Fragments.initField(block.linkTo);
-            if (link instanceof DocumentLink) {
+            if (link instanceof Fragments.DocumentLink) {
               result.push(link);
             }
           }
@@ -581,6 +581,4 @@ module.exports = {
   WithFragments: WithFragments,
   Document: Document,
   GroupDoc: GroupDoc
-}
-
-
+};

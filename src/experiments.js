@@ -80,5 +80,4 @@ Variation.prototype.label = function() {
 module.exports = {
   Experiments: Experiments,
   Variation: Variation
-}
-
+};

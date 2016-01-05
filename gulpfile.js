@@ -5,7 +5,7 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     mocha = require('gulp-mocha'),
     jsdoc = require('gulp-jsdoc'),
-    jshint = require('gulp-jshint'),
+    eslint = require('gulp-eslint'),
     gist = require('gulp-gist'),
     sourcemaps = require('gulp-sourcemaps'),
     source = require('vinyl-source-stream'),
@@ -28,7 +28,7 @@ function string_src(filename, string) {
  */
 
 gulp.task('version', () => {
-    return string_src("version.js", "(function (Global, undefined) {" +
+    return string_src("version.js", "(function (Global) {" +
         "Global.Prismic.version = '" + pkg.version + "';" +
         "}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));\n")
         .pipe(gulp.dest('src/'));
@@ -81,6 +81,17 @@ gulp.task('deploy:gist', ['test:doc'], (cb) => {
 gulp.task('dist', ['build', 'minify', 'doc']);
 
 /**
+ * ESlint
+ */
+
+gulp.task('lint', function() {
+  return gulp.src('src/**').pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failOnError());
+});
+
+
+/**
  * Tests
  */
 
@@ -88,11 +99,11 @@ var mocha_options = {
     timeout: 30000
 };
 
-gulp.task('jshint', () => {
+gulp.task('eslint', () => {
     return gulp.src(SOURCES)
-        .pipe(jshint())
-        .pipe(jshint.reporter('default'))
-        .pipe(jshint.reporter('fail'));
+        .pipe(eslint())
+        .pipe(eslint.reporter('default'))
+        .pipe(eslint.reporter('fail'));
 });
 
 gulp.task('test:int', () => {

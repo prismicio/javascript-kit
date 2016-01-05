@@ -107,7 +107,6 @@ var nodeJSRequest = (function() {
     var http = require('http'),
         https = require('https'),
         url = require('url'),
-        querystring = require('querystring'),
         pjson = require('../package.json');
 
     return function(requestUrl, callback) {

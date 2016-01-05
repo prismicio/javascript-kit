@@ -64,7 +64,7 @@ module.exports = {
    * @param values {Array}
    * @returns {Array} an array corresponding to the predicate
    */
-    in: function(fragment, values) { return ["in", fragment, values]; },
+  in: function(fragment, values) { return ["in", fragment, values]; },
 
   /**
    * Build a "fulltext" predicate: fulltext search in a fragment.

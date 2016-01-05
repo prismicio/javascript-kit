@@ -93,7 +93,7 @@ LRUCache.prototype.shift = function() {
 LRUCache.prototype.get = function(key, returnEntry) {
   // First, find our cache entry
   var entry = this._keymap[key];
-  if (entry === undefined) return; // Not cached. Sorry.
+  if (entry === undefined) return null; // Not cached. Sorry.
   // As <key> was found in the cache, register it as being requested recently
   if (entry === this.tail) {
     // Already the most recenlty used entry, so no need to update the list
@@ -153,7 +153,7 @@ LRUCache.prototype.set = function(key, value) {
  */
 LRUCache.prototype.remove = function(key) {
   var entry = this._keymap[key];
-  if (!entry) return;
+  if (!entry) return null;
   delete this._keymap[entry.key]; // need to do delete unfortunately
   if (entry.newer && entry.older) {
     // relink the older entry with the newer entry

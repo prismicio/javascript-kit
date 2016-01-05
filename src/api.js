@@ -8,7 +8,6 @@ var experiments = require('./experiments'),
     documents = require('./documents');
 
 var Document = documents.Document,
-    GroupDoc = documents.GroupDoc,
     Experiments = experiments.Experiments;
 
 
@@ -25,7 +24,7 @@ function Api(url, accessToken, maybeRequestHandler, maybeApiCache, maybeApiDataT
   this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
   this.apiDataTTL = maybeApiDataTTL || 5;
   return this;
-};
+}
 
 /**
  * The kit's main entry point; initialize your API like this: Prismic.Api(url, callback, accessToken, maybeRequestHandler)
@@ -62,7 +61,7 @@ function getApi(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCa
   });
 
   return api;
-};
+}
 
 
 Api.prototype = {
@@ -139,7 +138,7 @@ Api.prototype = {
       if (callback && err) { callback(err); return; }
       if (!callback && err) { throw err; }
 
-      self.get(function (err, data, xhr) {
+      self.get(function (err, data) {
         if (callback && err) { callback(err); return; }
         if (!callback && err) { throw err; }
 
@@ -380,7 +379,6 @@ Api.prototype = {
     var Predicates = Predicates;
     this.requestHandler(token, function (err, result, xhr) {
       if (err) {
-        console.log("Error from the request");
         callback(err, defaultUrl, xhr);
         return;
       }
@@ -405,7 +403,6 @@ Api.prototype = {
           });
         }
       } catch (e) {
-        console.log("Caught e ", e);
         callback(e, defaultUrl, xhr);
       }
     });
