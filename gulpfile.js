@@ -3,9 +3,7 @@ var gulp = require('gulp'),
     babel = require('babelify'),
     browserify = require('browserify'),
     uglify = require('gulp-uglify'),
-    mocha = require('gulp-mocha'),
     jsdoc = require('gulp-jsdoc'),
-    eslint = require('gulp-eslint'),
     gist = require('gulp-gist'),
     sourcemaps = require('gulp-sourcemaps'),
     source = require('vinyl-source-stream'),
@@ -78,60 +76,4 @@ gulp.task('deploy:gist', ['test:doc'], (cb) => {
         .pipe(gist());
 });
 
-gulp.task('dist', ['build', 'minify', 'doc']);
-
-/**
- * ESlint
- */
-
-gulp.task('lint', function() {
-  return gulp.src('src/**').pipe(eslint())
-    .pipe(eslint.format())
-    .pipe(eslint.failOnError());
-});
-
-
-/**
- * Tests
- */
-
-var mocha_options = {
-    timeout: 30000
-};
-
-gulp.task('eslint', () => {
-    return gulp.src(SOURCES)
-        .pipe(eslint())
-        .pipe(eslint.reporter('default'))
-        .pipe(eslint.reporter('fail'));
-});
-
-gulp.task('test:int', () => {
-    return gulp.src('./test/test.js')
-        .pipe(mocha(mocha_options));
-});
-
-gulp.task('test:unit', () => {
-    return gulp.src('./test/unit.js')
-        .pipe(mocha(mocha_options));
-});
-
-gulp.task('test:fragments', () => {
-    return gulp.src('./test/fragments.js')
-        .pipe(mocha(mocha_options));
-});
-
-gulp.task('test:doc', () => {
-    return gulp.src('./test/doc.js')
-        .pipe(mocha(mocha_options));
-});
-
-
-gulp.task('test', ['test:int', 'test:unit', 'test:doc', 'test:fragments']);
-
-/**
- * Default task
- */
-
-gulp.task('default', ['test']);
-
+gulp.task('default', ['build', 'minify', 'doc']);

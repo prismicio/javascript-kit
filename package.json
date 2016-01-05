@@ -18,11 +18,9 @@
     "chai": "*",
     "codeclimate-test-reporter": "~0.0.4",
     "gulp": "~3.9.0",
-    "gulp-eslint": "^1.1.1",
     "gulp-gh-pages": "~0.5.0",
     "gulp-gist": "~1.0.3",
     "gulp-jsdoc": "~0.1.4",
-    "gulp-mocha": "^2.2.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "~1.2.0",
     "gulp-util": "~3.0.6",
@@ -37,6 +35,7 @@
   },
   "main": "src/api.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "mocha",
+    "lint": "eslint src"
   }
 }
