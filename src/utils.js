@@ -1,5 +1,7 @@
 
-    "use strict";
+"use strict";
+
+var Utils = require('./utils');
 
     var createError = function(status, message) {
         var err = new Error(message);
@@ -122,6 +124,16 @@
                         }
                     };
 
+              if (!requestUrl) {
+                console.log("BOOM");
+                var e = new Error('dummy');
+                var stack = e.stack.replace(/^[^\(]+?[\n$]/gm, '')
+                                            .replace(/^\s+at\s+/gm, '')
+                                            .replace(/^Object.<anonymous>\s*\(/gm, '{anonymous}()@')
+                                                     .split('\n');
+                                                     console.log(stack);
+
+              }
                 var request = h.get(options, function(response) {
                     if(response.statusCode && response.statusCode == 200) {
                         var jsonStr = '';
@@ -132,7 +144,12 @@
                         });
 
                         response.on('end', function () {
-                          var json = JSON.parse(jsonStr);
+                          var json;
+                          try {
+                              json = JSON.parse(jsonStr);
+                          } catch (ex) {
+                            console.log("Failed to parse json: " + jsonStr, ex);
+                          }
                           var cacheControl = response.headers['cache-control'];
                           var ttl = cacheControl && /max-age=(\d+)/.test(cacheControl) ? parseInt(/max-age=(\d+)/.exec(cacheControl)[1], 10) : undefined;
 
@@ -159,7 +176,7 @@
     var queue = [];
 
     var processQueue = function() {
-        if (queue.length === 0 || running >= Global.Prismic.Utils.MAX_CONNECTIONS) {
+        if (queue.length === 0 || running >= Utils.MAX_CONNECTIONS) {
             return;
         }
         running++;
@@ -183,8 +200,7 @@
         };
     };
 
-    export default {
-        MAX_CONNECTIONS: 20, // Number of maximum simultaneous connections to the prismic server
-        request: request
-    };
-
+module.exports = {
+  MAX_CONNECTIONS: 20, // Number of maximum simultaneous connections to the prismic server
+  request: request
+};

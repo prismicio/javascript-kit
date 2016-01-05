@@ -1,7 +1,9 @@
 
 "use strict";
 
-import { WithFragments } from './documents';
+var documents = require('./documents');
+var WithFragments = documents.WithFragments,
+    GroupDoc = documents.GroupDoc;
 
 
     /**
@@ -617,7 +619,7 @@ import { WithFragments } from './documents';
     function Group(data) {
         this.value = [];
         for (var i = 0; i < data.length; i++) {
-            this.value.push(new Global.Prismic.GroupDoc(data[i]));
+            this.value.push(new GroupDoc(data[i]));
         }
     }
     Group.prototype = {
@@ -990,7 +992,7 @@ import { WithFragments } from './documents';
             var fragment = this.value;
             if(typeof fragment.getFirstImage === "function") {
                 return fragment.getFirstImage();
-            } else if (fragment instanceof  Global.Prismic.Fragments.Image) {
+            } else if (fragment instanceof ImageEl) {
                 return fragment;
             } else return null;
         },
@@ -999,7 +1001,7 @@ import { WithFragments } from './documents';
             var fragment = this.value;
             if(typeof fragment.getFirstTitle === "function") {
                 return fragment.getFirstTitle();
-            } else if (fragment instanceof  Global.Prismic.Fragments.StructuredText) {
+            } else if (fragment instanceof StructuredText) {
                 return fragment.getTitle();
             } else return null;
         },
@@ -1228,27 +1230,26 @@ import { WithFragments } from './documents';
         return "<!-- Warning: " + element.type + " not implemented. Upgrade the Developer Kit. -->" + content;
     }
 
-    export default {
-        Embed: Embed,
-        Image: ImageEl,
-        ImageView: ImageView,
-        Text: Text,
-        Number: Num,
-        Date: DateFragment,
-        Timestamp: Timestamp,
-        Select: Select,
-        Color: Color,
-        StructuredText: StructuredText,
-        WebLink: WebLink,
-        DocumentLink: DocumentLink,
-        ImageLink: ImageLink,
-        FileLink: FileLink,
-        Group: Group,
-        GeoPoint: GeoPoint,
-        Slice: Slice,
-        SliceZone: SliceZone,
-        initField: initField,
-        parseFragments: parseFragments,
-        insertSpans: insertSpans
-    };
-
+module.exports = {
+  Embed: Embed,
+  Image: ImageEl,
+  ImageView: ImageView,
+  Text: Text,
+  Number: Num,
+  Date: DateFragment,
+  Timestamp: Timestamp,
+  Select: Select,
+  Color: Color,
+  StructuredText: StructuredText,
+  WebLink: WebLink,
+  DocumentLink: DocumentLink,
+  ImageLink: ImageLink,
+  FileLink: FileLink,
+  Group: Group,
+  GeoPoint: GeoPoint,
+  Slice: Slice,
+  SliceZone: SliceZone,
+  initField: initField,
+  parseFragments: parseFragments,
+  insertSpans: insertSpans
+};

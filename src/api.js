@@ -1,11 +1,31 @@
 "use strict";
 
-import Experiments from './experiments';
-import Predicates from './predicates';
-import Utils from './utils';
-import Fragments from './fragments';
-import ApiCache from './cache.js';
-import { Document, GroupDoc } from './documents';
+var experiments = require('./experiments'),
+    Predicates = require('./predicates'),
+    Utils = require('./utils'),
+    Fragments = require('./fragments'),
+    ApiCache = require('./cache.js'),
+    documents = require('./documents');
+
+var Document = documents.Document,
+    GroupDoc = documents.GroupDoc,
+    Experiments = experiments.Experiments;
+
+
+/**
+ * Initialisation of the API object.
+ * This is for internal use, from outside this kit, you should call Prismic.Api()
+ * @private
+ */
+function Api(url, accessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+  this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
+  this.accessToken = accessToken;
+  this.apiCache = maybeApiCache || globalCache();
+  this.requestHandler = maybeRequestHandler || Utils.request();
+  this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+  this.apiDataTTL = maybeApiDataTTL || 5;
+  return this;
+};
 
 /**
  * The kit's main entry point; initialize your API like this: Prismic.Api(url, callback, accessToken, maybeRequestHandler)
@@ -21,8 +41,8 @@ import { Document, GroupDoc } from './documents';
  * @param {int} maybeApiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
  * @returns {Api} - The Api object that can be manipulated
  */
-var prismic = function(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
-  var api = new prismic.fn.init(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL);
+function getApi(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+  var api = new Api(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL);
   //Use cached api data if available
   api.get(function (err, data) {
     if (callback && err) { return callback(err); }
@@ -38,10 +58,9 @@ var prismic = function(url, callback, maybeAccessToken, maybeRequestHandler, may
 
   return api;
 };
-// note that the prismic variable is later affected as "Api" while exporting
 
-// Defining Api's instance methods; note that the prismic variable is later affected as "Api" while exporting
-prismic.fn = prismic.prototype = {
+
+Api.prototype = {
 
   // Predicates
   AT: "at",
@@ -67,7 +86,6 @@ prismic.fn = prismic.prototype = {
     TAGS: "document.tags"
   },
 
-  constructor: prismic,
   data: null,
 
   /**
@@ -107,7 +125,7 @@ prismic.fn = prismic.prototype = {
   refresh: function (callback) {
     var self = this;
     var cacheKey = this.apiCacheKey;
- 
+
     this.apiCache.remove(cacheKey, function (err) {
       if (callback && err) { return callback(err); }
       if (!callback && err) { throw err; }
@@ -204,21 +222,6 @@ self.get(function (err, data, xhr) {
         },
 
         /**
-         * Initialisation of the API object.
-         * This is for internal use, from outside this kit, you should call Prismic.Api()
-         * @private
-         */
-        init: function(url, accessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
-            this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
-            this.accessToken = accessToken;
-            this.apiCache = maybeApiCache || globalCache();
-            this.requestHandler = maybeRequestHandler || Utils.request();
-            this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
-            this.apiDataTTL = maybeApiDataTTL || 5;
-            return this;
-        },
-
-        /**
          * @deprecated use form() now
          * @param {string} formId - The id of a form, like "everything", or "products"
          * @returns {SearchForm} - the SearchForm that can be used.
@@ -278,35 +281,6 @@ self.get(function (err, data, xhr) {
         },
 
         /**
-         * Parse json as a document
-         *
-         * @returns {Document}
-         */
-        parseDoc: function(json) {
-            var fragments = {};
-            for(var field in json.data[json.type]) {
-                fragments[json.type + '.' + field] = json.data[json.type][field];
-            }
-
-            var slugs = [];
-            if (json.slugs !== undefined) {
-                for (var i = 0; i < json.slugs.length; i++) {
-                    slugs.push(decodeURIComponent(json.slugs[i]));
-                }
-            }
-
-            return new Global.Prismic.Document(
-                json.id,
-                json.uid || null,
-                json.type,
-                json.href,
-                json.tags,
-                slugs,
-                fragments
-            );
-        },
-
-        /**
          * Query the repository
          * @param {string|array|Predicate} the query itself
          * @param {object} additional parameters
@@ -330,8 +304,7 @@ self.get(function (err, data, xhr) {
 				 * @param {function} callback(err, response)
 				 */
 				getByID: function(id, options, callback) {
-            var Predicates = Global.Prismic.Predicates;
-						return this.query(Predicates.at('document.id', id), options, function(err, response) {
+            return this.query(Predicates.at('document.id', id), options, function(err, response) {
 								if (response && response.results.length > 0) {
 										callback(err, response.results[0]);
 								} else {
@@ -358,8 +331,7 @@ self.get(function (err, data, xhr) {
 				 * @param {function} callback(err, response)
 				 */
 				getByUID: function(type, uid, options, callback) {
-            var Predicates = Global.Prismic.Predicates;
-						return this.query(Predicates.at('my.'+type+'.uid', uid), options, function(err, response) {
+            return this.query(Predicates.at('my.'+type+'.uid', uid), options, function(err, response) {
 								if (response && response.results.length > 0) {
 										callback(err, response.results[0]);
 								} else {
@@ -394,7 +366,7 @@ self.get(function (err, data, xhr) {
          */
         previewSession: function(token, linkResolver, defaultUrl, callback) {
             var api = this;
-            var Predicates = Global.Prismic.Predicates;
+            var Predicates = Predicates;
             this.requestHandler(token, function (err, result, xhr) {
                 if (err) {
                     console.log("Error from the request");
@@ -443,7 +415,7 @@ self.get(function (err, data, xhr) {
                         callback(err, null, xhr);
                         return;
                     }
-                    var results = documents.results.map(prismic.fn.parseDoc);
+                    var results = documents.results.map(parseDoc);
                     var response = new Response(
                         documents.page,
                         documents.results_per_page,
@@ -468,8 +440,6 @@ self.get(function (err, data, xhr) {
         }
 
     };
-
-    prismic.fn.init.prototype = prismic.fn;
 
     /**
      * Embodies a submittable RESTful form as described on the API endpoint (as per RESTful standards)
@@ -504,6 +474,36 @@ self.get(function (err, data, xhr) {
             }
         }
     }
+
+/**
+ * Parse json as a document
+ *
+ * @returns {Document}
+ */
+var parseDoc = function(json) {
+  var fragments = {};
+  for(var field in json.data[json.type]) {
+    fragments[json.type + '.' + field] = json.data[json.type][field];
+  }
+
+  var slugs = [];
+  if (json.slugs !== undefined) {
+    for (var i = 0; i < json.slugs.length; i++) {
+      slugs.push(decodeURIComponent(json.slugs[i]));
+    }
+  }
+
+  return new Document(
+    json.id,
+    json.uid || null,
+    json.type,
+    json.href,
+    json.tags,
+    slugs,
+    fragments
+  );
+};
+
 
     SearchForm.prototype = {
 
@@ -778,7 +778,7 @@ function globalCache() {
     g = window; // browser
   }
   if (!g.prismicCache) {
-    g.prismicCache = new Global.Prismic.ApiCache();
+    g.prismicCache = new ApiCache();
   }
   return g.prismicCache;
 }
@@ -786,10 +786,12 @@ function globalCache() {
 module.exports = {
   experimentCookie: "io.prismic.experiment",
   previewCookie: "io.prismic.preview",
-  Api: prismic,
-  Experiments,
-  Predicates,
-  Fragments,
-  ApiCache
+  Api: Api,
+  Experiments: Experiments,
+  Predicates: Predicates,
+  Fragments: Fragments,
+  ApiCache: ApiCache,
+  getApi: getApi,
+  parseDoc: parseDoc
 };
 

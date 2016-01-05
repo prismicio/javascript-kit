@@ -1,11 +1,13 @@
 
-    "use strict";
+"use strict";
+
+var LRUCache = require('./lru');
 
     /**
      * Api cache
      */
     function ApiCache(limit) {
-        this.lru = new Global.Prismic.LRUCache(limit);
+        this.lru = new LRUCache(limit);
     }
 
     ApiCache.prototype = {
@@ -48,5 +50,4 @@
         }
     };
 
-export default ApiCache;
-
+module.exports = ApiCache;

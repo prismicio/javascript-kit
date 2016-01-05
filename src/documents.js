@@ -1,7 +1,5 @@
 "use strict";
 
-import Fragments from './fragments';
-
     /**
      * Functions to access fragments: superclass for Document and Doc (from Group), not supposed to be created directly
      * @constructor
@@ -41,6 +39,7 @@ import Fragments from './fragments';
          * @returns {ImageEl} - The Image object to manipulate
          */
         getImage: function(fragment) {
+          var Fragments = require('./fragments');
             var img = this.get(fragment);
             if (img instanceof Fragments.Image) {
                 return img;
@@ -54,6 +53,7 @@ import Fragments from './fragments';
 
         // Useful for obsolete multiples
         getAllImages: function(fragment) {
+            var Fragments = require('./fragments');
             var images = this.getAll(fragment);
 
             return images.map(function (image) {
@@ -69,6 +69,7 @@ import Fragments from './fragments';
 
 
         getFirstImage: function() {
+            var Fragments = require('./fragments');
             var fragments = this.fragments;
 
             var firstImage = Object.keys(fragments).reduce(function(image, key) {
@@ -88,6 +89,7 @@ import Fragments from './fragments';
         },
 
         getFirstTitle: function() {
+            var Fragments = require('./fragments');
             var fragments = this.fragments;
 
             var firstTitle = Object.keys(fragments).reduce(function(st, key) {
@@ -130,6 +132,7 @@ import Fragments from './fragments';
          * @returns {ImageView} view - The View object to manipulate
          */
         getImageView: function(name, view) {
+            var Fragments = require('./fragments');
             var fragment = this.get(name);
             if (fragment instanceof Fragments.Image) {
                 return fragment.getView(view);
@@ -160,6 +163,7 @@ import Fragments from './fragments';
          * @returns {Date} - The Date object to manipulate
          */
         getTimestamp: function(name) {
+            var Fragments = require('./fragments');
             var fragment = this.get(name);
 
             if (fragment instanceof Fragments.Timestamp) {
@@ -176,6 +180,7 @@ import Fragments from './fragments';
          * @returns {Date} - The Date object to manipulate
          */
         getDate: function(name) {
+            var Fragments = require('./fragments');
             var fragment = this.get(name);
 
             if (fragment instanceof Fragments.Date) {
@@ -208,6 +213,7 @@ import Fragments from './fragments';
          * @returns {object} - either StructuredText, or Text, or Number, or Select, or Color.
          */
         getText: function(name, after) {
+            var Fragments = require('./fragments');
             var fragment = this.get(name);
 
             if (fragment instanceof Fragments.StructuredText) {
@@ -253,7 +259,7 @@ import Fragments from './fragments';
         getStructuredText: function(name) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Fragments.StructuredText) {
+            if (fragment instanceof require('./fragments').StructuredText) {
                 return fragment;
             }
             return null;
@@ -267,6 +273,7 @@ import Fragments from './fragments';
          * @returns {WebLink|DocumentLink|ImageLink} - The Link fragment to manipulate.
          */
         getLink: function(name) {
+            var Fragments = require('./fragments');
             var fragment = this.get(name);
 
             if (fragment instanceof Fragments.WebLink ||
@@ -285,6 +292,7 @@ import Fragments from './fragments';
          * @returns {number} - The number value of the fragment.
          */
         getNumber: function(name) {
+            var Fragments = require('./fragments');
             var fragment = this.get(name);
 
             if (fragment instanceof Fragments.Number) {
@@ -301,6 +309,7 @@ import Fragments from './fragments';
          * @returns {string} - The string value of the Color fragment.
          */
         getColor: function(name) {
+            var Fragments = require('./fragments');
             var fragment = this.get(name);
 
             if (fragment instanceof Fragments.Color) {
@@ -317,6 +326,7 @@ import Fragments from './fragments';
          * @returns {GeoPoint} - The GeoPoint object to manipulate
          */
         getGeoPoint: function(name) {
+            var Fragments = require('./fragments');
             var fragment = this.get(name);
 
             if(fragment instanceof Fragments.GeoPoint) {
@@ -336,7 +346,7 @@ import Fragments from './fragments';
         getGroup: function(name) {
             var fragment = this.get(name);
 
-            if (fragment instanceof Fragments.Group) {
+            if (fragment instanceof require('./fragments').Group) {
                 return fragment;
             }
             return null;
@@ -419,6 +429,7 @@ import Fragments from './fragments';
         linkedDocuments: function() {
             var i, j, link;
             var result = [];
+            var Fragments = require('./fragments');
             for (var field in this.data) {
                 var fragment = this.get(field);
                 if (fragment instanceof Fragments.DocumentLink) {
@@ -524,7 +535,7 @@ import Fragments from './fragments';
         /**
          * Fragments, converted to business objects
          */
-        this.fragments = Fragments.parseFragments(data);
+        this.fragments = require('./fragments').parseFragments(data);
     }
 
     Document.prototype = Object.create(WithFragments.prototype);
@@ -540,7 +551,7 @@ import Fragments from './fragments';
     Document.prototype.getSliceZone = function(name) {
         var fragment = this.get(name);
 
-        if (fragment instanceof Fragments.SliceZone) {
+      if (fragment instanceof require('./fragments').SliceZone) {
             return fragment;
         }
         return null;
@@ -554,7 +565,7 @@ import Fragments from './fragments';
       /**
        * Fragments, converted to business objects
        */
-      this.fragments = Fragments.parseFragments(data);
+      this.fragments = require('./fragments').parseFragments(data);
     }
 
     GroupDoc.prototype = Object.create(WithFragments.prototype);

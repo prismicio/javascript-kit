@@ -77,7 +77,8 @@
         return this.data.label;
     };
 
-export default {
-  Experiments, Variation
+module.exports = {
+  Experiments: Experiments,
+  Variation: Variation
 }
 

@@ -1,4 +1,4 @@
-var Prismic = require('../dist/prismic.io.js');
+var Prismic = require('../src/api.js');
 var chai = require('chai');
 
     // Test snippets for the documentation, and keep them in sync with Gist
@@ -39,7 +39,7 @@ var chai = require('chai');
 
         it('prismic-api.js', function (done) {
             // startgist:1af7b5cb53a5d7cc8561:prismic-api.js
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 // You can use the Api object inside this block
                 console.log("References: ", Api.data.refs);
@@ -51,7 +51,7 @@ var chai = require('chai');
 
         it('prismic-apiPrivate.js', function (done) {
             // startgist:6ad513d7d0f784de36d9:prismic-apiPrivate.js
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 // This will fail because the token is invalid, but this is how to access a private API
                 assert.equal(err.message, "Unexpected status code [401] on URL https://lesbonneschoses.prismic.io/api?access_token=MC5-XXXXXXX-vRfvv70"); // gisthide
                 done(); // gisthide
@@ -62,7 +62,7 @@ var chai = require('chai');
         it('prismic-references.js', function (done) {
             // startgist:c737c4588742c328026f:prismic-references.js
             var previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70';
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 var stPatrickRef = Api.ref("St-Patrick specials");
                 // Now we'll use this reference for all our calls
@@ -87,7 +87,7 @@ var chai = require('chai');
 
         it('prismic-simplequery.js', function (done) {
             // startgist:9b6ff487190a429d7fbc:prismic-simplequery.js
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 Api.query(Prismic.Predicates.at("document.type", "product"), {}, function (err, response) {
                     if (err) { console.log(err); done(); } // gisthide
@@ -111,7 +111,7 @@ var chai = require('chai');
 
         it('prismic-orderings.js', function (done) {
             // startgist:92bdec9ace554b9f95c0:prismic-orderings.js
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 Api.form('everything')
                     .ref(Api.master())
@@ -130,7 +130,7 @@ var chai = require('chai');
 
         it('prismic-predicates.js', function (done) {
             // startgist:c90d98f6c77ef6505094:prismic-predicates.js
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 Api.form('everything').ref(Api.master()).query(
                     Prismic.Predicates.at("document.type", "blog-post"),
@@ -170,7 +170,7 @@ var chai = require('chai');
     describe('Fragments', function() {
 
         it('prismic-htmlSerializer.js', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbl"))
                     .ref(Api.master()).submit(function (err, documents) {
@@ -220,7 +220,7 @@ var chai = require('chai');
         });
 
         it('prismic-getText.js', function (done) {
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err; // gisthide
                 Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err; // gisthide
@@ -236,7 +236,7 @@ var chai = require('chai');
         });
 
         it('prismic-getNumber.js', function (done) {
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -257,7 +257,7 @@ var chai = require('chai');
         });
 
         it('prismic-images.js', function (done) {
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -275,7 +275,7 @@ var chai = require('chai');
         });
 
         it('prismic-dateTimestamp.js', function (done) {
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -313,7 +313,7 @@ var chai = require('chai');
         });
 
         it('prismic-group.js', function () {
-            var doc = Prismic.Api("").parseDoc({
+            var doc = Prismic.parseDoc({
                 id: "abcd",
                 type: "article",
                 data: {
@@ -380,7 +380,7 @@ var chai = require('chai');
         });
 
         it('prismic-link.js', function () {
-            var doc = Prismic.Api("").parseDoc({
+            var doc = Prismic.parseDoc({
                 id: "abcd",
                 type: "article",
                 data: {
@@ -412,7 +412,7 @@ var chai = require('chai');
         });
 
         it('prismic-embed.js', function () {
-            var doc = Prismic.Api("").parseDoc({
+            var doc = Prismic.parseDoc({
                 id: "abcd",
                 type: "article",
                 data: {
@@ -450,7 +450,7 @@ var chai = require('chai');
         });
 
         it('prismic-color.js', function () {
-            var doc = Prismic.Api("").parseDoc({
+            var doc = Prismic.parseDoc({
                 id: "abcd",
                 type: "article",
                 data: {
@@ -474,7 +474,7 @@ var chai = require('chai');
         });
 
         it('prismic-geopoint.js', function () {
-            var doc = Prismic.Api("").parseDoc({
+            var doc = Prismic.parseDoc({
                 id: "abcd",
                 type: "article",
                 data: {
@@ -504,7 +504,7 @@ var chai = require('chai');
         });
 
         it('prismic-asHtml.js', function (done) {
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) {
                     console.log(err);
                     done();
@@ -555,7 +555,7 @@ var chai = require('chai');
                 }
             };
 
-            Prismic.Api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
+            Prismic.getApi('https://lesbonneschoses.prismic.io/api', function (err, Api) {
                 if (err) return done(err); // gisthide
                 // The Api in this block will use the custom cache object
                 assert.notEqual(Api, null); // gisthide

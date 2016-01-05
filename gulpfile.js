@@ -3,7 +3,7 @@ var gulp = require('gulp'),
     babel = require('babelify'),
     browserify = require('browserify'),
     uglify = require('gulp-uglify'),
-    mocha = require('gulp-mocha-phantomjs'),
+    mocha = require('gulp-mocha'),
     jsdoc = require('gulp-jsdoc'),
     jshint = require('gulp-jshint'),
     gist = require('gulp-gist'),
@@ -95,22 +95,22 @@ gulp.task('jshint', function() {
         .pipe(jshint.reporter('fail'));
 });
 
-gulp.task('test:int', ['build'], function() {
+gulp.task('test:int', function() {
     return gulp.src('./test/test.js')
         .pipe(mocha(mocha_options));
 });
 
-gulp.task('test:unit', ['build'], function() {
+gulp.task('test:unit', function() {
     return gulp.src('./test/unit.js')
         .pipe(mocha(mocha_options));
 });
 
-gulp.task('test:fragments', ['build'], function() {
+gulp.task('test:fragments', function() {
     return gulp.src('./test/fragments.js')
         .pipe(mocha(mocha_options));
 });
 
-gulp.task('test:doc', ['build'], function() {
+gulp.task('test:doc', function() {
     return gulp.src('./test/doc.js')
         .pipe(mocha(mocha_options));
 });

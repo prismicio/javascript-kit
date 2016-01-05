@@ -6,7 +6,7 @@
      * @namespace
      * @alias Predicates
      */
-    const predicates = {
+module.exports = {
 
         /**
          * Build an "at" predicate: equality of a fragment to a value.
@@ -279,5 +279,4 @@
 
     };
 
-export default predicates;
 

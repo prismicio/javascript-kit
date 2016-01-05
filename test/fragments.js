@@ -1,4 +1,5 @@
-(function(Prismic) {
+var Prismic = require('../src/api.js');
+var chai = require('chai');
 
     var assert = chai.assert,
         testRepository = 'https://lesbonneschoses.prismic.io/api',
@@ -16,7 +17,7 @@
     describe('Document manipulation', function() {
 
         it('Stores and retrieves all document slugs well', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbg")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -28,7 +29,7 @@
         });
 
         it('Render a document to Html', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -41,7 +42,7 @@
         });
 
         it('Render a document to Text', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -61,7 +62,7 @@
     describe('Multiple fragment level global test', function() {
 
         it('getFirstImage in slice zone works', function (done) {
-            var doc = Prismic.Api("").parseDoc({
+            var doc = Prismic.parseDoc({
                 "id":"VQ_hV31Za5EAy02H",
                 "uid":null,
                 "type":"article",
@@ -157,7 +158,7 @@
                     }
                 }
             });
-            var sliceSingleElem = Prismic.Api("").parseDoc({
+            var sliceSingleElem = Prismic.parseDoc({
                 "id":"VQ_hV31Za5EAy02H",
                 "uid":null,
                 "type":"article",
@@ -204,7 +205,7 @@
         });
 
         it('getFirstTitle in slice zone works', function (done) {
-            var doc = Prismic.Api("").parseDoc({
+            var doc = Prismic.parseDoc({
                 "id":"VQ_hV31Za5EAy02H",
                 "uid":null,
                 "type":"article",
@@ -264,7 +265,7 @@
                 }
             });
 
-            var sliceSingleElem = Prismic.Api("").parseDoc({
+            var sliceSingleElem = Prismic.parseDoc({
                 "id":"VQ_hV31Za5EAy02H",
                 "uid":null,
                 "type":"article",
@@ -314,7 +315,7 @@
 
 
         it('getFirstParagraph in slice zone works', function (done) {
-            var doc = Prismic.Api("").parseDoc({
+            var doc = Prismic.parseDoc({
                 "id":"VQ_hV31Za5EAy02H",
                 "uid":null,
                 "type":"article",
@@ -374,7 +375,7 @@
                 }
             });
 
-            var sliceSingleElem = Prismic.Api("").parseDoc({
+            var sliceSingleElem = Prismic.parseDoc({
                 "id":"VQ_hV31Za5EAy02H",
                 "uid":null,
                 "type":"article",
@@ -425,7 +426,7 @@
     describe('StructuredText', function() {
 
         it('asHtml handles embeds and lists', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -436,7 +437,7 @@
         });
 
         it('asText works', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -447,7 +448,7 @@
         });
 
         it('asHtml handles preformatted', function (done) {
-            Prismic.Api(microRepository, function (err, Api) {
+            Prismic.getApi(microRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UrDejAEAAFwMyrW9")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -460,7 +461,7 @@
         });
 
         it('Test backward-compatibility with passing a ctx instead of just a linkResolver', function (done) {
-            Prismic.Api(microRepository, function (err, Api) {
+            Prismic.getApi(microRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UrDejAEAAFwMyrW9")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -483,7 +484,7 @@
         });
 
         it('asHtml handles spans', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbt")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -494,7 +495,7 @@
         });
 
         it('asHtml handles span Link.web', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbW")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -505,7 +506,7 @@
         });
 
         it('asHtml handles span Link.document', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -516,7 +517,7 @@
         });
 
         it('asHtml with custom serializer', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -557,7 +558,7 @@
         });
 
         it('getFirstImage works', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
                     assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().url, "https://prismic-io.s3.amazonaws.com/lesbonneschoses/c38f9e5a1a6c43aa7aae516c154013a2cee2bc75.jpg");
@@ -593,7 +594,7 @@
     describe('Various fragment types', function() {
 
         it('Handles multiple fields', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -604,7 +605,7 @@
         });
 
         it('ImageViews are well retrieved', function (done) {
-            Prismic.Api(testRepository, function (err, Api) {
+            Prismic.getApi(testRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbO")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -616,7 +617,7 @@
         });
 
         it('GeoPoint is retrieved', function (done) {
-            Prismic.Api(microRepository, function (err, Api) {
+            Prismic.getApi(microRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "U9pjvjQAADAAehbf")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -634,7 +635,7 @@
                 '"date": { "type": "Date", "value": "2013-08-17" },' +
                 '"timestamp": { "type": "Timestamp", "value": "2014-10-06T12:24:36+0000" } ' +
                 '}}}');
-            var doc = Prismic.Api("").parseDoc(json);
+            var doc = Prismic.parseDoc(json);
             var date = doc.getDate("blog-post.date");
             assert.equal(date.getFullYear(), 2013);
             var ts = doc.getTimestamp("blog-post.timestamp");
@@ -642,7 +643,7 @@
         });
 
         it('Block fragments are accessible, loopable, and serializable', function (done) {
-            Prismic.Api(microRepository, function (err, Api) {
+            Prismic.getApi(microRepository, function (err, Api) {
                 if (err) throw err;
                 Api.form('everything').query('[[:d = at(document.id, "UrDndQEAALQMyrXF")]]').ref(Api.master()).submit(function (err, documents) {
                     if (err) throw err;
@@ -673,7 +674,7 @@
         });
 
         it('Slices correctly parsed and serializable', function () {
-            var doc = Prismic.Api("").parseDoc({
+            var doc = Prismic.parseDoc({
                 "id":"VQ_hV31Za5EAy02H",
                 "uid":null,
                 "type":"article",
@@ -775,4 +776,3 @@
         });
     });
 
-}(window.Prismic));

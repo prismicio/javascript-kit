@@ -1,4 +1,3 @@
-(function (Global, undefined) {
 
 /**
  * A doubly linked list-based Least Recently Used (LRU) cache. Will keep most
@@ -249,9 +248,4 @@ LRUCache.prototype.toString = function() {
   return s;
 };
 
-// Export ourselves
-Global.Prismic.LRUCache = LRUCache;
-
-
-}(typeof exports === 'object' && exports ? exports : (typeof module === "object" && module && typeof module.exports === "object" ? module.exports : window)));
-
+module.exports = LRUCache;
