@@ -27,15 +27,15 @@ function string_src(filename, string) {
  * Build
  */
 
-gulp.task('version', function () {
+gulp.task('version', () => {
     return string_src("version.js", "(function (Global, undefined) {" +
         "Global.Prismic.version = '" + pkg.version + "';" +
         "}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));\n")
         .pipe(gulp.dest('src/'));
 });
 
-gulp.task('build', function () {
-  browserify('src/api.js', {debug: true })
+gulp.task('build', () => {
+  browserify('src/browser.js', {debug: true })
     .transform(babel, {presets: ["es2015"]})
     .bundle()
     .on('error', function(err) {
@@ -47,8 +47,8 @@ gulp.task('build', function () {
     .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('minify', function() {
-  browserify('src/api.js', {debug: true })
+gulp.task('minify', () => {
+  browserify('src/browser.js', {debug: true })
     .transform(babel, {presets: ["es2015"]})
     .bundle()
     .on('error', function(err) {
@@ -63,22 +63,22 @@ gulp.task('minify', function() {
     .pipe(gulp.dest('./dist'));
 });
 
-gulp.task('doc', ['build'], function() {
+gulp.task('doc', ['build'], () => {
     return gulp.src('./dist/prismic.io.js')
         .pipe(jsdoc('doc'));
 });
 
-gulp.task('deploy:doc', ['doc'], function () {
+gulp.task('deploy:doc', ['doc'], () => {
     return gulp.src("./doc/**/*")
         .pipe(deploy());
 });
 
-gulp.task('deploy:gist', ['test:doc'], function (cb) {
+gulp.task('deploy:gist', ['test:doc'], (cb) => {
     return gulp.src("./test/doc.js")
         .pipe(gist());
 });
 
-gulp.task('dist', ['build', 'minify']);
+gulp.task('dist', ['build', 'minify', 'doc']);
 
 /**
  * Tests
@@ -88,29 +88,29 @@ var mocha_options = {
     timeout: 30000
 };
 
-gulp.task('jshint', function() {
+gulp.task('jshint', () => {
     return gulp.src(SOURCES)
         .pipe(jshint())
         .pipe(jshint.reporter('default'))
         .pipe(jshint.reporter('fail'));
 });
 
-gulp.task('test:int', function() {
+gulp.task('test:int', () => {
     return gulp.src('./test/test.js')
         .pipe(mocha(mocha_options));
 });
 
-gulp.task('test:unit', function() {
+gulp.task('test:unit', () => {
     return gulp.src('./test/unit.js')
         .pipe(mocha(mocha_options));
 });
 
-gulp.task('test:fragments', function() {
+gulp.task('test:fragments', () => {
     return gulp.src('./test/fragments.js')
         .pipe(mocha(mocha_options));
 });
 
-gulp.task('test:doc', function() {
+gulp.task('test:doc', () => {
     return gulp.src('./test/doc.js')
         .pipe(mocha(mocha_options));
 });
