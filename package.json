@@ -18,6 +18,7 @@
     "chai": "*",
     "codeclimate-test-reporter": "~0.0.4",
     "es6-promise": "^3.0.2",
+    "eslint": "^1.10.3",
     "gulp": "~3.9.0",
     "gulp-gh-pages": "~0.5.0",
     "gulp-gist": "~1.0.3",

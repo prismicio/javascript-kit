@@ -28,13 +28,6 @@ function string_src(filename, string) {
 
  */
 
-gulp.task('version', () => {
-  return string_src("version.js", "(function (Global) {" +
-                    "Global.Prismic.version = '" + pkg.version + "';" +
-                    "}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));\n")
-    .pipe(gulp.dest('src/'));
-});
-
 gulp.task('build', () => {
   browserify('lib/browser.js', {debug: true })
     .transform(babel, {presets: ["es2015"]})
