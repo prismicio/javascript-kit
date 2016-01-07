@@ -325,46 +325,41 @@ describe('Fragments', function() {
         article: {
           documents: {
             type: "Group",
-            "value": [
-              {
-                "linktodoc": {
-                  "type": "Link.document",
-                  "value": {
-                    "document": {
-                      "id": "UrDejAEAAFwMyrW9",
-                      "type": "doc",
-                      "tags": [ ],
-                      "slug": "installing-meta-micro"
-                    },
-                    "isBroken": false
-                  }
-                },
-                "desc": {
-                  "type": "StructuredText",
-                  "value": [
-                    {
-                      "type": "paragraph",
-                      "text": "A detailed step by step point of view on how installing happens.",
-                      "spans": []
-                    }
-                  ]
+            "value": [{
+              "linktodoc": {
+                "type": "Link.document",
+                "value": {
+                  "document": {
+                    "id": "UrDejAEAAFwMyrW9",
+                    "type": "doc",
+                    "tags": [ ],
+                    "slug": "installing-meta-micro"
+                  },
+                  "isBroken": false
                 }
               },
-              {
-                "linktodoc": {
-                  "type": "Link.document",
-                  "value": {
-                    "document": {
-                      "id": "UrDmKgEAALwMyrXA",
-                      "type": "doc",
-                      "tags": [ ],
-                      "slug": "using-meta-micro"
-                    },
-                    "isBroken": false
-                  }
+              "desc": {
+                "type": "StructuredText",
+                "value": [{
+                  "type": "paragraph",
+                  "text": "A detailed step by step point of view on how installing happens.",
+                  "spans": []
+                }]
+              }
+            }, {
+              "linktodoc": {
+                "type": "Link.document",
+                "value": {
+                  "document": {
+                    "id": "UrDmKgEAALwMyrXA",
+                    "type": "doc",
+                    "tags": [ ],
+                    "slug": "using-meta-micro"
+                  },
+                  "isBroken": false
                 }
               }
-            ]
+            }]
           }
         }
       }

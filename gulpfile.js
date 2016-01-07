@@ -1,3 +1,5 @@
+/*eslint-env es6 */
+
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
     babel = require('babelify'),
@@ -13,23 +15,24 @@ var gulp = require('gulp'),
 var pkg = require('./package.json');
 
 function string_src(filename, string) {
-    var src = require('stream').Readable({ objectMode: true });
-    src._read = function () {
-        this.push(new gutil.File({ cwd: "", base: "", path: filename, contents: new Buffer(string) }));
-        this.push(null);
-    };
-    return src;
+  var src = require('stream').Readable({ objectMode: true });
+  src._read = function () {
+    this.push(new gutil.File({ cwd: "", base: "", path: filename, contents: new Buffer(string) }));
+    this.push(null);
+  };
+  return src;
 }
 
 /**
  * Build
+
  */
 
 gulp.task('version', () => {
-    return string_src("version.js", "(function (Global) {" +
-        "Global.Prismic.version = '" + pkg.version + "';" +
-        "}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));\n")
-        .pipe(gulp.dest('src/'));
+  return string_src("version.js", "(function (Global) {" +
+                    "Global.Prismic.version = '" + pkg.version + "';" +
+                    "}(typeof exports === 'object' && exports ? exports : (typeof module === 'object' && module && typeof module.exports === 'object' ? module.exports : window)));\n")
+    .pipe(gulp.dest('src/'));
 });
 
 gulp.task('build', () => {
@@ -62,18 +65,18 @@ gulp.task('minify', () => {
 });
 
 gulp.task('doc', ['build'], () => {
-    return gulp.src('./dist/prismic.io.js')
-        .pipe(jsdoc('doc'));
+  return gulp.src('./dist/prismic.io.js')
+    .pipe(jsdoc('doc'));
 });
 
 gulp.task('deploy:doc', ['doc'], () => {
-    return gulp.src("./doc/**/*")
-        .pipe(deploy());
+  return gulp.src("./doc/**/*")
+    .pipe(deploy());
 });
 
-gulp.task('deploy:gist', ['test:doc'], (cb) => {
-    return gulp.src("./test/doc.js")
-        .pipe(gist());
+gulp.task('deploy:gist', ['test:doc'], () => {
+  return gulp.src("./test/doc.js")
+    .pipe(gist());
 });
 
 gulp.task('default', ['build', 'minify', 'doc']);
