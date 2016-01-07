@@ -33,7 +33,7 @@ gulp.task('version', () => {
 });
 
 gulp.task('build', () => {
-  browserify('src/browser.js', {debug: true })
+  browserify('lib/browser.js', {debug: true })
     .transform(babel, {presets: ["es2015"]})
     .bundle()
     .on('error', function(err) {
