@@ -20,9 +20,6 @@
     "es6-promise": "^3.0.2",
     "eslint": "^1.10.3",
     "gh-pages": "^0.8.0",
-    "gulp": "~3.9.0",
-    "gulp-sourcemaps": "^1.6.0",
-    "gulp-uglify": "~1.2.0",
     "jsdoc": "^3.4.0",
     "mocha": "*",
     "vinyl-buffer": "^1.0.0",
@@ -34,12 +31,18 @@
   },
   "main": "lib/api.js",
   "scripts": {
-    "prepublish": "gulp",
+    "build": "scripts/browser.js",
+    "uglify": "uglifyjs -c -o=dist/prismic.io.min.js dist/prismic.io.js",
+    "preuglify": "npm run build",
+    "prepublish": "npm run uglify",
     "lint": "eslint lib",
     "test": "mocha",
     "posttest": "eslint lib",
     "builddoc": "jsdoc dist/prismic.io.js README.md",
-    "pushdoc": "",
+    "pushdoc": "scripts/pushdoc.js",
     "prepushdoc": "npm run builddoc"
+  },
+  "dependencies": {
+    "uglify-js": "^2.6.1"
   }
 }
