@@ -24,6 +24,16 @@ describe('API retrieval and parsing', function(){
     });
   });
 
+  it('Retrieve the API with a Promise', function(done) {
+    Prismic.api(testRepository).then(function(api) {
+      assert.operator(api.data.refs.length, '>', 0, 'at least one reference');
+      assert.equal(api.url, testRepository);
+      done();
+    }, function(err) {
+      throw err;
+    });
+  });
+
   it('Correctly handles the error if the URL is wrong', function(done) {
     console.log('\n*** Note by tester: The following error is a "normal" error (see note in test.js): ');
     // We can't help it because whatever you do, the JS engine contains a "console.error" statement when this error occurs,
