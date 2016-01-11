@@ -15,30 +15,39 @@ You can install a stable version using __npm__:
 npm install prismic.io --save
 ```
 
-Or using __bower__:
-
-```sh
-bower install prismic.io
-```
-
 Finally, you can find downloadable versions of the kit on our release page: [https://github.com/prismicio/javascript-kit/releases](https://github.com/prismicio/javascript-kit/releases).
+
+The kit is universal, it can be used:
+
+* Server-side with NodeJS
+* Client-side as part of your build with Browserify, Webpack (you need a [Promise polyfill](https://github.com/jakearchibald/es6-promise) to support IE11 and below)
+* Client-side with a simple script tag
+
+### Starter kits
+
+For new project, you can start from a sample project:
+
+* [Node.js project](https://github.com/prismicio/nodejs-sdk)
+* [Simple in-browser project](https://github.com/prismicio/javascript-jquery-starter)
+* [Static pages generation with baked.js](https://github.com/prismicio/baked.js)
 
 ### Usage
 
-If you don't have a Prismic.io repository yet, find out [how to get one](https://developers.prismic.io/documentation/UjBaQsuvzdIHvE4D/getting-started).
+To fetch documents from your repository, you need to fetch the Api data first. All asynchronous calls return ES2015 promises.
 
-Once your repository is ready, you can use the Javascript kit server-side with Node.js, or client-side without needing and specific technology server-side. We provide various starter kits depending on your choice:
+```javascript
+var Prismic = require('prismic.io');
 
-* [jQuery starter kit](https://github.com/prismicio/javascript-jquery-starter)
-* [Node.js starter kit](https://github.com/prismicio/javascript-nodejs-starter)
-* [Single page starter kit](https://github.com/prismicio/javascript-singlepage)
-* [Static pages generation with baked.js](https://github.com/prismicio/baked.js)
+Prismic.api("http://lesbonneschoses.prismic.io/api").then(function(api) {
+  return api.query(""); // An empty query will return all the documents
+}).then(function(response) {
+  console.log("Documents: ", response.documents);
+}, function(err) {
+  console.log("Something went wrong: ", err);
+});
+```
 
-We're working hard to keep all the starter kit up-to-date, but it's always a good idea to check on this page if you're on the
-latest version of the kit. We're constantly adding new features to Prismic.io, and it is necessary to have the latest version
-to use all of them.
-
-You can then read the documentation from the [Developer's Portal](https://developers.prismic.io/) for more details on how to use
+See the (https://prismic.io/docs)[developer documentation] or the (http://prismicio.github.io/javascript-kit/)[API documentation] for more details on how to use it.
 
 ### Contribute to the kit
 
@@ -46,27 +55,13 @@ Contribution is open to all developer levels, read our "[Contribute to the offic
 
 #### Install the kit locally
 
-You can simply execute this JavaScript kit with a web browser, but before committing, we kindly ask you to run the ```gulp``` command (it will make sure all tests still pass, and concatenate/minify your changes).
+Source files are in the `lib/` directory. You only need [Node.js and npm](http://www.joyent.com/blog/installing-node-and-npm/)
+to work on the codebase.
 
-To install gulp and other required packages: [install Node.js and npm](http://www.joyent.com/blog/installing-node-and-npm/), and then run this from your kit's repository, as an administrator:
 ```
-npm install -g gulp
 npm install
+npm test
 ```
-
-#### Test
-
-Please write tests in [test/test.js](test/test.js) for any bugfix or new feature, following the [very simple QUnit syntax](http://qunitjs.com/), if you need to test with a real Prismic.io repository. Otherwise use [test/unit.js](test/unit.js) for unit testing features.
-
-Execute the tests either by opening [test/test.html](test/test.html) or [test/unit.html](test/unit.html) in a browser, or by using Gulp:
-
-* ```gulp jshint``` will run jshint to check for syntax errors or bad practice in the code
-* ```gulp test``` will run jshint, all the tests and display the result on your shell
-* ```gulp test:int``` will run all integration tests (the ones from [test/test.html](test/test.html))
-* ```gulp test:unit``` will run all unit tests (the ones from [test/unit.html](test/unit.html))
-* ```gulp test:doc``` will run all tests related to the code snippets from the documentation (the ones from [test/doc.html](test/doc.html))
-
-If you find existing code that is not optimally tested and wish to make it better, we really appreciate it; but you should document it on its own branch and its own pull request.
 
 #### Documentation
 
@@ -80,7 +75,7 @@ If you find existing code that is not optimally documented and wish to make it b
 
 This software is licensed under the Apache 2 license, quoted below.
 
-Copyright 2013-2014 Zengularity (http://www.zengularity.com).
+Copyright 2013-2016 Zengularity (http://www.zengularity.com).
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this project except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
 
