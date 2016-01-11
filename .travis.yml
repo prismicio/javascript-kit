@@ -2,10 +2,8 @@ language: node_js
 sudo: false
 
 node_js:
-- '4.0'
-- '4.1'
-
-script: gulp test
+- '4'
+- '5'
 
 deploy:
   provider: npm
