@@ -328,14 +328,21 @@ Api.prototype = {
    * @param {string} uid
    * @param {object} additional parameters
    * @param {function} callback(err, response)
+   * @returns {Promise}
    */
   getBookmark: function getBookmark(bookmark, options, callback) {
-    var id = this.bookmarks[bookmark];
-    if (id) {
-      this.getById(this.bookmarks[bookmark], options, callback);
-    } else {
-      callback(new Error("Error retrieving bookmarked id"));
-    }
+    return new Promise(function (resolve, reject) {
+      var id = this.bookmarks[bookmark];
+      if (id) {
+        resolve(id);
+      } else {
+        var err = new Error("Error retrieving bookmarked id");
+        if (callback) callback(err);
+        reject(err);
+      }
+    }).then(function (id) {
+      return this.getById(id, options, callback);
+    });
   },
 
   /**
@@ -3346,40 +3353,50 @@ var Api = api.Api,
     Experiments = experiments.Experiments;
 
 /**
- * The kit's main entry point; initialize your API like this: Prismic.Api(url, callback, accessToken, maybeRequestHandler)
+ * The kit's main entry point; initialize your API like this: Prismic.api(url, callback, accessToken, maybeRequestHandler)
  *
  * @global
  * @alias Api
  * @constructor
  * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
- * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
+ * @param {function} callback - Optional callback function
  * @param {string} maybeAccessToken - The accessToken for an OAuth2 connection
  * @param {function} maybeRequestHandler - Environment specific HTTP request handling function
  * @param {object} maybeApiCache - A cache object with get/set functions for caching API responses
  * @param {int} maybeApiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
+ * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
  * @returns {Api} - The Api object that can be manipulated
  */
-function getApi(url, callback, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+function getApi(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+  var callback = null;
+  if (typeof arguments[1] == 'function') {
+    // The second argument is the callback, push the rest
+    callback = arguments[1];
+    maybeAccessToken = arguments[2];
+    maybeRequestHandler = arguments[3];
+    maybeApiCache = arguments[4];
+    maybeApiDataTTL = arguments[5];
+  }
   var api = new Api(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL);
   //Use cached api data if available
-  api.get(function (err, data) {
-    if (callback && err) {
-      callback(err);
-      return;
-    }
+  return new Promise(function (resolve, reject) {
+    var cb = function cb(err, value, xhr) {
+      if (callback) callback(err, value, xhr);
+      if (value) resolve(value);
+      if (err) reject(err);
+    };
+    api.get(function (err, data) {
+      if (!err && data) {
+        api.data = data;
+        api.bookmarks = data.bookmarks;
+        api.experiments = new Experiments(data.experiments);
+      }
 
-    if (data) {
-      api.data = data;
-      api.bookmarks = data.bookmarks;
-      api.experiments = new Experiments(data.experiments);
-    }
+      cb(err, api);
+    });
 
-    if (callback) {
-      callback(null, api);
-    }
+    return api;
   });
-
-  return api;
 }
 
 module.exports = {
@@ -11355,8 +11372,9 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "2.0.0",
+  "version": "2.0.0-beta2",
   "devDependencies": {
+    "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
     "babelify": "^7.2.0",
     "browserify": "^12.0.1",
@@ -11365,9 +11383,6 @@ module.exports={
     "es6-promise": "^3.0.2",
     "eslint": "^1.10.3",
     "gh-pages": "^0.8.0",
-    "gulp": "~3.9.0",
-    "gulp-sourcemaps": "^1.6.0",
-    "gulp-uglify": "~1.2.0",
     "jsdoc": "^3.4.0",
     "mocha": "*",
     "vinyl-buffer": "^1.0.0",
@@ -11377,7 +11392,7 @@ module.exports={
     "type": "git",
     "url": "http://github.com/prismicio/javascript-kit.git"
   },
-  "main": "lib/api.js",
+  "main": "lib/prismic.js",
   "scripts": {
     "build": "scripts/browser.js",
     "uglify": "uglifyjs -c -o=dist/prismic.io.min.js dist/prismic.io.js",
@@ -11389,9 +11404,6 @@ module.exports={
     "builddoc": "jsdoc dist/prismic.io.js README.md",
     "pushdoc": "scripts/pushdoc.js",
     "prepushdoc": "npm run builddoc"
-  },
-  "dependencies": {
-    "uglify-js": "^2.6.1"
   }
 }
 
