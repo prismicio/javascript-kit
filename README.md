@@ -33,7 +33,22 @@ For new project, you can start from a sample project:
 
 ### Usage
 
-To fetch documents from your repository, you need to fetch the Api data first. All asynchronous calls return ES2015 promises.
+To fetch documents from your repository, you need to fetch the Api data first.
+
+```javascript
+var Prismic = require('prismic.io');
+
+Prismic.api("http://lesbonneschoses.prismic.io/api", function(error, api) {
+  api.query("", function(error, response) { // An empty query will return all the documents
+    if (error) {
+      console.log("Something went wrong: ", err);
+    }
+    console.log("Documents: ", response.documents);
+  });
+});
+```
+
+All asynchronous calls return ES2015 promises, so alternatively you can use them instead of callbacks.
 
 ```javascript
 var Prismic = require('prismic.io');
