@@ -12,16 +12,12 @@
 You can install a stable version using __npm__:
 
 ```sh
-npm install prismic.io
+npm install prismic.io --save
 ```
 
-Or using __bower__:
+Or you can find downloadable versions of the kit on our release page: [https://github.com/prismicio/javascript-kit/releases](https://github.com/prismicio/javascript-kit/releases).
 
-```sh
-bower install prismic.io
-```
-
-Finally, you can find downloadable versions of the kit on our release page: [https://github.com/prismicio/javascript-kit/releases](https://github.com/prismicio/javascript-kit/releases).
+*A beta version is available: 2.0.0-beta2 on NPM, see [the new README](https://github.com/prismicio/javascript-kit/tree/newbuild) for usage information.*
 
 ### Usage
 
@@ -31,7 +27,6 @@ Once your repository is ready, you can use the Javascript kit server-side with N
 
 * [jQuery starter kit](https://github.com/prismicio/javascript-jquery-starter)
 * [Node.js starter kit](https://github.com/prismicio/javascript-nodejs-starter)
-* [Single page starter kit](https://github.com/prismicio/javascript-singlepage)
 * [Static pages generation with baked.js](https://github.com/prismicio/baked.js)
 
 We're working hard to keep all the starter kit up-to-date, but it's always a good idea to check on this page if you're on the
