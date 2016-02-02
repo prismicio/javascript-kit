@@ -373,7 +373,7 @@
 				getBookmark: function(bookmark, options, callback) {
 						var id = this.bookmarks[bookmark];
 						if (id) {
-								this.getById(this.bookmarks[bookmark], options, callback);
+								this.getByID(this.bookmarks[bookmark], options, callback);
 						} else {
 								callback(new Error("Error retrieving bookmarked id"));
 						}
