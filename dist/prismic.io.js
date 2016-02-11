@@ -265,11 +265,12 @@ Api.prototype = {
    * @param {function} callback(err, response)
    */
   query: function query(q, options, callback) {
+    var opts = options || {};
     var form = this.form('everything');
-    for (var key in options) {
+    for (var key in opts) {
       form = form.set(key, options[key]);
     }
-    if (!options['ref']) {
+    if (!opts['ref']) {
       form = form.ref(this.master());
     }
     return form.query(q).submit(callback);
@@ -341,7 +342,7 @@ Api.prototype = {
         reject(err);
       }
     }).then(function (id) {
-      return this.getById(id, options, callback);
+      return this.getByID(id, options, callback);
     });
   },
 
@@ -11372,7 +11373,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "2.0.0-beta2",
+  "version": "2.0.0",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",

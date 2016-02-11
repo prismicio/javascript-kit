@@ -9,13 +9,23 @@
 
 ### Installation
 
-You can install a stable version using __npm__:
+#### NPM
 
 ```sh
 npm install prismic.io --save
 ```
 
-Or you can find downloadable versions of the kit on our release page: [https://github.com/prismicio/javascript-kit/releases](https://github.com/prismicio/javascript-kit/releases).
+#### CDN
+
+```
+https://npmcdn.com/prismic.io@2.0.0/dist/prismic.io.min.js
+```
+
+(You may need to adapt the version number)
+
+#### Downloadable version
+
+On our release page: [https://github.com/prismicio/javascript-kit/releases](https://github.com/prismicio/javascript-kit/releases).
 
 The kit is universal, it can be used:
 
