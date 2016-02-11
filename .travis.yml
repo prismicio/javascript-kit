@@ -3,8 +3,8 @@ sudo: false
 
 node_js:
 - '0.12'
-
-script: gulp test
+- '4'
+- '5'
 
 deploy:
   provider: npm

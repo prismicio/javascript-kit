@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="https://npmcdn.com/prismic.io@2.0.0-beta2/dist/prismic.io.min.js"></script>
+  </head>
+  <script>
+   $(function(){
+
+     function fillResults(results) {
+       console.log("Fill", results);
+       var $ul = $('#documents').empty();
+       for (var i =0; i < results.length; i++) {
+         $ul.append("<li>" + results[i].slug + "</li>");
+       }
+     }
+
+     $('#submit').on('click', function(){
+       var endpoint = $('#endpoint').val();
+       console.log("click!", endpoint)
+       window.Prismic.api(endpoint, function(err, api) {
+         $('#messages').html(err ? ("<div class='bg-danger'>" + err + "</div>") : "");
+         api.query("", {}, function(err, response) {
+           $('#messages').html(err ? ("<div class='bg-danger'>" + err + "</div>") : "");
+           fillResults(response.results);
+         });
+       });
+     });
+   });
+  </script>
+
+  <body>
+    <h1>Fetching Prismic.io data from a browser</h1>
+    <div>The Javascript kit can be used server-side, but also client-side.</div>
+    <div id="messages"></div>
+    API enpoint: <input id="endpoint" value="https://lesbonneschoses.prismic.io/api" size="50">
+    <button id="submit" class="btn btn-default">Go!</button>
+    <ul id="documents">
+    </ul>
+  </body>
+
+</html>

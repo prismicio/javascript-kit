@@ -4,5 +4,5 @@ local-build
 .idea
 doc
 .grunt
-src/version.js
-
+.tern-port
+npm-debug.log

@@ -10,27 +10,37 @@
     "content",
     "api"
   ],
-  "version": "1.4.1",
+  "version": "2.0.0",
   "devDependencies": {
-    "codeclimate-test-reporter": "~0.0.4",
-    "gulp": "~3.9.0",
-    "gulp-uglify": "~1.2.0",
-    "gulp-util": "~3.0.6",
-    "gulp-concat": "~2.6.0",
+    "uglify-js": "^2.6.1",
+    "babel-preset-es2015": "^6.3.13",
+    "babelify": "^7.2.0",
+    "browserify": "^12.0.1",
     "chai": "*",
+    "codeclimate-test-reporter": "~0.0.4",
+    "es6-promise": "^3.0.2",
+    "eslint": "^1.10.3",
+    "gh-pages": "^0.8.0",
+    "jsdoc": "^3.4.0",
     "mocha": "*",
-    "gulp-mocha-phantomjs": "git://github.com/erwan/gulp-mocha-phantomjs.git#phantomjs198",
-    "gulp-jsdoc": "~0.1.4",
-    "gulp-jshint": "~1.11.2",
-    "gulp-gist": "~1.0.3",
-    "gulp-gh-pages": "~0.5.0"
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
   },
   "repository": {
     "type": "git",
     "url": "http://github.com/prismicio/javascript-kit.git"
   },
-  "main": "dist/prismic.io",
+  "main": "lib/prismic.js",
   "scripts": {
-    "test": "gulp test"
+    "build": "scripts/browser.js",
+    "uglify": "uglifyjs -c -o=dist/prismic.io.min.js dist/prismic.io.js",
+    "preuglify": "npm run build",
+    "prepublish": "npm run uglify",
+    "lint": "eslint lib",
+    "test": "mocha",
+    "posttest": "eslint lib",
+    "builddoc": "jsdoc dist/prismic.io.js README.md",
+    "pushdoc": "scripts/pushdoc.js",
+    "prepushdoc": "npm run builddoc"
   }
 }

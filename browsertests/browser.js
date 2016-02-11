@@ -1,8 +1,6 @@
 /*eslint-env node, mocha */
+/*global chai, Prismic */
 /*eslint no-unused-vars: 0 */
-
-var Prismic = require('../lib/prismic.js').Prismic;
-var chai = require('chai');
 
 var assert = chai.assert;
 
@@ -24,22 +22,12 @@ describe('API retrieval and parsing', function(){
     });
   });
 
-  it('Retrieve the API with a Promise', function(done) {
-    Prismic.api(testRepository).then(function(api) {
-      assert.operator(api.data.refs.length, '>', 0, 'at least one reference');
-      assert.equal(api.url, testRepository);
-      done();
-    }, function(err) {
-      throw err;
-    });
-  });
-
   it('Correctly handles the error if the URL is wrong', function(done) {
     console.log('\n*** Note by tester: The following error is a "normal" error (see note in test.js): ');
     // We can't help it because whatever you do, the JS engine contains a "console.error" statement when this error occurs,
     // and we're exactly trying to test how the kit reacts when this error occurs.
     Prismic.api(testRepository+"/errormaker", function(err, Api) {
-      assert.equal(err.message, "Unexpected status code [404] on URL https://lesbonneschoses.prismic.io/api/errormaker");
+      assert.equal(err.message, "Unexpected status code [0] on URL https://lesbonneschoses.prismic.io/api/errormaker");
       done();
     });
   });
@@ -117,9 +105,7 @@ describe('API form submissions', function() {
         .query(Predicates.any("document.type", ["doc", "docchapter"]))
         .ref(Api.master())
         .submit(function (err, response) {
-          if (err) {
-            console.log(err);
-          }
+          if (err) console.log(err);
           var document = response.results[0];
           assert.equal(document.linkedDocuments().length, 1);
           assert.equal(document.linkedDocuments()[0].id, 'U0w8OwEAACoAQEvB');

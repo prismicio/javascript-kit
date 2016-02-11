@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Prismic.io Javascript kit Test Suite</title>
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css">
+</head>
+<body>
+<!-- Mocha and Chai -->
+<div id="mocha"></div>
+<script src="../node_modules/chai/chai.js"></script>
+<script src="../node_modules/mocha/mocha.js"></script>
+<script>mocha.setup('bdd')</script>
+<!-- Load local lib and tests. -->
+<script src="../dist/prismic.io.min.js"></script>
+<script src="./browser.js"></script>
+<!-- Run tests -->
+<script>
+    if (window.mochaPhantomJS) {
+        mochaPhantomJS.run();
+    } else {
+        mocha.run();
+    }
+</script>
+</body>
+</html>
