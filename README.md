@@ -72,7 +72,7 @@ Prismic.api("https://lesbonneschoses.prismic.io/api").then(function(api) {
 });
 ```
 
-See the (https://prismic.io/docs)[developer documentation] or the (http://prismicio.github.io/javascript-kit/)[API documentation] for more details on how to use it.
+See the [developer documentation](https://prismic.io/docs) or the [API documentation](http://prismicio.github.io/javascript-kit/) for more details on how to use it.
 
 ### Contribute to the kit
 
