@@ -3383,8 +3383,11 @@ function getApi(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybe
   return new Promise(function (resolve, reject) {
     var cb = function cb(err, value, xhr) {
       if (callback) callback(err, value, xhr);
-      if (value) resolve(value);
-      if (err) reject(err);
+      if (err) {
+        reject(err);
+      } else {
+        resolve(value);
+      }
     };
     api.get(function (err, data) {
       if (!err && data) {
@@ -11373,7 +11376,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "2.0.0",
+  "version": "2.0.1",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
