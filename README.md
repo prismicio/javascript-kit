@@ -63,10 +63,10 @@ All asynchronous calls return ES2015 promises, so alternatively you can use them
 ```javascript
 var Prismic = require('prismic.io');
 
-Prismic.api("http://lesbonneschoses.prismic.io/api").then(function(api) {
+Prismic.api("https://lesbonneschoses.prismic.io/api").then(function(api) {
   return api.query(""); // An empty query will return all the documents
 }).then(function(response) {
-  console.log("Documents: ", response.documents);
+  console.log("Documents: ", response.results);
 }, function(err) {
   console.log("Something went wrong: ", err);
 });
