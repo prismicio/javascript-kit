@@ -768,4 +768,53 @@ describe('Various fragment types', function() {
     assert.equal(slices.asText(getLinkResolver()), "c'est un bloc features\n\nC'est un bloc content\n");
     assert.equal(slices.asHtml(getLinkResolver()), '<div data-slicetype="features" class="slice"><section data-field="illustration"><img src="https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg" width="4285" height="709" alt=""></section><section data-field="title"><span>c\'est un bloc features</span></section></div><div data-slicetype="text" class="slice"><p>C\'est un bloc content</p></div>');
   });
+
+
+  it('Slices correctly handle document links when rendering as text', function () {
+    var doc = Prismic.parseDoc({
+      "id":"VQ_hV31Za5EAy02H",
+      "uid":null,
+      "type":"article",
+      "href":"http://toto.wroom.dev/api/documents/search?ref=VQ_uWX1Za0oCy46m&q=%5B%5B%3Ad+%3D+at%28document.id%2C+%22VQ_hV31Za5EAy02H%22%29+%5D%5D",
+      "tags":[],
+      "slugs":["une-activite"],
+      "linked_documents":[],
+      "data":{
+        "article":{
+          "blocks":{
+            "type":"SliceZone",
+            "value":[{
+              "type":"Slice",
+              "slice_type": "link",
+              "value":{
+                "type":"Link.document",
+                "value": {
+                  "document": {
+                    "id": "UrDejAEAAFwMyrW9",
+                    "type": "doc",
+                    "tags": [],
+                    "slug": "installing-meta-micro"
+                  },
+                  "isBroken": false
+                }
+              }
+            },{
+              "type":"Slice",
+              "slice_type":"text",
+              "value":{
+                "type":"StructuredText",
+                "value":[{
+                  "type":"paragraph",
+                  "text":"C'est un bloc content",
+                  "spans":[]
+                }]
+              }
+            }]
+          }
+        }
+      }
+    });
+    var slices = doc.getSliceZone('article.blocks');
+    assert.equal(slices.asText(getLinkResolver()), "/testing_url/UrDejAEAAFwMyrW9/installing-meta-micro\nC'est un bloc content\n");
+  });
 });
