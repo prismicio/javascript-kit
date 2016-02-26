@@ -8,7 +8,7 @@ var assert = chai.assert;
 
 /* === TESTS ARE RUN OVER "LES BONNES CHOSES" EXAMPLE REPOSITORY === */
 
-var testRepository = 'https://lesbonneschoses.prismic.io/api',
+var testRepository = 'https://lesbonneschoses.cdn.prismic.io/api',
     previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70',
     microRepository = 'https://micro.prismic.io/api',
     Predicates = Prismic.Predicates;
@@ -39,7 +39,7 @@ describe('API retrieval and parsing', function(){
     // We can't help it because whatever you do, the JS engine contains a "console.error" statement when this error occurs,
     // and we're exactly trying to test how the kit reacts when this error occurs.
     Prismic.api(testRepository+"/errormaker", function(err, Api) {
-      assert.equal(err.message, "Unexpected status code [404] on URL https://lesbonneschoses.prismic.io/api/errormaker");
+      assert.equal(err.message, "Unexpected status code [404] on URL https://lesbonneschoses.cdn.prismic.io/api/errormaker");
       done();
     });
   });
@@ -76,7 +76,7 @@ describe('API form submissions', function() {
           return;
         }
         assert.equal(documents.results.length, 20);
-        assert.equal(documents.next_page, "https://lesbonneschoses.prismic.io/api/documents/search?ref=UlfoxUnM08QWYXdl&page=2&pageSize=20");
+        assert.equal(documents.next_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=2&pageSize=20");
         assert.equal(documents.page, 1);
         assert.equal(documents.prev_page, null);
         assert.equal(documents.results_per_page, 20);
@@ -194,7 +194,7 @@ describe('API form submissions', function() {
         assert.equal(documents.results.length, 20);
         assert.equal(documents.next_page, null);
         assert.equal(documents.page, 2);
-        assert.equal(documents.prev_page, "https://lesbonneschoses.prismic.io/api/documents/search?ref=UlfoxUnM08QWYXdl&page=1&pageSize=20");
+        assert.equal(documents.prev_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=1&pageSize=20");
         assert.equal(documents.results_per_page, 20);
         assert.equal(documents.results_size, 20);
         assert.equal(documents.total_pages, 2);
@@ -213,7 +213,7 @@ describe('API form submissions', function() {
       Api.form('everything').pageSize(10).ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
         assert.equal(documents.results.length, 10);
-        assert.equal(documents.next_page, "https://lesbonneschoses.prismic.io/api/documents/search?ref=UlfoxUnM08QWYXdl&page=2&pageSize=10");
+        assert.equal(documents.next_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=2&pageSize=10");
         assert.equal(documents.page, 1);
         assert.equal(documents.prev_page, null);
         assert.equal(documents.results_per_page, 10);
@@ -234,9 +234,9 @@ describe('API form submissions', function() {
           return;
         }
         assert.equal(documents.results.length, 10);
-        assert.equal(documents.next_page, "https://lesbonneschoses.prismic.io/api/documents/search?ref=UlfoxUnM08QWYXdl&page=3&pageSize=10");
+        assert.equal(documents.next_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=3&pageSize=10");
         assert.equal(documents.page, 2);
-        assert.equal(documents.prev_page, "https://lesbonneschoses.prismic.io/api/documents/search?ref=UlfoxUnM08QWYXdl&page=1&pageSize=10");
+        assert.equal(documents.prev_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=1&pageSize=10");
         assert.equal(documents.results_per_page, 10);
         assert.equal(documents.results_size, 10);
         assert.equal(documents.total_pages, 4);
@@ -250,7 +250,7 @@ describe('API form submissions', function() {
     Prismic.api(testRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').ref(Api.master()).query("wrongpredicate").submit(function (err, _) {
-        assert.equal(err.message, "Unexpected status code [400] on URL https://lesbonneschoses.prismic.io/api/documents/search?page=1&pageSize=20&ref=UlfoxUnM08QWYXdl&q=wrongpredicate");
+        assert.equal(err.message, "Unexpected status code [400] on URL https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?page=1&pageSize=20&ref=UlfoxUnM08QWYXdl&q=wrongpredicate");
         done();
       });
     });
