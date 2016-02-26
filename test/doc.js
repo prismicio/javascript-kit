@@ -116,13 +116,14 @@ describe('Query', function() {
   it('prismic-orderings.js', function (done) {
     // startgist:92bdec9ace554b9f95c0:prismic-orderings.js
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
-      if (err) done(err); // gisthide
+      if (err) { done(err); return; } // gisthide
       Api.form('everything')
         .ref(Api.master())
         .query(Prismic.Predicates.at("document.type", "product"))
         .pageSize(100)
         .orderings('[my.product.price desc]')
         .submit(function (err, response) {
+          if (err) { done(err); return; } // gisthide
           // The products are now ordered by price, highest first
           var results = response.results;
           assert.equal(response.results_per_page, 100); // gisthide
@@ -135,12 +136,12 @@ describe('Query', function() {
   it('prismic-predicates.js', function (done) {
     // startgist:c90d98f6c77ef6505094:prismic-predicates.js
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
-      if (err) done(err); // gisthide
+      if (err) { done(err); return; } // gisthide
       Api.form('everything').ref(Api.master()).query(
         Prismic.Predicates.at("document.type", "blog-post"),
         Prismic.Predicates.dateAfter("my.blog-post.date", new Date(2014, 6, 1))
       ).submit(function (err, response) {
-        if (err) throw err; // gisthide
+        if (err) { done(err); return; } // gisthide
         // All documents of type "product", updated after June 1st, 2014
         assert.equal(response.results.length, 0); // gisthide
         done(); // gisthide
