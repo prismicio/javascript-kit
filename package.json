@@ -31,13 +31,14 @@
     "url": "http://github.com/prismicio/javascript-kit.git"
   },
   "main": "lib/prismic.js",
+  "browser": "lib/browser.js",
   "scripts": {
     "build": "scripts/browser.js",
     "uglify": "uglifyjs -c -o=dist/prismic.io.min.js dist/prismic.io.js",
     "preuglify": "npm run build",
     "prepublish": "npm run uglify",
     "lint": "eslint lib",
-    "test": "mocha",
+    "test": "mocha -t 5000",
     "posttest": "eslint lib",
     "builddoc": "jsdoc dist/prismic.io.js README.md",
     "pushdoc": "scripts/pushdoc.js",

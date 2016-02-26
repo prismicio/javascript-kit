@@ -31,9 +31,9 @@ describe('Document manipulation', function() {
 
   it('Render a document to Html', function (done) {
     Prismic.api(testRepository, function (err, Api) {
-      if (err) throw err;
+      if (err) { done(err); return; }
       Api.form('everything').ref(Api.master()).submit(function (err, documents) {
-        if (err) throw err;
+        if (err) { done(err); return; }
         var first = documents.results[0];
         assert.notEqual(null, first);
         first.asHtml(getLinkResolver());
@@ -44,9 +44,9 @@ describe('Document manipulation', function() {
 
   it('Render a document to Text', function (done) {
     Prismic.api(testRepository, function (err, Api) {
-      if (err) throw err;
+      if (err) { done(err); return; }
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
-        if (err) throw err;
+        if (err) { done(err); return; }
         function fix(s) {
           // remove dates and timezone
           return s.replace(/[A-Z][a-z]{2,4} [A-Z][a-z]{2,4} \d{2} \d{4} \d{2}:\d{2}:\d{2} GMT[+-]\d{4} \([^)]+\)/g, '<DATE>');

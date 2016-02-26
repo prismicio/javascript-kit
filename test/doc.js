@@ -43,7 +43,7 @@ describe('API', function() {
   it('prismic-api.js', function (done) {
     // startgist:1af7b5cb53a5d7cc8561:prismic-api.js
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
-      if (err) throw err; // gisthide
+      if (err) done(err); // gisthide
       // You can use the Api object inside this block
       console.log("References: ", Api.data.refs);
       assert.operator(Api.data.refs.length, '>', 0, 'at least one reference'); // gisthide
@@ -66,7 +66,7 @@ describe('API', function() {
     // startgist:c737c4588742c328026f:prismic-references.js
     var previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70';
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
-      if (err) throw err; // gisthide
+      if (err) done(err); // gisthide
       var stPatrickRef = Api.ref("St-Patrick specials");
       // Now we'll use this reference for all our calls
       Api.query(Prismic.Predicates.at("document.type", "product"), {
@@ -92,7 +92,7 @@ describe('Query', function() {
   it('prismic-simplequery.js', function (done) {
     // startgist:9b6ff487190a429d7fbc:prismic-simplequery.js
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
-      if (err) throw err; // gisthide
+      if (err) done(err); // gisthide
       Api.query(Prismic.Predicates.at("document.type", "product"), {}, function (err, response) {
         if (err) { console.log(err); done(); } // gisthide
         // The documents object contains a Response object with all documents of type "product".
@@ -116,7 +116,7 @@ describe('Query', function() {
   it('prismic-orderings.js', function (done) {
     // startgist:92bdec9ace554b9f95c0:prismic-orderings.js
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
-      if (err) throw err; // gisthide
+      if (err) done(err); // gisthide
       Api.form('everything')
         .ref(Api.master())
         .query(Prismic.Predicates.at("document.type", "product"))
@@ -135,7 +135,7 @@ describe('Query', function() {
   it('prismic-predicates.js', function (done) {
     // startgist:c90d98f6c77ef6505094:prismic-predicates.js
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
-      if (err) throw err; // gisthide
+      if (err) done(err); // gisthide
       Api.form('everything').ref(Api.master()).query(
         Prismic.Predicates.at("document.type", "blog-post"),
         Prismic.Predicates.dateAfter("my.blog-post.date", new Date(2014, 6, 1))
@@ -176,10 +176,10 @@ describe('Fragments', function() {
 
   it('prismic-htmlSerializer.js', function (done) {
     Prismic.api(testRepository, function (err, Api) {
-      if (err) throw err;
+      if (err) { done(err); return; }
       Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbl"))
         .ref(Api.master()).submit(function (err, documents) {
-          if (err) throw err;
+          if (err) { done(err); return; }
           var doc = documents.results[0];
           // startgist:ad67f185eefe842e4a12:prismic-htmlSerializer.js
           var htmlSerializer = function (element, content) {
