@@ -10,7 +10,7 @@
     "content",
     "api"
   ],
-  "version": "2.1.2",
+  "version": "2.1.3",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",

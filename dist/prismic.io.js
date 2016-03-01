@@ -357,7 +357,6 @@ Api.prototype = {
    */
   previewSession: function previewSession(token, linkResolver, defaultUrl, callback) {
     var api = this;
-    var Predicates = Predicates;
     return new Promise(function (resolve, reject) {
       var cb = function cb(err, value, xhr) {
         if (callback) callback(err, value, xhr);
@@ -11410,7 +11409,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "2.1.2",
+  "version": "2.1.3",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
