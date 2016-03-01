@@ -10,7 +10,7 @@
     "content",
     "api"
   ],
-  "version": "2.1.1",
+  "version": "2.1.2",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
@@ -31,7 +31,6 @@
     "url": "http://github.com/prismicio/javascript-kit.git"
   },
   "main": "lib/prismic.js",
-  "browser": "lib/browser.js",
   "scripts": {
     "build": "scripts/browser.js",
     "uglify": "uglifyjs -c -o=dist/prismic.io.min.js dist/prismic.io.js",
