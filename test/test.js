@@ -76,7 +76,6 @@ describe('API form submissions', function() {
           return;
         }
         assert.equal(documents.results.length, 20);
-        assert.equal(documents.next_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=2&pageSize=20");
         assert.equal(documents.page, 1);
         assert.equal(documents.prev_page, null);
         assert.equal(documents.results_per_page, 20);
