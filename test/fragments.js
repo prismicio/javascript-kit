@@ -817,4 +817,25 @@ describe('Various fragment types', function() {
     var slices = doc.getSliceZone('article.blocks');
     assert.equal(slices.asText(getLinkResolver()), "/testing_url/UrDejAEAAFwMyrW9/installing-meta-micro\nC'est un bloc content\n");
   });
+
+  it('Number correctly null content when rendering as text', function () {
+    var doc = Prismic.parseDoc({
+      "id":"VQ_hV31Za5EAy02H",
+      "uid":null,
+      "type":"article",
+      "href":"http://toto.wroom.dev/api/documents/search?ref=VQ_uWX1Za0oCy46m&q=%5B%5B%3Ad+%3D+at%28document.id%2C+%22VQ_hV31Za5EAy02H%22%29+%5D%5D",
+      "tags":[],
+      "slugs":["une-activite"],
+      "linked_documents":[],
+      "data":{
+        "article":{
+          "number":{
+            "type":"Number",
+            "value":null
+          }
+        }
+      }
+    });
+    assert.equal(doc.asText(getLinkResolver()), "");
+  });
 });
