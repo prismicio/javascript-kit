@@ -16,5 +16,8 @@ module.exports = {
     "node": true,
     "browser": true
   },
+  "globals": {
+    "Promise": true
+  },
   "extends": "eslint:recommended"
 };

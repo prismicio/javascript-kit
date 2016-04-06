@@ -19,7 +19,7 @@
     "chai": "*",
     "codeclimate-test-reporter": "~0.0.4",
     "es6-promise": "^3.0.2",
-    "eslint": "^1.10.3",
+    "eslint": "^2.7.0",
     "gh-pages": "^0.8.0",
     "jsdoc": "^3.4.0",
     "mocha": "*",
