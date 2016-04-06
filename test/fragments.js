@@ -283,7 +283,7 @@ describe('Multiple fragment level global test', function() {
                 "value":[{
                   type: "heading2",
                   text: "As seen by fine pastry as a field",
-                  spans: [ ]
+                  spans: []
                 }, {
                   "type":"paragraph",
                   "text":"C'est un bloc content",
@@ -354,7 +354,7 @@ describe('Multiple fragment level global test', function() {
                 "value":[{
                   type: "heading2",
                   text: "As seen by fine pastry as a field",
-                  spans: [ ]
+                  spans: []
                 }, {
                   "type":"paragraph",
                   "text":"C'est un bloc content",
@@ -387,7 +387,7 @@ describe('Multiple fragment level global test', function() {
                 "value":[{
                   type: "heading2",
                   text: "As seen by fine pastry as a field",
-                  spans: [ ]
+                  spans: []
                 }, {
                   "type":"paragraph",
                   "text":"C'est un bloc content",
@@ -515,7 +515,7 @@ describe('StructuredText', function() {
         if (err) throw err;
         var htmlSerializer = function (element, content) {
           if (element.type == "image") {
-            return '<img src="' + element.url + '" alt="' + element.alt + '">';
+            return '<img src="' + element.url + '" alt="' + (element.alt || "") + '">';
           }
 
           if (element.type == "hyperlink") {
@@ -555,8 +555,9 @@ describe('StructuredText', function() {
     Prismic.api(testRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
+        if (err) throw err;
         assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().url, "https://prismic-io.s3.amazonaws.com/lesbonneschoses/c38f9e5a1a6c43aa7aae516c154013a2cee2bc75.jpg");
-        assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().alt, "");
+        assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().alt, null);
         assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().height, 427);
         assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().width, 640);
         assert.equal(documents.results[0].getStructuredText('blog-post.body').getFirstImage().asHtml(),

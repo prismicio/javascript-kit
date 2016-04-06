@@ -186,7 +186,7 @@ describe('Fragments', function() {
           var htmlSerializer = function (element, content) {
             // Don't wrap images in a <p> tag
             if (element.type == "image") {
-              return '<img src="' + element.url + '" alt="' + element.alt + '">';
+              return '<img src="' + element.url + '" alt="' + (element.alt || "") + '">';
             }
 
             // Add a class to hyperlinks
