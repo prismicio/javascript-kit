@@ -404,7 +404,7 @@ Api.prototype = {
     var cache = this.apiCache;
     cache.get(cacheKey, function (err, value) {
       if (err || value) {
-        callback(err, value);
+        callback(err, api.response(value));
         return;
       }
       api.requestHandler(url, function (err, documents, xhr, ttl) {
@@ -412,17 +412,24 @@ Api.prototype = {
           callback(err, null, xhr);
           return;
         }
-        var results = documents.results.map(parseDoc);
-        var response = new Response(documents.page, documents.results_per_page, documents.results_size, documents.total_results_size, documents.total_pages, documents.next_page, documents.prev_page, results || []);
+
         if (ttl) {
-          cache.set(cacheKey, response, ttl, function (err) {
-            callback(err, response);
+          cache.set(cacheKey, documents, ttl, function (err) {
+            callback(err, api.response(documents));
           });
         } else {
-          callback(null, response);
+          callback(null, api.response(documents));
         }
       });
     });
+  },
+
+  /**
+   * JSON documents to Response object
+   */
+  response: function response(documents) {
+    var results = documents.results.map(parseDoc);
+    return new Response(documents.page, documents.results_per_page, documents.results_size, documents.total_results_size, documents.total_pages, documents.next_page, documents.prev_page, results || []);
   }
 
 };
@@ -2700,7 +2707,7 @@ function serialize(element, content, htmlSerializer) {
 
   if (element.type == "image") {
     var label = element.label ? " " + element.label : "";
-    var imgTag = '<img src="' + element.url + '" alt="' + element.alt + '">';
+    var imgTag = '<img src="' + element.url + '" alt="' + (element.alt || "") + '">';
     return '<p class="block-img' + label + '">' + (element.linkUrl ? '<a href="' + element.linkUrl + '">' + imgTag + '</a>' : imgTag) + '</p>';
   }
 
@@ -11331,7 +11338,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "2.1.3",
+  "version": "2.1.4",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
