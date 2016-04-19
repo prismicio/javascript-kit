@@ -5,6 +5,7 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var Requests = require('./requests'),
+    Cookies = require('./cookies'),
     documents = require('./documents'),
     ApiCache = require('./cache'),
     Predicates = require('./predicates'),
@@ -13,14 +14,18 @@ var Requests = require('./requests'),
 var Experiments = experiments.Experiments,
     Document = documents.Document;
 
+var experimentCookie = "io.prismic.experiment",
+    previewCookie = "io.prismic.preview";
+
 /**
  * Initialisation of the API object.
  * This is for internal use, from outside this kit, you should call Prismic.Api()
  * @private
  */
-function Api(url, accessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+function Api(url, accessToken, req, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
   this.url = url + (accessToken ? (url.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + accessToken : '');
   this.accessToken = accessToken;
+  this.req = req;
   this.apiCache = maybeApiCache || globalCache();
   this.requestHandler = maybeRequestHandler || Requests.request;
   this.apiCacheKey = this.url + (this.accessToken ? '#' + this.accessToken : '');
@@ -261,7 +266,7 @@ Api.prototype = {
   /**
    * Query the repository
    * @param {string|array|Predicate} the query itself
-   * @param {object} additional parameters
+   * @param {object} additional parameters. In NodeJS, pass the request as 'req'.
    * @param {function} callback(err, response)
    */
   query: function query(q, options, callback) {
@@ -270,8 +275,21 @@ Api.prototype = {
     for (var key in opts) {
       form = form.set(key, options[key]);
     }
+    // Don't override the ref if the caller specified one in the options
     if (!opts['ref']) {
-      form = form.ref(this.master());
+      // Look in cookies if we have a ref (preview or experiment)
+      var cookieString = '';
+      if (typeof window === 'undefined') {
+        // Browser
+        cookieString = window.document.cookie || '';
+      } else if (options['req']) {
+        // NodeJS
+        cookieString = options['req'].headers["cookie"] || '';
+      }
+      var cookies = Cookies.parse(cookieString);
+      var previewRef = cookies[previewCookie];
+      var experimentRef = cookies[experimentCookie];
+      form = form.ref(previewRef || experimentRef || this.master());
     }
     return form.query(q).submit(callback);
   },
@@ -756,6 +774,8 @@ function globalCache() {
 }
 
 module.exports = {
+  experimentCookie: experimentCookie,
+  previewCookie: previewCookie,
   Api: Api,
   Form: Form,
   SearchForm: SearchForm,
@@ -764,7 +784,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./cache":3,"./documents":4,"./experiments":5,"./predicates":8,"./requests":10}],2:[function(require,module,exports){
+},{"./cache":3,"./cookies":4,"./documents":5,"./experiments":6,"./predicates":9,"./requests":11}],2:[function(require,module,exports){
 'use strict';
 
 // IE below 12 doesn't support promises
@@ -794,7 +814,7 @@ if (typeof Object.create != 'function') {
 
 window.Prismic = require('./prismic');
 
-},{"./prismic":9,"es6-promise":17}],3:[function(require,module,exports){
+},{"./prismic":10,"es6-promise":18}],3:[function(require,module,exports){
 
 "use strict";
 
@@ -849,7 +869,61 @@ ApiCache.prototype = {
 
 module.exports = ApiCache;
 
-},{"./lru":7}],4:[function(require,module,exports){
+},{"./lru":8}],4:[function(require,module,exports){
+"use strict";
+
+// Some portions of code from https://github.com/jshttp/cookie
+
+var decode = decodeURIComponent;
+
+function tryDecode(str, decode) {
+  try {
+    return decode(str);
+  } catch (e) {
+    return str;
+  }
+}
+
+function parse(str, options) {
+  if (typeof str !== 'string') {
+    throw new TypeError('argument str must be a string');
+  }
+
+  var obj = {};
+  var opt = options || {};
+  var pairs = str.split(/; */);
+  var dec = opt.decode || decode;
+
+  pairs.forEach(function (pair) {
+    var eq_idx = pair.indexOf('=');
+
+    // skip things that don't look like key=value
+    if (eq_idx < 0) {
+      return;
+    }
+
+    var key = pair.substr(0, eq_idx).trim();
+    var val = pair.substr(++eq_idx, pair.length).trim();
+
+    // quoted values
+    if ('"' == val[0]) {
+      val = val.slice(1, -1);
+    }
+
+    // only assign once
+    if (undefined == obj[key]) {
+      obj[key] = tryDecode(val, dec);
+    }
+  });
+
+  return obj;
+}
+
+module.exports = {
+  parse: parse
+};
+
+},{}],5:[function(require,module,exports){
 "use strict";
 
 /**
@@ -1436,7 +1510,7 @@ module.exports = {
   GroupDoc: GroupDoc
 };
 
-},{"./fragments":6}],5:[function(require,module,exports){
+},{"./fragments":7}],6:[function(require,module,exports){
 
 "use strict";
 
@@ -1522,7 +1596,7 @@ module.exports = {
   Variation: Variation
 };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 "use strict";
 
 var documents = require('./documents');
@@ -2750,7 +2824,7 @@ module.exports = {
   insertSpans: insertSpans
 };
 
-},{"./documents":4}],7:[function(require,module,exports){
+},{"./documents":5}],8:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -3011,7 +3085,7 @@ LRUCache.prototype.toString = function () {
 
 module.exports = LRUCache;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 
 "use strict";
 
@@ -3377,7 +3451,7 @@ module.exports = {
 
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 var experiments = require('./experiments'),
@@ -3396,15 +3470,15 @@ var Api = api.Api,
  * @alias Api
  * @constructor
  * @param {string} url - The mandatory URL of the prismic.io API endpoint (like: https://lesbonneschoses.prismic.io/api)
- * @param {function} callback - Optional callback function
- * @param {string} maybeAccessToken - The accessToken for an OAuth2 connection
+ * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
+ * @param {string} maybeAccessToken - The accessToken, necessary if the API is set as private
+ * @param {string} maybeReq - The NodeJS request (pass null if not in a NodeJS context)
  * @param {function} maybeRequestHandler - Environment specific HTTP request handling function
  * @param {object} maybeApiCache - A cache object with get/set functions for caching API responses
  * @param {int} maybeApiDataTTL - How long (in seconds) to cache data used by the client to make calls (e.g. refs). Defaults to 5 seconds
- * @param {function} callback - Optional callback function that is called after the API was retrieved, which will be called with two parameters: a potential error object and the API object
  * @returns {Api} - The Api object that can be manipulated
  */
-function getApi(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
+function getApi(url, maybeAccessToken, maybeReq, maybeRequestHandler, maybeApiCache, maybeApiDataTTL) {
   var callback = null;
   if (typeof arguments[1] == 'function') {
     // The second argument is the callback, push the rest
@@ -3440,8 +3514,8 @@ function getApi(url, maybeAccessToken, maybeRequestHandler, maybeApiCache, maybe
 }
 
 module.exports = {
-  experimentCookie: "io.prismic.experiment",
-  previewCookie: "io.prismic.preview",
+  experimentCookie: api.experimentCookie,
+  previewCookie: api.previewCookie,
   Document: documents.Document,
   SearchForm: api.SearchForm,
   Form: api.Form,
@@ -3455,7 +3529,7 @@ module.exports = {
 
 module.exports.Prismic = module.exports; // Backward compatibility
 
-},{"./api":1,"./documents":4,"./experiments":5,"./fragments":6,"./predicates":8}],10:[function(require,module,exports){
+},{"./api":1,"./documents":5,"./experiments":6,"./fragments":7,"./predicates":9}],11:[function(require,module,exports){
 (function (process){
 
 "use strict";
@@ -3696,7 +3770,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"../package.json":51,"_process":24,"http":41,"https":19,"url":47}],11:[function(require,module,exports){
+},{"../package.json":52,"_process":25,"http":42,"https":20,"url":48}],12:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -3822,9 +3896,9 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],12:[function(require,module,exports){
-
 },{}],13:[function(require,module,exports){
+
+},{}],14:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -5376,14 +5450,14 @@ function blitBuffer (src, dst, offset, length) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":11,"ieee754":20,"isarray":14}],14:[function(require,module,exports){
+},{"base64-js":12,"ieee754":21,"isarray":15}],15:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = {
   "100": "Continue",
   "101": "Switching Protocols",
@@ -5448,7 +5522,7 @@ module.exports = {
   "511": "Network Authentication Required"
 }
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5559,7 +5633,7 @@ function objectToString(o) {
 }
 
 }).call(this,{"isBuffer":require("../../is-buffer/index.js")})
-},{"../../is-buffer/index.js":22}],17:[function(require,module,exports){
+},{"../../is-buffer/index.js":23}],18:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -6517,7 +6591,7 @@ function objectToString(o) {
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":24}],18:[function(require,module,exports){
+},{"_process":25}],19:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -6817,7 +6891,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var http = require('http');
 
 var https = module.exports;
@@ -6833,7 +6907,7 @@ https.request = function (params, cb) {
     return http.request.call(this, params, cb);
 }
 
-},{"http":41}],20:[function(require,module,exports){
+},{"http":42}],21:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -6919,7 +6993,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -6944,7 +7018,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /**
  * Determine if an object is Buffer
  *
@@ -6963,7 +7037,7 @@ module.exports = function (obj) {
     ))
 }
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -6987,7 +7061,7 @@ function nextTick(fn) {
 }
 
 }).call(this,require('_process'))
-},{"_process":24}],24:[function(require,module,exports){
+},{"_process":25}],25:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -7080,7 +7154,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.4.1 by @mathias */
 ;(function(root) {
@@ -7617,7 +7691,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7703,7 +7777,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7790,16 +7864,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":26,"./encode":27}],29:[function(require,module,exports){
+},{"./decode":27,"./encode":28}],30:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":30}],30:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":31}],31:[function(require,module,exports){
 // a duplex stream is just a stream that is both readable and writable.
 // Since JS doesn't have multiple prototypal inheritance, this class
 // prototypally inherits from Readable, and then parasitically from
@@ -7875,7 +7949,7 @@ function forEach(xs, f) {
     f(xs[i], i);
   }
 }
-},{"./_stream_readable":32,"./_stream_writable":34,"core-util-is":16,"inherits":21,"process-nextick-args":23}],31:[function(require,module,exports){
+},{"./_stream_readable":33,"./_stream_writable":35,"core-util-is":17,"inherits":22,"process-nextick-args":24}],32:[function(require,module,exports){
 // a passthrough stream.
 // basically just the most minimal sort of Transform stream.
 // Every written chunk gets output as-is.
@@ -7902,7 +7976,7 @@ function PassThrough(options) {
 PassThrough.prototype._transform = function (chunk, encoding, cb) {
   cb(null, chunk);
 };
-},{"./_stream_transform":33,"core-util-is":16,"inherits":21}],32:[function(require,module,exports){
+},{"./_stream_transform":34,"core-util-is":17,"inherits":22}],33:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -8785,7 +8859,7 @@ function indexOf(xs, x) {
   return -1;
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":30,"_process":24,"buffer":13,"core-util-is":16,"events":18,"inherits":21,"isarray":35,"process-nextick-args":23,"string_decoder/":45,"util":12}],33:[function(require,module,exports){
+},{"./_stream_duplex":31,"_process":25,"buffer":14,"core-util-is":17,"events":19,"inherits":22,"isarray":36,"process-nextick-args":24,"string_decoder/":46,"util":13}],34:[function(require,module,exports){
 // a transform stream is a readable/writable stream where you do
 // something with the data.  Sometimes it's called a "filter",
 // but that's not a great name for it, since that implies a thing where
@@ -8966,7 +9040,7 @@ function done(stream, er) {
 
   return stream.push(null);
 }
-},{"./_stream_duplex":30,"core-util-is":16,"inherits":21}],34:[function(require,module,exports){
+},{"./_stream_duplex":31,"core-util-is":17,"inherits":22}],35:[function(require,module,exports){
 (function (process){
 // A bit simpler than readable streams.
 // Implement an async ._write(chunk, encoding, cb), and it'll handle all
@@ -9485,12 +9559,12 @@ function CorkedRequest(state) {
   };
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":30,"_process":24,"buffer":13,"core-util-is":16,"events":18,"inherits":21,"process-nextick-args":23,"util-deprecate":49}],35:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}],36:[function(require,module,exports){
+},{"./_stream_duplex":31,"_process":25,"buffer":14,"core-util-is":17,"events":19,"inherits":22,"process-nextick-args":24,"util-deprecate":50}],36:[function(require,module,exports){
+arguments[4][15][0].apply(exports,arguments)
+},{"dup":15}],37:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":31}],37:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":32}],38:[function(require,module,exports){
 var Stream = (function (){
   try {
     return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
@@ -9504,13 +9578,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":30,"./lib/_stream_passthrough.js":31,"./lib/_stream_readable.js":32,"./lib/_stream_transform.js":33,"./lib/_stream_writable.js":34}],38:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":31,"./lib/_stream_passthrough.js":32,"./lib/_stream_readable.js":33,"./lib/_stream_transform.js":34,"./lib/_stream_writable.js":35}],39:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":33}],39:[function(require,module,exports){
+},{"./lib/_stream_transform.js":34}],40:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":34}],40:[function(require,module,exports){
+},{"./lib/_stream_writable.js":35}],41:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9639,7 +9713,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":18,"inherits":21,"readable-stream/duplex.js":29,"readable-stream/passthrough.js":36,"readable-stream/readable.js":37,"readable-stream/transform.js":38,"readable-stream/writable.js":39}],41:[function(require,module,exports){
+},{"events":19,"inherits":22,"readable-stream/duplex.js":30,"readable-stream/passthrough.js":37,"readable-stream/readable.js":38,"readable-stream/transform.js":39,"readable-stream/writable.js":40}],42:[function(require,module,exports){
 (function (global){
 var ClientRequest = require('./lib/request')
 var extend = require('xtend')
@@ -9721,7 +9795,7 @@ http.METHODS = [
 	'UNSUBSCRIBE'
 ]
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/request":43,"builtin-status-codes":15,"url":47,"xtend":50}],42:[function(require,module,exports){
+},{"./lib/request":44,"builtin-status-codes":16,"url":48,"xtend":51}],43:[function(require,module,exports){
 (function (global){
 exports.fetch = isFunction(global.fetch) && isFunction(global.ReadableByteStream)
 
@@ -9765,7 +9839,7 @@ function isFunction (value) {
 xhr = null // Help gc
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],43:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 (function (process,global,Buffer){
 // var Base64 = require('Base64')
 var capability = require('./capability')
@@ -10047,7 +10121,7 @@ var unsafeHeaders = [
 ]
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":42,"./response":44,"_process":24,"buffer":13,"inherits":21,"stream":40,"to-arraybuffer":46}],44:[function(require,module,exports){
+},{"./capability":43,"./response":45,"_process":25,"buffer":14,"inherits":22,"stream":41,"to-arraybuffer":47}],45:[function(require,module,exports){
 (function (process,global,Buffer){
 var capability = require('./capability')
 var inherits = require('inherits')
@@ -10229,7 +10303,7 @@ IncomingMessage.prototype._onXHRProgress = function () {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer)
-},{"./capability":42,"_process":24,"buffer":13,"inherits":21,"stream":40}],45:[function(require,module,exports){
+},{"./capability":43,"_process":25,"buffer":14,"inherits":22,"stream":41}],46:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10452,7 +10526,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":13}],46:[function(require,module,exports){
+},{"buffer":14}],47:[function(require,module,exports){
 var Buffer = require('buffer').Buffer
 
 module.exports = function (buf) {
@@ -10481,7 +10555,7 @@ module.exports = function (buf) {
 	}
 }
 
-},{"buffer":13}],47:[function(require,module,exports){
+},{"buffer":14}],48:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11215,7 +11289,7 @@ Url.prototype.parseHost = function() {
   if (host) this.hostname = host;
 };
 
-},{"./util":48,"punycode":25,"querystring":28}],48:[function(require,module,exports){
+},{"./util":49,"punycode":26,"querystring":29}],49:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -11233,7 +11307,7 @@ module.exports = {
   }
 };
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 (function (global){
 
 /**
@@ -11304,7 +11378,7 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports = extend
 
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -11325,7 +11399,7 @@ function extend() {
     return target
 }
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 module.exports={
   "name": "prismic.io",
   "description": "JavaScript development kit for prismic.io",
