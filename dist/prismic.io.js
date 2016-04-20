@@ -288,6 +288,7 @@ Api.prototype = {
         var result = response.results.length > 0 ? response.results[0] : null;
         callback(err, result);
       }
+    }).then(function (response) {
       return response && response.results && response.results[0];
     });
   },
@@ -315,6 +316,7 @@ Api.prototype = {
         var result = response.results.length > 0 ? response.results[0] : null;
         callback(err, result);
       }
+    }).then(function (response) {
       return response && response.results && response.results[0];
     });
   },
@@ -11334,7 +11336,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "2.1.5",
+  "version": "2.1.6",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
