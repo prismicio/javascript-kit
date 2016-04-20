@@ -284,12 +284,10 @@ Api.prototype = {
    */
   getByID: function getByID(id, options, callback) {
     return this.query(Predicates.at('document.id', id), options, function (err, response) {
-      if (response && response.results.length > 0) {
-        callback(err, response.results[0]);
-      } else {
-        callback(err, null);
+      if (callback) {
+        var result = response.results.length > 0 ? response.results[0] : null;
+        callback(err, result);
       }
-    }).then(function (response) {
       return response && response.results && response.results[0];
     });
   },
@@ -313,12 +311,10 @@ Api.prototype = {
    */
   getByUID: function getByUID(type, uid, options, callback) {
     return this.query(Predicates.at('my.' + type + '.uid', uid), options, function (err, response) {
-      if (response && response.results.length > 0) {
-        callback(err, response.results[0]);
-      } else {
-        callback(err, null);
+      if (callback) {
+        var result = response.results.length > 0 ? response.results[0] : null;
+        callback(err, result);
       }
-    }).then(function (response) {
       return response && response.results && response.results[0];
     });
   },
@@ -11338,7 +11334,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "2.1.4",
+  "version": "2.1.5",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
