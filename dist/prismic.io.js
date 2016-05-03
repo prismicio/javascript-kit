@@ -377,8 +377,11 @@ Api.prototype = {
     return new Promise(function (resolve, reject) {
       var cb = function cb(err, value, xhr) {
         if (callback) callback(err, value, xhr);
-        if (value) resolve(value);
-        if (err) reject(err);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(value);
+        }
       };
       api.requestHandler(token, function (err, result, xhr) {
         if (err) {
@@ -11421,7 +11424,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "3.0.0-rc.1",
+  "version": "3.0.0",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
