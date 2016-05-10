@@ -16,32 +16,9 @@ function getLinkResolver(ref) {
   };
 }
 
-describe('Previews', function() {
-
-  it('preview-js', function() {
-    // startgist:51f9c95c4ea58e7e3877:preview-js.js
-    // todo
-    // endgist
-  });
-
-  it('endpoint-js', function() {
-    // startgist:563d0601f954aa7b492c:endpoint-js.js
-    // todo
-    // endgist
-  });
-
-  it('preview-ref', function() {
-    // startgist:fc7786d7c1cec52f0d36:preview-ref.js
-    // todo
-    // endgist
-  });
-
-});
-
 describe('API', function() {
 
   it('prismic-api.js', function (done) {
-    // startgist:1af7b5cb53a5d7cc8561:prismic-api.js
     Prismic.api('https://lesbonneschoses.cdn.prismic.io/api', function (err, Api) {
       if (err) done(err); // gisthide
       // You can use the Api object inside this block
@@ -49,21 +26,17 @@ describe('API', function() {
       assert.operator(Api.data.refs.length, '>', 0, 'at least one reference'); // gisthide
       done(); // gisthide
     });
-    // endgist
   });
 
   it('prismic-apiPrivate.js', function (done) {
-    // startgist:6ad513d7d0f784de36d9:prismic-apiPrivate.js
     Prismic.api('https://lesbonneschoses.cdn.prismic.io/api', function (err) {
       // This will fail because the token is invalid, but this is how to access a private API
       assert.equal(err.message, "Unexpected status code [401] on URL https://lesbonneschoses.cdn.prismic.io/api?access_token=MC5-XXXXXXX-vRfvv70"); // gisthide
       done(); // gisthide
     }, "MC5-XXXXXXX-vRfvv70");
-    // endgist
   });
 
   it('prismic-references.js', function (done) {
-    // startgist:c737c4588742c328026f:prismic-references.js
     var previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70';
     Prismic.api('https://lesbonneschoses.cdn.prismic.io/api', function (err, Api) {
       if (err) done(err); // gisthide
@@ -82,7 +55,6 @@ describe('API', function() {
         done(); // gisthide
       });
     }, previewToken);
-    // endgist
   });
 
 });
@@ -90,7 +62,6 @@ describe('API', function() {
 describe('Query', function() {
 
   it('prismic-simplequery.js', function (done) {
-    // startgist:9b6ff487190a429d7fbc:prismic-simplequery.js
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
       if (err) done(err); // gisthide
       Api.query(Prismic.Predicates.at("document.type", "product"), {}, function (err, response) {
@@ -110,11 +81,9 @@ describe('Query', function() {
         done(); // gisthide
       });
     });
-    // endgist
   });
 
   it('prismic-orderings.js', function (done) {
-    // startgist:92bdec9ace554b9f95c0:prismic-orderings.js
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
       if (err) { done(err); return; } // gisthide
       Api.form('everything')
@@ -130,11 +99,9 @@ describe('Query', function() {
           done(); // gisthide
         });
     });
-    // endgist
   });
 
   it('prismic-predicates.js', function (done) {
-    // startgist:c90d98f6c77ef6505094:prismic-predicates.js
     Prismic.api('https://lesbonneschoses.prismic.io/api', function (err, Api) {
       if (err) { done(err); return; } // gisthide
       Api.form('everything').ref(Api.master()).query(
@@ -147,11 +114,9 @@ describe('Query', function() {
         done(); // gisthide
       });
     });
-    // endgist
   });
 
   it('prismic-allPredicates.js', function () {
-    // startgist:1650e3b498d99076f65b:prismic-allPredicates.js
     // "at" predicate: equality of a fragment to a value.
     var at = Prismic.Predicates.at("document.type", "article");
     assert.deepEqual(at, ["at", "document.type", "article"]); // gisthide
@@ -168,7 +133,6 @@ describe('Query', function() {
 
     // "similar" predicate, with a document id as reference
     var similar = Prismic.Predicates.similar("UXasdFwe42D", 10);
-    // endgist
   });
 
 });
@@ -182,7 +146,6 @@ describe('Fragments', function() {
         .ref(Api.master()).submit(function (err, documents) {
           if (err) { done(err); return; }
           var doc = documents.results[0];
-          // startgist:ad67f185eefe842e4a12:prismic-htmlSerializer.js
           var htmlSerializer = function (element, content) {
             // Don't wrap images in a <p> tag
             if (element.type == "image") {
@@ -198,7 +161,6 @@ describe('Fragments', function() {
             return null;
           };
           var html = doc.getStructuredText('blog-post.body').asHtml(getLinkResolver(), htmlSerializer);
-          // endgist
           assert.equal(html,
                        '<h1>Our world-famous Pastry Art Brainstorm event</h1>' +
                        '<img src=\"https://prismic-io.s3.amazonaws.com/lesbonneschoses/c38f9e5a1a6c43aa7aae516c154013a2cee2bc75.jpg\" alt=\"\">' +
@@ -231,11 +193,9 @@ describe('Fragments', function() {
       Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
         if (err) throw err; // gisthide
         var doc = documents.results[0];
-        // startgist:39e5df50e5f10c574fde:prismic-getText.js
         var author = doc.getText("blog-post.author");
         if (!author) author = "Anonymous";
         assert.equal(author, "John M. Martelle, Fine Pastry Magazine"); // gisthide
-        // endgist
         done();
       });
     });
@@ -247,7 +207,6 @@ describe('Fragments', function() {
       Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
         var doc = documents.results[0];
-        // startgist:17fab0179019f272f947:prismic-getNumber.js
         // Number predicates
         var gt = Prismic.Predicates.gt("my.product.price", 10);
         var lt = Prismic.Predicates.lt("my.product.price", 20);
@@ -255,7 +214,6 @@ describe('Fragments', function() {
 
         // Accessing number fields
         var price = doc.getNumber("product.price");
-        // endgist
         assert.equal(price, 2.5);
         done();
       });
@@ -268,12 +226,10 @@ describe('Fragments', function() {
       Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbO")).ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
         var doc = documents.results[0];
-        // startgist:a7be4722af6671f87797:prismic-images.js
         // Accessing image fields
         var image = doc.getImage("product.image");
         // Most of the time you will be using the "main" view
         var url = image.main.url;
-        // endgist
         assert.equal(url, "https://prismic-io.s3.amazonaws.com/lesbonneschoses/f606ad513fcc2a73b909817119b84d6fd0d61a6d.png");
         done();
       });
@@ -286,7 +242,6 @@ describe('Fragments', function() {
       Api.form('everything').query(Prismic.Predicates.at("document.id", "UlfoxUnM0wkXYXbl")).ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
         var doc = documents.results[0];
-        // startgist:1c9514ef4f31701732ac:prismic-dateTimestamp.js
         var Predicates = Prismic.Predicates;
         // Date and Timestamp predicates
         var dateBefore = Predicates.dateBefore("my.product.releaseDate", new Date(2014, 6, 1));
@@ -312,7 +267,6 @@ describe('Fragments', function() {
         var updateTime = doc.getTimestamp("blog-post.update");
         var updateHour = updateTime ? updateTime.getHours() : 0;
         assert.equal(resultYear, 2013); // gisthide
-        // endgist
         done();
       });
     });
@@ -365,7 +319,6 @@ describe('Fragments', function() {
         }
       }
     });
-    // startgist:1c9514ef4f31701732ac:prismic-group.js
     var group = doc.getGroup("article.documents");
     var docs = group ? group.toArray() : [];
     for (var i = 0; i < docs.length; i++) {
@@ -373,7 +326,6 @@ describe('Fragments', function() {
       var desc = docs[i].getStructuredText("desc");
       var link = docs[i].getLink("linktodoc");
     }
-    // endgist
     assert.equal(
       docs[0].getStructuredText("desc").asHtml(),
       "<p>A detailed step by step point of view on how installing happens.</p>"
@@ -401,14 +353,12 @@ describe('Fragments', function() {
         }
       }
     });
-    // startgist:0c86d1fe3471baf52f59:prismic-link.js
     var resolver = function (doc, isBroken) {
       if (isBroken) return '#broken';
       return "/testing_url/" + doc.id + "/" + doc.slug;
     };
     var source = doc.getLink("article.source");
     var url = source ? source.url(resolver) : null;
-    // endgist
     assert.equal(url, "/testing_url/UlfoxUnM0wkXYXbE/dark-chocolate-macaron");
   });
 
@@ -442,11 +392,9 @@ describe('Fragments', function() {
         }
       }
     });
-    // startgist:407c6960a6a7bb407c88:prismic-embed.js
     var video = doc.get("article.video");
     // Html is the code to include to embed the object, and depends on the embedded service
     var html = video ? video.asHtml() : "";
-    // endgist
     assert.equal(html, "<iframe width=\"480\" height=\"270\" src=\"http://www.youtube.com/embed/baGfM6dBzs8?feature=oembed\" frameborder=\"0\" allowfullscreen></iframe>"
                 );
   });
@@ -468,10 +416,8 @@ describe('Fragments', function() {
       return { css: function (y, z) {
       } };
     };
-    // startgist:4d5072768603847ede43:prismic-color.js
     var bgcolor = doc.getColor("article.background");
     $("#article").css("background-color", bgcolor);
-    // endgist
     assert.equal(bgcolor, "#000000");
   });
 
@@ -491,7 +437,6 @@ describe('Fragments', function() {
         }
       }
     });
-    // startgist:6eb5436349a2e7fc9f5a:prismic-geopoint.js
     // "near" predicate for GeoPoint fragments
     var near = Prismic.Predicates.near("my.store.location", 48.8768767, 2.3338802, 10);
 
@@ -501,7 +446,6 @@ describe('Fragments', function() {
     if (place) {
       coordinates = place.latitude + "," + place.longitude;
     }
-    // endgist
     assert.equal(coordinates, "48.877108,2.333879");
   });
 
@@ -516,7 +460,6 @@ describe('Fragments', function() {
           console.log(err);
           done();
         }
-        // startgist:6bf3785fbacac021c7ee:prismic-asHtml.js
         var doc = response.results[0];
         var html = doc.getStructuredText('blog-post.body').asHtml({
           linkResolver: function (ctx, doc, isBroken) {
@@ -524,7 +467,6 @@ describe('Fragments', function() {
             return "/testing_url/" + doc.id + "/" + doc.slug + ( ctx.maybeRef ? '?ref=' + ctx.maybeRef : '' );
           }
         });
-        // endgist
         assert.equal(
           html,
           '<h1>Get the right approach to ganache</h1><p>A lot of people touch base with us to know about one of our key ingredients, and the essential role it plays in our creations: ganache.</p><p>Indeed, ganache is the macaron\'s softener, or else, macarons would be but tough biscuits; it is the cupcake\'s wrapper, or else, cupcakes would be but plain old cake. We even sometimes use ganache within our cupcakes, to soften the cake itself, or as a support to our pies\' content.</p><h2>How to approach ganache</h2><p class=\"block-img\"><img src=\"https://d2aw36oac6sa9o.cloudfront.net/lesbonneschoses/ee7b984b98db4516aba2eabd54ab498293913c6c.jpg\" alt=\"\"></p><p>Apart from the taste balance, which is always a challenge when it comes to pastry, the tough part about ganache is about thickness. It is even harder to predict through all the phases the ganache gets to meet (how long will it get melted? how long will it remain in the fridge?). Things get a hell of a lot easier to get once you consider that there are two main ways to get the perfect ganache:</p><ul><li><strong>working from the top down</strong>: start with a thick, almost hard material, and soften it by manipulating it, or by mixing it with a more liquid ingredient (like milk)</li><li><strong>working from the bottom up</strong>: start from a liquid-ish state, and harden it by miwing it with thicker ingredients, or by leaving it in the fridge longer.</li></ul><p>We do hope this advice will empower you in your ganache-making skills. Let us know how you did with it!</p><h2>Ganache at <em>Les Bonnes Choses</em></h2><p>We have a saying at Les Bonnes Choses: \"Once you can make ganache, you can make anything.\"</p><p>As you may know, we like to give our workshop artists the ability to master their art to the top; that is why our Preparation Experts always start off as being Ganache Specialists for Les Bonnes Choses. That way, they\'re given an opportunity to focus on one exercise before moving on. Once they master their ganache, and are able to provide the most optimal delight to our customers, we consider they\'ll thrive as they work on other kinds of preparations.</p><h2>About the chocolate in our ganache</h2><p>Now, we\'ve also had a lot of questions about how our chocolate gets made. It\'s true, as you might know, that we make it ourselves, from Columbian cocoa and French cow milk, with a process that much resembles the one in the following Discovery Channel documentary.</p><div data-oembed=\"undefined\" data-oembed-type=\"embed\" data-oembed-provider=\"undefined\"><iframe width=\"459\" height=\"344\" src=\"http://www.youtube.com/embed/Ye78F3-CuXY?feature=oembed\" frameborder=\"0\" allowfullscreen></iframe></div>'
@@ -539,7 +481,6 @@ describe('Fragments', function() {
 describe('Cache', function() {
 
   it('prismic-cache.js', function(done) {
-    // startgist:6bf3785fbacac021c7ee:prismic-cache.js
     var cache = {
       get: function (key, cb) {
         // Retrieve a value from the key
@@ -566,7 +507,6 @@ describe('Cache', function() {
       assert.notEqual(Api, null); // gisthide
       done(); // gisthide
     }, null, null, cache);
-    // endgist
   });
 
 });
