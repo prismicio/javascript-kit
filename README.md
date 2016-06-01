@@ -49,7 +49,8 @@ To fetch documents from your repository, you need to fetch the Api data first.
 var Prismic = require('prismic.io');
 
 Prismic.api("http://lesbonneschoses.prismic.io/api", function(error, api) {
-  api.query("", function(error, response) { // An empty query will return all the documents
+  var options = {}; // In Node.js, pass the request as 'req' to read the reference from the cookies
+  api.query("", options, function(error, response) { // An empty query will return all the documents
     if (error) {
       console.log("Something went wrong: ", err);
     }
