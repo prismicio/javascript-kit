@@ -106,6 +106,19 @@ describe('API form submissions', function() {
     });
   });
 
+  it('Get linked documents from within slices', function (done) {
+    Prismic.api(microRepository, function (err, api) {
+      api.getByUID('page', 'page-with-slices', function(err, document) {
+        if (!document) {
+          chai.fail('Missing document page-with-slices');
+        } else {
+          assert.equal(document.linkedDocuments().length, 2);
+        }
+        done();
+      });
+    });
+  });
+
   it('Use an Array to query', function (done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) {
