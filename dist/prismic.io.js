@@ -11449,7 +11449,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "3.1.0",
+  "version": "3.1.1",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
