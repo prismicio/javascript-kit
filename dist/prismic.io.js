@@ -2239,6 +2239,22 @@ ImageView.prototype = {
 };
 
 /**
+ * Embodies a fragment of type "Separator" (only used in Slices)
+ * @constructor
+ * @global
+ * @alias Fragments:Separator
+ */
+function Separator() {}
+Separator.prototype = {
+  asHtml: function asHtml() {
+    return "<hr/>";
+  },
+  asText: function asText() {
+    return "----";
+  }
+};
+
+/**
  * Embodies a fragment of type "Group" (which is a group of subfragments)
  * @constructor
  * @global
@@ -2725,6 +2741,7 @@ function initField(field) {
     "Link.web": WebLink,
     "Link.file": FileLink,
     "Link.image": ImageLink,
+    "Separator": Separator,
     "Group": Group,
     "SliceZone": SliceZone
   };
@@ -2837,6 +2854,7 @@ module.exports = {
   DocumentLink: DocumentLink,
   ImageLink: ImageLink,
   FileLink: FileLink,
+  Separator: Separator,
   Group: Group,
   GeoPoint: GeoPoint,
   Slice: Slice,
@@ -3514,10 +3532,10 @@ function getApi(url, options) {
   } else if (typeof arguments[1] == 'string') {
     // Legacy (2) the second argument is the accessToken
     options = {
-      "maybeAccessToken": arguments[1],
-      "maybeRequestHandler": arguments[2],
-      "maybeApiCache": arguments[3],
-      "maybeApiDataTTL": arguments[4]
+      "accessToken": arguments[1],
+      "requestHandler": arguments[2],
+      "apiCache": arguments[3],
+      "apiDataTTL": arguments[4]
     };
   }
   var api = new Api(url, options || {});
@@ -11449,7 +11467,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "3.1.1",
+  "version": "3.1.3",
   "devDependencies": {
     "uglify-js": "^2.6.1",
     "babel-preset-es2015": "^6.3.13",
