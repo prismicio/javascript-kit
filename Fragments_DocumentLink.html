@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Doc</title>
+    <title>JSDoc: Class: Fragments:DocumentLink</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Doc</h1>
+    <h1 class="page-title">Class: Fragments:DocumentLink</h1>
 
     
 
@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2>Doc</h2>
+        <h2>Fragments:DocumentLink</h2>
         
     
 </header>
@@ -40,15 +40,14 @@
 
     
 
-    <h4 class="name" id="Doc"><span class="type-signature"></span>new Doc<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Fragments:DocumentLink"><span class="type-signature"></span>new Fragments:DocumentLink<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Embodies a document as returned by the API.
-Most useful fields: id, type, tags, slug, slugs
+    Embodies a document link fragment (a link that is internal to a prismic.io repository)
 </div>
 
 
@@ -92,7 +91,7 @@ Most useful fields: id, type, tags, slug, slugs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1443">line 1443</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1662">line 1662</a>
     </li></ul></dd>
     
 
@@ -136,75 +135,13 @@ Most useful fields: id, type, tags, slug, slugs
 
         
             
-<h4 class="name" id="data"><span class="type-signature"></span>data<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    The original JSON data from the API
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1482">line 1482</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
 <h4 class="name" id="fragments"><span class="type-signature"></span>fragments<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    Fragments, converted to business objects
+    the fragment list, if the fetchLinks parameter was used in at query time
 </div>
 
 
@@ -242,7 +179,7 @@ Most useful fields: id, type, tags, slug, slugs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1486">line 1486</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1702">line 1702</a>
     </li></ul></dd>
     
 
@@ -260,26 +197,16 @@ Most useful fields: id, type, tags, slug, slugs
 
         
             
-<h4 class="name" id="href"><span class="type-signature"></span>href<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    The URL of the document in the API
+    the linked document id
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -314,7 +241,7 @@ Most useful fields: id, type, tags, slug, slugs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1463">line 1463</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1670">line 1670</a>
     </li></ul></dd>
     
 
@@ -332,26 +259,16 @@ Most useful fields: id, type, tags, slug, slugs
 
         
             
-<h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="isBroken"><span class="type-signature"></span>isBroken<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    The ID of the document
+    true if the link is broken, false otherwise
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -386,7 +303,7 @@ Most useful fields: id, type, tags, slug, slugs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1448">line 1448</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1707">line 1707</a>
     </li></ul></dd>
     
 
@@ -404,26 +321,16 @@ Most useful fields: id, type, tags, slug, slugs
 
         
             
-<h4 class="name" id="slug"><span class="type-signature"></span>slug<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="slug"><span class="type-signature"></span>slug<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    The current slug of the document, "-" if none was provided
+    the linked document slug
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -458,7 +365,7 @@ Most useful fields: id, type, tags, slug, slugs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1473">line 1473</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1685">line 1685</a>
     </li></ul></dd>
     
 
@@ -476,26 +383,16 @@ Most useful fields: id, type, tags, slug, slugs
 
         
             
-<h4 class="name" id="slugs"><span class="type-signature"></span>slugs<span class="type-signature"> :array</span></h4>
+<h4 class="name" id="tags"><span class="type-signature"></span>tags<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    All the slugs that were ever used by this document (including the current one, at the head)
+    the linked document tags
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">array</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -530,7 +427,7 @@ Most useful fields: id, type, tags, slug, slugs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1478">line 1478</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1680">line 1680</a>
     </li></ul></dd>
     
 
@@ -548,26 +445,16 @@ Most useful fields: id, type, tags, slug, slugs
 
         
             
-<h4 class="name" id="tags"><span class="type-signature"></span>tags<span class="type-signature"> :array</span></h4>
+<h4 class="name" id="type"><span class="type-signature"></span>type<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    The tags of the document
+    the linked document type
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">array</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -602,7 +489,7 @@ Most useful fields: id, type, tags, slug, slugs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1468">line 1468</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1690">line 1690</a>
     </li></ul></dd>
     
 
@@ -620,26 +507,16 @@ Most useful fields: id, type, tags, slug, slugs
 
         
             
-<h4 class="name" id="type"><span class="type-signature"></span>type<span class="type-signature"> :string</span></h4>
+<h4 class="name" id="uid"><span class="type-signature"></span>uid<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    The type of the document, corresponds to a document mask defined in the repository
+    the linked document uid
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -674,82 +551,7 @@ Most useful fields: id, type, tags, slug, slugs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1458">line 1458</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="uid"><span class="type-signature"></span>uid<span class="type-signature"> :string|null</span></h4>
-
-
-
-
-<div class="description">
-    The User ID of the document, a human readable id
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">string</span>
-|
-
-<span class="param-type">null</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1453">line 1453</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1675">line 1675</a>
     </li></ul></dd>
     
 
@@ -776,14 +578,15 @@ Most useful fields: id, type, tags, slug, slugs
 
     
 
-    <h4 class="name" id="getSliceZone"><span class="type-signature"></span>getSliceZone<span class="signature">(name)</span><span class="type-signature"> &rarr; {Group}</span></h4>
+    <h4 class="name" id="asHtml"><span class="type-signature"></span>asHtml<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
 
 
 <div class="description">
-    Gets the SliceZone fragment in the current Document object, for further manipulation.
+    Turns the fragment into a useable HTML version of it.
+If the native HTML code doesn't suit your design, this function is meant to be overriden.
 </div>
 
 
@@ -792,55 +595,6 @@ Most useful fields: id, type, tags, slug, slugs
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The name of the fragment to get, with its type; for instance, "product.gallery"</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -876,7 +630,7 @@ Most useful fields: id, type, tags, slug, slugs
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1499">line 1499</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1719">line 1719</a>
     </li></ul></dd>
     
 
@@ -903,7 +657,7 @@ Most useful fields: id, type, tags, slug, slugs
 
         
 <div class="param-desc">
-    - The SliceZone fragment to manipulate.
+    - basic HTML code for the fragment
 </div>
 
 
@@ -914,7 +668,7 @@ Most useful fields: id, type, tags, slug, slugs
     </dt>
     <dd>
         
-<span class="param-type">Group</span>
+<span class="param-type">string</span>
 
 
     </dd>
@@ -923,9 +677,212 @@ Most useful fields: id, type, tags, slug, slugs
     
 
 
-    <h5>Example</h5>
+
+        
+            
+
     
-    <pre class="prettyprint"><code>document.getSliceZone('product.gallery').asHtml(linkResolver).</code></pre>
+
+    <h4 class="name" id="asText"><span class="type-signature"></span>asText<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Turns the fragment into a useable text version of it.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1738">line 1738</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - basic text version of the fragment
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="url"><span class="type-signature"></span>url<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Returns the URL of the document link.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line1729">line 1729</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - the proper URL to use
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 

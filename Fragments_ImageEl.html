@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Ref</title>
+    <title>JSDoc: Class: Fragments:ImageEl</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Ref</h1>
+    <h1 class="page-title">Class: Fragments:ImageEl</h1>
 
     
 
@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2>Ref</h2>
+        <h2>Fragments:ImageEl</h2>
         
     
 </header>
@@ -40,14 +40,14 @@
 
     
 
-    <h4 class="name" id="Ref"><span class="type-signature"></span>new Ref<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Fragments:ImageEl"><span class="type-signature"></span>new Fragments:ImageEl<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Embodies a prismic.io ref (a past or future point in time you can query)
+    Embodies an Image fragment
 </div>
 
 
@@ -91,7 +91,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line748">line 748</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line2136">line 2136</a>
     </li></ul></dd>
     
 
@@ -135,13 +135,13 @@
 
         
             
-<h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"></span></h4>
+<h4 class="name" id="main"><span class="type-signature"></span>main<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    the name of the ref
+    the main ImageView for this image
 </div>
 
 
@@ -179,7 +179,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line773">line 773</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line2141">line 2141</a>
     </li></ul></dd>
     
 
@@ -197,13 +197,13 @@
 
         
             
-<h4 class="name" id="isMaster"><span class="type-signature"></span>isMaster<span class="type-signature"></span></h4>
+<h4 class="name" id="url"><span class="type-signature"></span>url<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    is true if the ref is the master ref
+    the url of the main ImageView for this image
 </div>
 
 
@@ -241,7 +241,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line763">line 763</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line2147">line 2147</a>
     </li></ul></dd>
     
 
@@ -259,13 +259,13 @@
 
         
             
-<h4 class="name" id="label"><span class="type-signature"></span>label<span class="type-signature"></span></h4>
+<h4 class="name" id="views"><span class="type-signature"></span>views<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    the label of the ref
+    an array of all the other ImageViews for this image
 </div>
 
 
@@ -303,7 +303,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line758">line 758</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line2153">line 2153</a>
     </li></ul></dd>
     
 
@@ -316,19 +316,140 @@
 
 
 
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="asHtml"><span class="type-signature"></span>asHtml<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Turns the fragment into a useable HTML version of it.
+If the native HTML code doesn't suit your design, this function is meant to be overriden.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line2175">line 2175</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - basic HTML code for the fragment
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
         
             
-<h4 class="name" id="ref"><span class="type-signature"></span>ref<span class="type-signature"></span></h4>
 
+    
+
+    <h4 class="name" id="asText"><span class="type-signature"></span>asText<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
 
 
 
 <div class="description">
-    the ID of the ref
+    Turns the fragment into a useable text version of it.
 </div>
+
+
+
+
+
+
 
 
 
@@ -365,7 +486,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line753">line 753</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line2184">line 2184</a>
     </li></ul></dd>
     
 
@@ -378,20 +499,111 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - basic text version of the fragment
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
         
             
-<h4 class="name" id="scheduledAt"><span class="type-signature"></span>scheduledAt<span class="type-signature"></span></h4>
 
+    
+
+    <h4 class="name" id="getView"><span class="type-signature"></span>getView<span class="signature">(name)</span><span class="type-signature"> &rarr; {ImageView}</span></h4>
+
+    
 
 
 
 <div class="description">
-    the scheduled date of the ref
+    Gets the view of the image, from its name
 </div>
 
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the name of the view to get</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -427,7 +639,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line768">line 768</a>
+        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line2162">line 2162</a>
     </li></ul></dd>
     
 
@@ -443,9 +655,39 @@
 
 
 
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
         
+<div class="param-desc">
+    - the proper view
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">ImageView</span>
+
+
+    </dd>
+</dl>
+
     
 
+
+
+        
     
 
     
