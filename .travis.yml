@@ -16,3 +16,8 @@ deploy:
     tags: true
     all_branches: true
     repo: prismicio/javascript-kit
+
+addons:
+    code_climate:
+        repo_token: 25760a4ae3dea7404d3a3ef79951e0b6bf8808fcdb7f63bc1533610a9d8f936d
+
