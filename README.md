@@ -3,6 +3,7 @@
 [![npm version](https://badge.fury.io/js/prismic.io.svg)](http://badge.fury.io/js/prismic.io)
 [![Build Status](https://api.travis-ci.org/prismicio/javascript-kit.png)](https://travis-ci.org/prismicio/javascript-kit)
 [![Code Climate](https://codeclimate.com/github/prismicio/javascript-kit.png)](https://codeclimate.com/github/prismicio/javascript-kit)
+[![Test Coverage](https://codeclimate.com/github/prismicio/javascript-kit/badges/coverage.svg)](https://codeclimate.com/github/prismicio/javascript-kit/coverage)
 
 * The [source code](https://github.com/prismicio/javascript-kit) is on Github.
 * The [Changelog](https://github.com/prismicio/javascript-kit/releases) is on Github's releases tab.
