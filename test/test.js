@@ -8,26 +8,28 @@ var assert = chai.assert;
 
 /* === TESTS ARE RUN OVER "LES BONNES CHOSES" EXAMPLE REPOSITORY === */
 
-var testRepository = 'https://lesbonneschoses.cdn.prismic.io/api',
-    previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70',
-    microRepository = 'https://micro.prismic.io/api',
+var microRepository = 'https://micro.prismic.io/api',
+    previewToken = 'MC5VcXBHWHdFQUFONDZrbWp4.77-9cDx6C3lgJu-_vXZafO-_vXPvv73vv73vv70777-9Ju-_ve-_vSLvv73vv73vv73vv70O77-977-9Me-_vQ',
     Predicates = Prismic.Predicates;
 
 describe('API retrieval and parsing', function(){
 
   it('Retrieve the API', function(done) {
-    Prismic.api(testRepository, function(err, Api) {
-      if (err) throw err;
+    Prismic.api(microRepository, function(err, Api) {
+      if (err) {
+        done(err);
+        return;
+      }
       assert.operator(Api.data.refs.length, '>', 0, 'at least one reference');
-      assert.equal(Api.url, testRepository);
+      assert.equal(Api.url, microRepository);
       done();
     });
   });
 
   it('Retrieve the API with a Promise', function(done) {
-    Prismic.api(testRepository).then(function(api) {
+    Prismic.api(microRepository).then(function(api) {
       assert.operator(api.data.refs.length, '>', 0, 'at least one reference');
-      assert.equal(api.url, testRepository);
+      assert.equal(api.url, microRepository);
       done();
     }, function(err) {
       throw err;
@@ -38,23 +40,24 @@ describe('API retrieval and parsing', function(){
     console.log('\n*** Note by tester: The following error is a "normal" error (see note in test.js): ');
     // We can't help it because whatever you do, the JS engine contains a "console.error" statement when this error occurs,
     // and we're exactly trying to test how the kit reacts when this error occurs.
-    Prismic.api(testRepository+"/errormaker", function(err, Api) {
-      assert.equal(err.message, "Unexpected status code [404] on URL https://lesbonneschoses.cdn.prismic.io/api/errormaker");
+    Prismic.api(microRepository+"/errormaker", function(err, Api) {
+      assert.equal(err.message, "Unexpected status code [404] on URL https://micro.prismic.io/api/errormaker");
       done();
     });
   });
 
   it('Parsing stores types and tags', function(done) {
-    Prismic.api(testRepository, function(err, Api) {
-      if (err) throw err;
-      assert.equal(Object.keys(Api.data.types).length, 6);
-      assert.equal(Api.data.tags.length, 4);
+    Prismic.api(microRepository).then(function(Api) {
+      assert.equal(Object.keys(Api.data.types).length, 9);
+      assert.equal(Api.data.tags.length, 1);
       done();
+    }, function(err) {
+      done(err);
     });
   });
 
   it('Retrieve the API with master+releases privilege', function(done) {
-    Prismic.api(testRepository, function(err, Api) {
+    Prismic.api(microRepository, function(err, Api) {
       if (err) throw err;
       assert.equal(Api.data.refs.length, 3);
       done();
@@ -65,7 +68,7 @@ describe('API retrieval and parsing', function(){
 describe('API form submissions', function() {
 
   it('Submit the `everything` form', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) {
         console.log(err);
         done();
@@ -75,13 +78,13 @@ describe('API form submissions', function() {
           console.log(err);
           return;
         }
-        assert.equal(documents.results.length, 20);
+        assert.equal(documents.results.length, 18);
         assert.equal(documents.page, 1);
         assert.equal(documents.prev_page, null);
         assert.equal(documents.results_per_page, 20);
-        assert.equal(documents.results_size, 20);
-        assert.equal(documents.total_pages, 2);
-        assert.equal(documents.total_results_size, 40);
+        assert.equal(documents.results_size, 18);
+        assert.equal(documents.total_pages, 1);
+        assert.equal(documents.total_results_size, 18);
         done();
       });
     });
@@ -141,19 +144,19 @@ describe('API form submissions', function() {
   });
 
   it('Use getByID', function(done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
-      Api.getByID('UlfoxUnM0wkXYXbt', {}, function (err, document) {
-        assert.equal(document.id, 'UlfoxUnM0wkXYXbt');
+      Api.getByID('UrDejAEAAFwMyrW9', {}, function (err, document) {
+        assert.equal(document.id, 'UrDejAEAAFwMyrW9');
         done();
       });
     });
   });
 
   it('Use getByIDs', function(done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
-      Api.getByIDs(['UlfoxUnM0wkXYXbt', 'UlfoxUnM0wkXYXbj'], {}, function (err, res) {
+      Api.getByIDs(['UrDejAEAAFwMyrW9', 'V2OokCUAAHSZcOUP'], {}, function (err, res) {
         assert.equal(res.results.length, 2);
         done();
       });
@@ -161,63 +164,39 @@ describe('API form submissions', function() {
   });
 
   it('Submit the `everything` form with an ordering', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) {
         console.log(err);
         done();
       }
       Api.form('everything').ref(Api.master()).orderings('[my.product.price desc]').submit(function (err, documents) {
         if (err) { console.log(err); }
-        assert.equal(documents.results.length, 20);
-        assert.equal(documents.results[0].id, 'UlfoxUnM0wkXYXbj');
+        assert.equal(documents.results.length, 18);
+        assert.equal(documents.results[0].id, 'UrDejAEAAFwMyrW9');
         done();
       });
     });
   });
 
   it('Submit with an ordering array', function(done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) {
         console.log(err);
         done();
       }
-      Api.form('everything').ref(Api.master()).orderings(['my.product.price desc']).submit(function (err, documents) {
+      Api.form('everything').ref(Api.master()).orderings(['my.doc.title desc']).submit(function (err, documents) {
         if (err) {
           console.log(err);
         }
-        assert.equal(documents.results.length, 20);
-        assert.equal(documents.results[0].id, 'UlfoxUnM0wkXYXbj');
-        done();
-      });
-    });
-  });
-
-  it('Get page 2 of the `everything` form', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
-      if (err) {
-        console.log(err);
-        done();
-      }
-      Api.form('everything').page(2).ref(Api.master()).submit(function (err, documents) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        assert.equal(documents.results.length, 20);
-        assert.equal(documents.next_page, null);
-        assert.equal(documents.page, 2);
-        assert.equal(documents.prev_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=1&pageSize=20");
-        assert.equal(documents.results_per_page, 20);
-        assert.equal(documents.results_size, 20);
-        assert.equal(documents.total_pages, 2);
-        assert.equal(documents.total_results_size, 40);
+        assert.equal(documents.results.length, 18);
+        assert.equal(documents.results[0].id, 'UrDofwEAALAdpbNH');
         done();
       });
     });
   });
 
   it('Get page 1 of the `everything` form with pagination set at 10', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) {
         console.log(err);
         done();
@@ -225,65 +204,65 @@ describe('API form submissions', function() {
       Api.form('everything').pageSize(10).ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
         assert.equal(documents.results.length, 10);
-        assert.equal(documents.next_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=2&pageSize=10");
+        assert.equal(documents.next_page, "https://micro.prismic.io/api/documents/search?ref=V6nx_CUAAM0bW-T6&page=2&pageSize=10");
         assert.equal(documents.page, 1);
         assert.equal(documents.prev_page, null);
         assert.equal(documents.results_per_page, 10);
         assert.equal(documents.results_size, 10);
-        assert.equal(documents.total_pages, 4);
-        assert.equal(documents.total_results_size, 40);
+        assert.equal(documents.total_pages, 2);
+        assert.equal(documents.total_results_size, 18);
         done();
       });
     });
   });
 
   it('Get page 2 of the `everything` form with pagination set at 10', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').pageSize(10).page(2).ref(Api.master()).submit(function (err, documents) {
         if (err) {
           console.log(err);
           return;
         }
-        assert.equal(documents.results.length, 10);
-        assert.equal(documents.next_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=3&pageSize=10");
+        assert.equal(documents.results.length, 8);
+        assert.isNull(documents.next_page);
         assert.equal(documents.page, 2);
-        assert.equal(documents.prev_page, "https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?ref=UlfoxUnM08QWYXdl&page=1&pageSize=10");
+        assert.equal(documents.prev_page, "https://micro.prismic.io/api/documents/search?ref=V6nx_CUAAM0bW-T6&page=1&pageSize=10");
         assert.equal(documents.results_per_page, 10);
-        assert.equal(documents.results_size, 10);
-        assert.equal(documents.total_pages, 4);
-        assert.equal(documents.total_results_size, 40);
+        assert.equal(documents.results_size, 8);
+        assert.equal(documents.total_pages, 2);
+        assert.equal(documents.total_results_size, 18);
         done();
       });
     });
   });
 
   it('Correctly handles the error if wrong submission', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').ref(Api.master()).query("wrongpredicate").submit(function (err, _) {
-        assert.equal(err.message, "Unexpected status code [400] on URL https://d2aw36oac6sa9o.cloudfront.net/api/documents/search?page=1&pageSize=20&ref=UlfoxUnM08QWYXdl&q=wrongpredicate");
+        assert.equal(err.message, "Unexpected status code [400] on URL https://micro.prismic.io/api/documents/search?page=1&pageSize=20&ref=V6nx_CUAAM0bW-T6&q=wrongpredicate");
         done();
       });
     });
   });
 
   it('Submit the `everything` form with a predicate', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
-      Api.form('everything').ref(Api.master()).query(["at", "document.type", "product"]).submit(function (err, documents) {
+      Api.form('everything').ref(Api.master()).query(["at", "document.type", "doc"]).submit(function (err, documents) {
         if (err) {
           console.log(err);
           return;
         }
-        assert.equal(documents.results.length, 16);
+        assert.equal(documents.results.length, 4);
         done();
       });
     });
   });
 
   it('Submit the `everything` form with a predicate that give no results', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').ref(Api.master()).query('[[:d = at(document.type, "youhou")]]').submit(function (err, documents) {
         if (err) {
@@ -296,20 +275,6 @@ describe('API form submissions', function() {
     });
   });
 
-  it('Fetch additional fields in links with fetchLinks', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
-      if (err) throw err;
-      Api.form('everything')
-        .ref(Api.master())
-        .fetchLinks('blog-post.author')
-        .query(Predicates.at('document.id', 'UlfoxUnM0wkXYXbt'))
-        .submit(function (err, response) {
-          var links = response.results[0].getAll('blog-post.relatedpost');
-          assert.equal(links[0].getText('blog-post.author'), 'John M. Martelle, Fine Pastry Magazine');
-          done();
-        });
-    });
-  });
 });
 
 describe('Fragments', function() {
@@ -330,7 +295,7 @@ describe('Fragments', function() {
   });
 
   it('Similarity search', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').ref(Api.master()).query(["similar", "U9pjvjQAADAAehbf", 10]).submit(function (err, documents) {
         if (err) {
@@ -353,7 +318,7 @@ describe('Fragments', function() {
           console.log(err);
           return;
         }
-        assert.equal(0, documents.results.length);
+        assert.equal(1, documents.results.length);
         done();
       });
     });
@@ -363,86 +328,71 @@ describe('Fragments', function() {
     Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').ref(Api.master()).query(
-        Predicates.at("document.type", "article"),
-        Predicates.fulltext("my.article.title", "meta")
+        Predicates.at("document.type", "doc"),
+        Predicates.fulltext("my.doc.title", "meta")
       ).submit(function (err, documents) {
         if (err) {
           console.log(err);
           return;
         }
-        assert.equal(documents.results.length, 1);
+        assert.equal(documents.results.length, 2);
         done();
       });
     });
   });
 
-  it('Submit the `products` form', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+  it('Submit the `doc` form', function (done) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
-      Api.form('products').ref(Api.master()).submit(function (err, documents) {
+      Api.form('doc').ref(Api.master()).submit(function (err, documents) {
         if (err) {
           console.log(err);
           return;
         }
-        assert.equal(documents.results.length, 16);
+        assert.equal(documents.results.length, 6);
         done();
       });
     });
   });
 
-  it('Submit the `products` form with a predicate', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+  it('Submit the `doc` form with a predicate', function (done) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
-      Api.form('products').ref(Api.master()).query('[[:d = at(my.product.flavour, "Chocolate")]]').submit(function (err, documents) {
+      Api.form('doc').ref(Api.master()).query('[[:d = fulltext(my.doc.title, "meta")]]').submit(function (err, documents) {
         if (err) {
-          console.log(err);
-          return;
-        }
-        assert.equal(documents.results.length, 5);
-        done();
-      });
-    });
-  });
-
-  it('Submit the `products` form with an empty query', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
-      if (err) throw err;
-      Api.form('products').ref(Api.master()).query('').submit(function (err, documents) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        assert.equal(documents.results.length, 16);
-        done();
-      });
-    });
-  });
-
-  it('Submit the `products` form in the future', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
-      if (err) throw err;
-      Api.form('products').ref(Api.ref('Announcement of new SF shop')).submit(function (err, documents) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        assert.equal(documents.results.length, 17);
-        done();
-      });
-    }, previewToken);
-  });
-
-  it('Test cache', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
-      if (err) { done(err); return; }
-      var form = Api.form('products').ref(Api.master()).query('[[:d = at(my.product.flavour, "Caramel")]]');
-      var olderKeys = Api.apiCache.lru.keys();
-      form.submit(function (err, response) {
-        if (err) {
-          console.log(err);
           done(err);
           return;
         }
+        assert.equal(documents.results.length, 2);
+        done();
+      });
+    });
+  });
+
+  it('Submit the `doc` form with an empty query', function (done) {
+    Prismic.api(microRepository, function (err, Api) {
+      if (err) {
+        done(err);
+        return;
+      }
+      Api.form('doc').ref(Api.master()).query('').submit(function (err, documents) {
+        if (err) {
+          done(err);
+          return;
+        }
+        assert.equal(documents.results.length, 6);
+        done();
+      });
+    });
+  });
+
+  it('Test cache', function (done) {
+    Prismic.api(microRepository, function (err, Api) {
+      if (err) { done(err); return; }
+      var form = Api.form('doc').ref(Api.master()).query('[[:d = fulltext(my.doc.title, "Download")]]');
+      var olderKeys = Api.apiCache.lru.keys();
+      form.submit(function (err, response) {
+        if (err) { done(err); return; }
 
         var key = null;
         Api.apiCache.lru.keys().forEach(function (candidate) {
@@ -452,6 +402,7 @@ describe('Fragments', function() {
         });
 
         Api.apiCache.get(key, function (err, value) {
+          if (err) { done(err); return; }
           assert.equal(value.results.length, response.results.length);
           done();
         });

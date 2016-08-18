@@ -4,9 +4,8 @@ var Prismic = require('../lib/prismic.js');
 var chai = require('chai');
 
 var assert = chai.assert,
-    testRepository = 'https://lesbonneschoses.prismic.io/api',
-    previewToken = 'MC5VbDdXQmtuTTB6Z0hNWHF3.c--_vVbvv73vv73vv73vv71EA--_vS_vv73vv70T77-9Ke-_ve-_vWfvv70ebO-_ve-_ve-_vQN377-9ce-_vRfvv70',
-    microRepository = 'https://micro.prismic.io/api';
+    microRepository = 'https://micro.prismic.io/api',
+    previewToken = 'MC5VcXBHWHdFQUFONDZrbWp4.77-9cDx6C3lgJu-_vXZafO-_vXPvv73vv73vv70777-9Ju-_ve-_vSLvv73vv73vv73vv70O77-977-9Me-_vQ';
 
 function getLinkResolver(ref) {
   return function(doc, isBroken) {
@@ -17,42 +16,14 @@ function getLinkResolver(ref) {
 
 describe('Document manipulation', function() {
 
-  it('Stores and retrieves all document slugs well', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
-      if (err) throw err;
-      Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbg")]]').ref(Api.master()).submit(function (err, documents) {
-        if (err) throw err;
-        var doc = documents.results[0];
-        assert.equal(doc.slugs.length, 2);
-        done();
-      });
-    });
-  });
-
   it('Render a document to Html', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) { done(err); return; }
       Api.form('everything').ref(Api.master()).submit(function (err, documents) {
         if (err) { done(err); return; }
         var first = documents.results[0];
         assert.notEqual(null, first);
         first.asHtml(getLinkResolver());
-        done();
-      });
-    });
-  });
-
-  it('Render a document to Text', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
-      if (err) { done(err); return; }
-      Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
-        if (err) { done(err); return; }
-        function fix(s) {
-          // remove dates and timezone
-          return s.replace(/[A-Z][a-z]{2,4} [A-Z][a-z]{2,4} \d{2} \d{4} \d{2}:\d{2}:\d{2} GMT[+-]\d{4} \([^)]+\)/g, '<DATE>');
-        }
-
-        assert.equal(fix(documents.results[0].asText(getLinkResolver('XXXXX'))), fix("Get the right approach to ganache A lot of people touch base with us to know about one of our key ingredients, and the essential role it plays in our creations: ganache. Indeed, ganache is the macaron's softener, or else, macarons would be but tough biscuits; it is the cupcake's wrapper, or else, cupcakes would be but plain old cake. We even sometimes use ganache within our cupcakes, to soften the cake itself, or as a support to our pies' content. How to approach ganache Apart from the taste balance, which is always a challenge when it comes to pastry, the tough part about ganache is about thickness. It is even harder to predict through all the phases the ganache gets to meet (how long will it get melted? how long will it remain in the fridge?). Things get a hell of a lot easier to get once you consider that there are two main ways to get the perfect ganache: working from the top down: start with a thick, almost hard material, and soften it by manipulating it, or by mixing it with a more liquid ingredient (like milk) working from the bottom up: start from a liquid-ish state, and harden it by miwing it with thicker ingredients, or by leaving it in the fridge longer. We do hope this advice will empower you in your ganache-making skills. Let us know how you did with it! Ganache at Les Bonnes Choses We have a saying at Les Bonnes Choses: \"Once you can make ganache, you can make anything.\" As you may know, we like to give our workshop artists the ability to master their art to the top; that is why our Preparation Experts always start off as being Ganache Specialists for Les Bonnes Choses. That way, they're given an opportunity to focus on one exercise before moving on. Once they master their ganache, and are able to provide the most optimal delight to our customers, we consider they'll thrive as they work on other kinds of preparations. About the chocolate in our ganache Now, we've also had a lot of questions about how our chocolate gets made. It's true, as you might know, that we make it ourselves, from Columbian cocoa and French cow milk, with a process that much resembles the one in the following Discovery Channel documentary.Ganache is a tricky topic, but here's some guidance.Tue Jul 23 2013 17:00:00 GMT-0700 (PDT)Steve Adams, Ganache SpecialistDo it yourselfYes/testing_url/UlfoxUnM0wkXYXbj/triple-chocolate-cupcake?ref=XXXXX/testing_url/UlfoxUnM0wkXYXbm/tips-to-dress-a-pastry?ref=XXXXX"));
         done();
       });
     });
@@ -413,9 +384,9 @@ describe('Multiple fragment level global test', function() {
 });
 
 describe('StructuredText', function() {
-
+/*
   it('asHtml handles embeds and lists', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
@@ -429,7 +400,7 @@ describe('StructuredText', function() {
   });
 
   it('asText works', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
@@ -476,7 +447,7 @@ describe('StructuredText', function() {
   });
 
   it('asHtml handles spans', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbt")]]').ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
@@ -487,7 +458,7 @@ describe('StructuredText', function() {
   });
 
   it('asHtml handles span Link.web', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbW")]]').ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
@@ -498,7 +469,7 @@ describe('StructuredText', function() {
   });
 
   it('asHtml handles span Link.document', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
@@ -509,7 +480,7 @@ describe('StructuredText', function() {
   });
 
   it('asHtml with custom serializer', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
@@ -552,7 +523,7 @@ describe('StructuredText', function() {
   });
 
   it('getFirstImage works', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbl")]]').ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
@@ -566,7 +537,7 @@ describe('StructuredText', function() {
       });
     }, previewToken);
   });
-
+*/
   it('asHtml handles span Link.file', function () {
     var jsonString = '{"type":"StructuredText","value":[{"type":"paragraph","text":"2012 Annual Report","spans":[{"start":0,"end":18,"type":"hyperlink","data":{"type":"Link.file","value":{"file":{"name":"2012_annual.report.pdf","kind":"document","url":"https://prismic-io.s3.amazonaws.com/annual.report.pdf","size":"1282484"}}}}]},{"type":"paragraph","text":"2012 Annual Budget","spans":[{"start":0,"end":18,"type":"hyperlink","data":{"type":"Link.file","value":{"file":{"name":"2012_smec.annual.budget.pdf","kind":"document","url":"https://prismic-io.s3.amazonaws.com/annual.budget.pdf","size":"59229"}}}}]},{"type":"paragraph","text":"2015 Vision & Strategic Plan","spans":[{"start":0,"end":28,"type":"hyperlink","data":{"type":"Link.file","value":{"file":{"name":"2015_vision.strategic.plan_.sm_.pdf","kind":"document","url":"https://prismic-io.s3.amazonaws.com/vision.strategic.plan_.sm_.pdf","size":"1969956"}}}}]}]}';
     var jsonObject = JSON.parse(jsonString);
@@ -587,9 +558,9 @@ describe('StructuredText', function() {
 });
 
 describe('Various fragment types', function() {
-
+/*
   it('Handles multiple fields', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbX")]]').ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
@@ -600,7 +571,7 @@ describe('Various fragment types', function() {
   });
 
   it('ImageViews are well retrieved', function (done) {
-    Prismic.api(testRepository, function (err, Api) {
+    Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').query('[[:d = at(document.id, "UlfoxUnM0wkXYXbO")]]').ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
@@ -610,7 +581,7 @@ describe('Various fragment types', function() {
       });
     }, previewToken);
   });
-
+*/
   it('GeoPoint is retrieved', function (done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
