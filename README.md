@@ -19,7 +19,7 @@ npm install prismic.io --save
 #### CDN
 
 ```
-https://npmcdn.com/prismic.io@2.0.0/dist/prismic.io.min.js
+https://unpkg.com/prismic.io@2.0.0/dist/prismic.io.min.js
 ```
 
 (You may need to adapt the version number)
