@@ -19,10 +19,10 @@
     "codeclimate-test-reporter": "0.0.4",
     "es6-promise": "^3.2.1",
     "eslint": "^2.12.0",
-    "gh-pages": "^0.8.0",
     "istanbul": "^0.4.4",
     "jsdoc": "^3.4.0",
     "mocha": "*",
+    "rimraf": "^2.5.4",
     "uglify-js": "^2.6.1",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
@@ -34,14 +34,14 @@
   "main": "lib/prismic.js",
   "scripts": {
     "build": "scripts/browser.js",
+    "postbuild": "npm run docs",
     "uglify": "uglifyjs -c -o=dist/prismic.io.min.js dist/prismic.io.js",
     "preuglify": "npm run build",
     "prepublish": "npm run uglify",
     "lint": "eslint lib",
     "test": "istanbul cover _mocha test/",
     "posttest": "eslint lib",
-    "builddoc": "jsdoc dist/prismic.io.js README.md",
-    "pushdoc": "scripts/pushdoc.js",
-    "prepushdoc": "npm run builddoc"
+    "predocs": "rimraf ./docs",
+    "docs": "jsdoc dist/prismic.io.js README.md -d docs"
   }
 }
