@@ -318,7 +318,7 @@ describe('Fragments', function() {
           console.log(err);
           return;
         }
-        assert.equal(1, documents.results.length);
+        assert.equal(4, documents.results.length);
         done();
       });
     });
