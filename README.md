@@ -19,7 +19,7 @@ npm install prismic.io --save
 #### CDN
 
 ```
-https://unpkg.com/prismic.io@2.0.0/dist/prismic.io.min.js
+https://unpkg.com/prismic.io@3.1.3/dist/prismic.io.min.js
 ```
 
 (You may need to adapt the version number)
@@ -39,8 +39,7 @@ The kit is universal, it can be used:
 For new project, you can start from a sample project:
 
 * [Node.js project](https://github.com/prismicio/nodejs-sdk)
-* [Simple in-browser project](https://github.com/prismicio/javascript-jquery-starter)
-* [Static pages generation with baked.js](https://github.com/prismicio/baked.js)
+* [Node.js blog](https://github.com/prismicio/nodejs-blog)
 
 ### Usage
 
@@ -49,7 +48,7 @@ To fetch documents from your repository, you need to fetch the Api data first.
 ```javascript
 var Prismic = require('prismic.io');
 
-Prismic.api("http://lesbonneschoses.prismic.io/api", function(error, api) {
+Prismic.api("http://your_repository_name.prismic.io/api", function(error, api) {
   var options = {}; // In Node.js, pass the request as 'req' to read the reference from the cookies
   api.query("", options, function(error, response) { // An empty query will return all the documents
     if (error) {
