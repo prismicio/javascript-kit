@@ -48,7 +48,7 @@ describe('API retrieval and parsing', function(){
 
   it('Parsing stores types and tags', function(done) {
     Prismic.api(microRepository).then(function(Api) {
-      assert.equal(Object.keys(Api.data.types).length, 9);
+      assert.equal(Object.keys(Api.data.types).length, 11);
       assert.equal(Api.data.tags.length, 1);
       done();
     }, function(err) {
@@ -78,13 +78,13 @@ describe('API form submissions', function() {
           console.log(err);
           return;
         }
-        assert.equal(documents.results.length, 18);
+        assert.equal(documents.results.length, 20);
         assert.equal(documents.page, 1);
         assert.equal(documents.prev_page, null);
         assert.equal(documents.results_per_page, 20);
-        assert.equal(documents.results_size, 18);
+        assert.equal(documents.results_size, 20);
         assert.equal(documents.total_pages, 1);
-        assert.equal(documents.total_results_size, 18);
+        assert.equal(documents.total_results_size, 20);
         done();
       });
     });
@@ -153,6 +153,26 @@ describe('API form submissions', function() {
     });
   });
 
+  it('Use getByUID', function(done) {
+    Prismic.api(microRepository, function (err, Api) {
+      if (err) throw err;
+      Api.getByUID('with-uid', 'demo', {}, function (err, document) {
+        assert.equal(document.id, 'V_OoLCYAAFv84agw');
+        done();
+      });
+    });
+  });
+
+  it('Use getSingle', function(done) {
+    Prismic.api(microRepository, function (err, Api) {
+      if (err) throw err;
+      Api.getSingle('single', {}, function (err, document) {
+        assert.equal(document.id, 'V_OplCUAACQAE0lA');
+        done();
+      });
+    });
+  });
+
   it('Use getByIDs', function(done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
@@ -171,8 +191,8 @@ describe('API form submissions', function() {
       }
       Api.form('everything').ref(Api.master()).orderings('[my.product.price desc]').submit(function (err, documents) {
         if (err) { console.log(err); }
-        assert.equal(documents.results.length, 18);
-        assert.equal(documents.results[0].id, 'UrDejAEAAFwMyrW9');
+        assert.equal(documents.results.length, 20);
+        assert.equal(documents.results[0].id, 'V_OplCUAACQAE0lA');
         done();
       });
     });
@@ -188,7 +208,7 @@ describe('API form submissions', function() {
         if (err) {
           console.log(err);
         }
-        assert.equal(documents.results.length, 18);
+        assert.equal(documents.results.length, 20);
         assert.equal(documents.results[0].id, 'UrDofwEAALAdpbNH');
         done();
       });
@@ -204,13 +224,13 @@ describe('API form submissions', function() {
       Api.form('everything').pageSize(10).ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
         assert.equal(documents.results.length, 10);
-        assert.equal(documents.next_page, "https://micro.prismic.io/api/documents/search?ref=V6nx_CUAAM0bW-T6&page=2&pageSize=10");
+        assert.equal(documents.next_page, "https://micro.prismic.io/api/documents/search?ref=V_OpmSUAACcAE0lS&page=2&pageSize=10");
         assert.equal(documents.page, 1);
         assert.equal(documents.prev_page, null);
         assert.equal(documents.results_per_page, 10);
         assert.equal(documents.results_size, 10);
         assert.equal(documents.total_pages, 2);
-        assert.equal(documents.total_results_size, 18);
+        assert.equal(documents.total_results_size, 20);
         done();
       });
     });
@@ -224,14 +244,14 @@ describe('API form submissions', function() {
           console.log(err);
           return;
         }
-        assert.equal(documents.results.length, 8);
+        assert.equal(documents.results.length, 10);
         assert.isNull(documents.next_page);
         assert.equal(documents.page, 2);
-        assert.equal(documents.prev_page, "https://micro.prismic.io/api/documents/search?ref=V6nx_CUAAM0bW-T6&page=1&pageSize=10");
+        assert.equal(documents.prev_page, "https://micro.prismic.io/api/documents/search?ref=V_OpmSUAACcAE0lS&page=1&pageSize=10");
         assert.equal(documents.results_per_page, 10);
-        assert.equal(documents.results_size, 8);
+        assert.equal(documents.results_size, 10);
         assert.equal(documents.total_pages, 2);
-        assert.equal(documents.total_results_size, 18);
+        assert.equal(documents.total_results_size, 20);
         done();
       });
     });
@@ -241,7 +261,7 @@ describe('API form submissions', function() {
     Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').ref(Api.master()).query("wrongpredicate").submit(function (err, _) {
-        assert.equal(err.message, "Unexpected status code [400] on URL https://micro.prismic.io/api/documents/search?page=1&pageSize=20&ref=V6nx_CUAAM0bW-T6&q=wrongpredicate");
+        assert.equal(err.message, "Unexpected status code [400] on URL https://micro.prismic.io/api/documents/search?page=1&pageSize=20&ref=V_OpmSUAACcAE0lS&q=wrongpredicate");
         done();
       });
     });
