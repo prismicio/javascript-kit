@@ -12,8 +12,7 @@ deploy:
     secure: R9LtyIpgqJkeiTigLdWsqrbdE/+sxVnlKKhufeJZIRJyxrlJDVpQJkA/xzFpypqDGCL7ZjtWh8nwk0d8SiljLMAR3xe4E1PlXKcGNQ1eVlwom++Ar7W4uizoRTVVADinzv2koowzx/mlqfiyeu/wC/B0Gap7HhUazrn9r2ezeFk=
   on:
     tags: true
-    all_branches: true
-    repo: prismicio/javascript-kit
+    branch: master
 after_script:
 - codeclimate < coverage/lcov.info
 addons:
