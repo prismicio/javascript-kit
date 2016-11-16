@@ -47,6 +47,19 @@ describe("Unit tests", function() {
     assert.equal(html, fragment.asHtml());
   });
 
+  it('should init Timestamp without value', function () {
+    assert.doesNotThrow(function() {
+      var field = Prismic.Fragments.initField({"type" : "Timestamp", "value" : null });
+      assert.equal(field.value, null);
+    });
+  });
+
+  it('should init Timestamp with valid date string', function () {
+    var dateString = '1970-11-23T00:00:00.000';
+    var field = Prismic.Fragments.initField({"type" : "Timestamp", "value" : dateString });
+    assert.deepEqual(field.value, new Date(dateString));
+  });
+
 });
 
 describe("HTML content", function() {
