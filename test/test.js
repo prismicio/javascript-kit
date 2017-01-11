@@ -6,8 +6,6 @@ var chai = require('chai');
 
 var assert = chai.assert;
 
-/* === TESTS ARE RUN OVER "LES BONNES CHOSES" EXAMPLE REPOSITORY === */
-
 var microRepository = 'https://micro.prismic.io/api',
     previewToken = 'MC5VcXBHWHdFQUFONDZrbWp4.77-9cDx6C3lgJu-_vXZafO-_vXPvv73vv73vv70777-9Ju-_ve-_vSLvv73vv73vv73vv70O77-977-9Me-_vQ',
     Predicates = Prismic.Predicates;
@@ -122,7 +120,7 @@ describe('API form submissions', function() {
     });
   });
 
-  it('Use an Array to query', function (done) {
+  it('Use an Array of String to query', function (done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) {
         console.log(err);
@@ -138,6 +136,25 @@ describe('API form submissions', function() {
           var document = response.results[0];
           assert.equal(document.linkedDocuments().length, 1);
           assert.equal(document.linkedDocuments()[0].id, 'U0w8OwEAACoAQEvB');
+          done();
+        });
+    });
+  });
+
+  it('Use an Array of Number to query', function (done) {
+    Prismic.api(microRepository, function (err, Api) {
+      if (err) {
+        console.log(err);
+        done();
+      }
+      Api.form('everything')
+        .query(Predicates.any('my.argument.priority', [1000, 600]))
+        .ref(Api.master())
+        .submit(function (err, response) {
+          if (err) {
+            console.log(err);
+          }
+          assert.equal(response.results.length, 2);
           done();
         });
     });
