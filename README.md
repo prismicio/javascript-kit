@@ -50,8 +50,8 @@ var Prismic = require('prismic.io');
 
 Prismic.api("http://your_repository_name.prismic.io/api", function(error, api) {
   var options = {}; // In Node.js, pass the request as 'req' to read the reference from the cookies
-  api.query("", options, function(error, response) { // An empty query will return all the documents
-    if (error) {
+  api.query("", options, function(err, response) { // An empty query will return all the documents
+    if (err) {
       console.log("Something went wrong: ", err);
     }
     console.log("Documents: ", response.documents);
