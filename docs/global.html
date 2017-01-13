@@ -96,26 +96,16 @@
 
         
             
-<h4 class="name" id="punycode"><span class="type-signature"></span>punycode<span class="type-signature"> :Object</span></h4>
+<h4 class="name" id="data"><span class="type-signature"></span>data<span class="type-signature"></span></h4>
 
 
 
 
 <div class="description">
-    The `punycode` object.
+    The original JSON data from the API
 </div>
 
 
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object</span>
-
-
-        </li>
-    </ul>
 
 
 
@@ -150,7 +140,69 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line7231">line 7231</a>
+        <a href="documents.js.html">documents.js</a>, <a href="documents.js.html#line586">line 586</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="fragments"><span class="type-signature"></span>fragments<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Fragments, converted to business objects
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="documents.js.html">documents.js</a>, <a href="documents.js.html#line590">line 590</a>
     </li></ul></dd>
     
 
@@ -177,33 +229,96 @@
 
     
 
-    <h4 class="name" id="catch"><span class="type-signature"></span>catch<span class="signature">(onRejection)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="ApiCache"><span class="type-signature"></span>ApiCache<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    `catch` is simply sugar for `then(undefined, onRejection)` which makes it the same
-      as the catch block of a try/catch statement.
+    Api cache
+</div>
 
-      ```js
-      function findAuthor(){
-        throw new Error('couldn't find that author');
-      }
 
-      // synchronous
-      try {
-        findAuthor();
-      } catch(reason) {
-        // something went wrong
-      }
 
-      // async with promises
-      findAuthor().catch(function(reason){
-        // something went wrong
-      });
-      ```
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="cache.js.html">cache.js</a>, <a href="cache.js.html#line9">line 9</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="insertSpans"><span class="type-signature"></span>insertSpans<span class="signature">(text, spans, linkResolver, htmlSerializer)</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Parses a block that has spans, and inserts the proper HTML code.
 </div>
 
 
@@ -239,7 +354,76 @@
 
         <tr>
             
-                <td class="name"><code>onRejection</code></td>
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the original text of the block</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>spans</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the spans as returned by the API</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>linkResolver</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the function to build links that may be in the fragment (please read prismic.io's online documentation about this)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>htmlSerializer</code></td>
             
 
             <td class="type">
@@ -255,7 +439,7 @@
 
             
 
-            <td class="description last">Useful for tooling.</td>
+            <td class="description last">optional serializer</td>
         </tr>
 
     
@@ -296,7 +480,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line6479">line 6479</a>
+        <a href="fragments.js.html">fragments.js</a>, <a href="fragments.js.html#line905">line 905</a>
     </li></ul></dd>
     
 
@@ -322,6 +506,10 @@
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    - the HTML output
+</div>
+
 
 
 <dl>
@@ -330,7 +518,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise</span>
+<span class="param-type">string</span>
 
 
     </dd>
@@ -345,198 +533,29 @@
 
     
 
-    <h4 class="name" id="then"><span class="type-signature"></span>then<span class="signature">(onFulfilled, onRejected)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="LRUCache"><span class="type-signature"></span>LRUCache<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    The primary way of interacting with a promise is through its `then` method,
-      which registers callbacks to receive either a promise's eventual value or the
-      reason why the promise cannot be fulfilled.
+    A doubly linked list-based Least Recently Used (LRU) cache. Will keep most
+recently used items while discarding least recently used items when its limit
+is reached.
 
-      ```js
-      findUser().then(function(user){
-        // user is available
-      }, function(reason){
-        // user is unavailable, and you are given the reason why
-      });
-      ```
+Licensed under MIT. Copyright (c) 2010 Rasmus Andersson <http://hunch.se/>
+See README.md for details.
 
-      Chaining
-      --------
+Illustration of the design:
 
-      The return value of `then` is itself a promise.  This second, 'downstream'
-      promise is resolved with the return value of the first promise's fulfillment
-      or rejection handler, or rejected if the handler throws an exception.
+      entry             entry             entry             entry
+      ______            ______            ______            ______
+     | head |.newer => |      |.newer => |      |.newer => | tail |
+     |  A   |          |  B   |          |  C   |          |  D   |
+     |______| <= older.|______| <= older.|______| <= older.|______|
 
-      ```js
-      findUser().then(function (user) {
-        return user.name;
-      }, function (reason) {
-        return 'default name';
-      }).then(function (userName) {
-        // If `findUser` fulfilled, `userName` will be the user's name, otherwise it
-        // will be `'default name'`
-      });
-
-      findUser().then(function (user) {
-        throw new Error('Found user, but still unhappy');
-      }, function (reason) {
-        throw new Error('`findUser` rejected and we're unhappy');
-      }).then(function (value) {
-        // never reached
-      }, function (reason) {
-        // if `findUser` fulfilled, `reason` will be 'Found user, but still unhappy'.
-        // If `findUser` rejected, `reason` will be '`findUser` rejected and we're unhappy'.
-      });
-      ```
-      If the downstream promise does not specify a rejection handler, rejection reasons will be propagated further downstream.
-
-      ```js
-      findUser().then(function (user) {
-        throw new PedagogicalException('Upstream error');
-      }).then(function (value) {
-        // never reached
-      }).then(function (value) {
-        // never reached
-      }, function (reason) {
-        // The `PedgagocialException` is propagated all the way down to here
-      });
-      ```
-
-      Assimilation
-      ------------
-
-      Sometimes the value you want to propagate to a downstream promise can only be
-      retrieved asynchronously. This can be achieved by returning a promise in the
-      fulfillment or rejection handler. The downstream promise will then be pending
-      until the returned promise is settled. This is called *assimilation*.
-
-      ```js
-      findUser().then(function (user) {
-        return findCommentsByAuthor(user);
-      }).then(function (comments) {
-        // The user's comments are now available
-      });
-      ```
-
-      If the assimliated promise rejects, then the downstream promise will also reject.
-
-      ```js
-      findUser().then(function (user) {
-        return findCommentsByAuthor(user);
-      }).then(function (comments) {
-        // If `findCommentsByAuthor` fulfills, we'll have the value here
-      }, function (reason) {
-        // If `findCommentsByAuthor` rejects, we'll have the reason here
-      });
-      ```
-
-      Simple Example
-      --------------
-
-      Synchronous Example
-
-      ```javascript
-      var result;
-
-      try {
-        result = findResult();
-        // success
-      } catch(reason) {
-        // failure
-      }
-      ```
-
-      Errback Example
-
-      ```js
-      findResult(function(result, err){
-        if (err) {
-          // failure
-        } else {
-          // success
-        }
-      });
-      ```
-
-      Promise Example;
-
-      ```javascript
-      findResult().then(function(result){
-        // success
-      }, function(reason){
-        // failure
-      });
-      ```
-
-      Advanced Example
-      --------------
-
-      Synchronous Example
-
-      ```javascript
-      var author, books;
-
-      try {
-        author = findAuthor();
-        books  = findBooksByAuthor(author);
-        // success
-      } catch(reason) {
-        // failure
-      }
-      ```
-
-      Errback Example
-
-      ```js
-
-      function foundBooks(books) {
-
-      }
-
-      function failure(reason) {
-
-      }
-
-      findAuthor(function(author, err){
-        if (err) {
-          failure(err);
-          // failure
-        } else {
-          try {
-            findBoooksByAuthor(author, function(books, err) {
-              if (err) {
-                failure(err);
-              } else {
-                try {
-                  foundBooks(books);
-                } catch(reason) {
-                  failure(reason);
-                }
-              }
-            });
-          } catch(error) {
-            failure(err);
-          }
-          // success
-        }
-      });
-      ```
-
-      Promise Example;
-
-      ```javascript
-      findAuthor().
-        then(findBooksByAuthor).
-        then(function(books){
-          // found books
-      }).catch(function(reason){
-        // something went wrong
-      });
-      ```
+ removed  <--  <--  <--  <--  <--  <--  <--  <--  <--  <--  <--  added
 </div>
 
 
@@ -545,78 +564,6 @@
 
 
 
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>onFulfilled</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>onRejected</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Useful for tooling.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -652,7 +599,89 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="prismic.io.js.html">prismic.io.js</a>, <a href="prismic.io.js.html#line6284">line 6284</a>
+        <a href="lru.js.html">lru.js</a>, <a href="lru.js.html#line20">line 20</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="parseDoc"><span class="type-signature"></span>parseDoc<span class="signature">()</span><span class="type-signature"> &rarr; {Document}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Parse json as a document
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line547">line 547</a>
     </li></ul></dd>
     
 
@@ -686,7 +715,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise</span>
+<span class="param-type">Document</span>
 
 
     </dd>
@@ -712,13 +741,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#catch">catch</a></li><li><a href="global.html#punycode">punycode</a></li><li><a href="global.html#then">then</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Sep 07 2016 16:34:36 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jan 13 2017 11:58:14 GMT+0900 (JST)
 </footer>
 
 <script> prettyPrint(); </script>
