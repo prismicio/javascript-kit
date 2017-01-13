@@ -42,6 +42,6 @@
     "test": "istanbul cover _mocha test/",
     "posttest": "eslint lib",
     "predocs": "rimraf ./docs",
-    "docs": "jsdoc dist/prismic.io.js README.md -d docs"
+    "docs": "jsdoc lib/*.js README.md -d docs"
   }
 }
