@@ -51,7 +51,7 @@
 <li>The <a href="https://github.com/prismicio/javascript-kit">source code</a> is on Github.</li>
 <li>The <a href="https://github.com/prismicio/javascript-kit/releases">Changelog</a> is on Github's releases tab.</li>
 </ul>
-<h3>Installation</h3><h4>NPM</h4><pre class="prettyprint source lang-sh"><code>npm install prismic.io --save</code></pre><h4>CDN</h4><pre class="prettyprint source"><code>https://npmcdn.com/prismic.io@2.0.0/dist/prismic.io.min.js</code></pre><p>(You may need to adapt the version number)</p>
+<h3>Installation</h3><h4>NPM</h4><pre class="prettyprint source lang-sh"><code>npm install prismic.io --save</code></pre><h4>CDN</h4><pre class="prettyprint source"><code>https://unpkg.com/prismic.io/dist/prismic.io.min.js</code></pre><p>(You may need to adapt the version number)</p>
 <h4>Downloadable version</h4><p>On our release page: <a href="https://github.com/prismicio/javascript-kit/releases">https://github.com/prismicio/javascript-kit/releases</a>.</p>
 <p>The kit is universal, it can be used:</p>
 <ul>
@@ -62,16 +62,15 @@
 <h3>Starter kits</h3><p>For new project, you can start from a sample project:</p>
 <ul>
 <li><a href="https://github.com/prismicio/nodejs-sdk">Node.js project</a></li>
-<li><a href="https://github.com/prismicio/javascript-jquery-starter">Simple in-browser project</a></li>
-<li><a href="https://github.com/prismicio/baked.js">Static pages generation with baked.js</a></li>
+<li><a href="https://github.com/prismicio/nodejs-blog">Node.js blog</a></li>
 </ul>
 <h3>Usage</h3><p>To fetch documents from your repository, you need to fetch the Api data first.</p>
 <pre class="prettyprint source lang-javascript"><code>var Prismic = require('prismic.io');
 
-Prismic.api(&quot;http://lesbonneschoses.prismic.io/api&quot;, function(error, api) {
+Prismic.api(&quot;http://your_repository_name.prismic.io/api&quot;, function(error, api) {
   var options = {}; // In Node.js, pass the request as 'req' to read the reference from the cookies
-  api.query(&quot;&quot;, options, function(error, response) { // An empty query will return all the documents
-    if (error) {
+  api.query(&quot;&quot;, options, function(err, response) { // An empty query will return all the documents
+    if (err) {
       console.log(&quot;Something went wrong: &quot;, err);
     }
     console.log(&quot;Documents: &quot;, response.documents);
@@ -107,13 +106,13 @@ npm test</code></pre><h4>Documentation</h4><p>Please document any new feature or
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#catch">catch</a></li><li><a href="global.html#punycode">punycode</a></li><li><a href="global.html#then">then</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Sep 07 2016 16:34:36 GMT+0200 (CEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jan 13 2017 11:58:14 GMT+0900 (JST)
 </footer>
 
 <script> prettyPrint(); </script>
