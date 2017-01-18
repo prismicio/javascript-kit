@@ -135,7 +135,7 @@ describe('API form submissions', function() {
   it('Use query', function(done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) { done(err); return; }
-      Api.query(Predicates.at('document.id', 'UrDejAEAAFwMyrW9'), {}, function (err, resp) {
+      Api.query(Predicates.at('document.id', 'UrDejAEAAFwMyrW9'), function (err, resp) {
         if (err) { done(err); return; }
         assert.equal(resp.results[0].id, 'UrDejAEAAFwMyrW9');
         done();
@@ -145,15 +145,35 @@ describe('API form submissions', function() {
 
   it('Use query with a Promise', function() {
     return Prismic.api(microRepository).then(function (Api) {
-      return Api.query(Predicates.at('document.id', 'UrDejAEAAFwMyrW9'), {}).then(function (resp) {
+      return Api.query(Predicates.at('document.id', 'UrDejAEAAFwMyrW9')).then(function (resp) {
         assert.equal(resp.results[0].id, 'UrDejAEAAFwMyrW9');
       });
     });
   });
+
+  it('Use queryFirst', function(done) {
+    Prismic.api(microRepository, function (err, Api) {
+      if (err) { done(err); return; }
+      Api.queryFirst(Predicates.at('document.id', 'UrDejAEAAFwMyrW9'), function (err, document) {
+        if (err) { done(err); return; }
+        assert.equal(document.id, 'UrDejAEAAFwMyrW9');
+        done();
+      });
+    });
+  });
+
+  it('Use queryFirst with a Promise', function() {
+    return Prismic.api(microRepository).then(function (Api) {
+      return Api.queryFirst(Predicates.at('document.id', 'UrDejAEAAFwMyrW9')).then(function (document) {
+        assert.equal(document.id, 'UrDejAEAAFwMyrW9');
+      });
+    });
+  });
+
   it('Use getByID', function(done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) { done(err); return; }
-      Api.getByID('UrDejAEAAFwMyrW9', {}, function (err, document) {
+      Api.getByID('UrDejAEAAFwMyrW9', function (err, document) {
         if (err) { done(err); return; }
         assert.equal(document.id, 'UrDejAEAAFwMyrW9');
         done();
@@ -163,7 +183,7 @@ describe('API form submissions', function() {
 
   it('Use getByID with a Promise', function() {
     return Prismic.api(microRepository).then(function(Api) {
-      return Api.getByID('UrDejAEAAFwMyrW9', {}).then(function(document) {
+      return Api.getByID('UrDejAEAAFwMyrW9').then(function(document) {
         assert.equal(document.id, 'UrDejAEAAFwMyrW9');
       });
     });
@@ -172,7 +192,7 @@ describe('API form submissions', function() {
   it('Use getByUID', function(done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) { done(err); return; }
-      Api.getByUID('with-uid', 'demo', {}, function (err, document) {
+      Api.getByUID('with-uid', 'demo', function (err, document) {
         if (err) { done(err); return; }
         assert.equal(document.id, 'V_OoLCYAAFv84agw');
         done();
@@ -182,7 +202,7 @@ describe('API form submissions', function() {
 
   it('Use getByUID with a Promise', function() {
     return Prismic.api(microRepository).then(function (Api) {
-      return Api.getByUID('with-uid', 'demo', {}).then(function (document) {
+      return Api.getByUID('with-uid', 'demo').then(function (document) {
         assert.equal(document.id, 'V_OoLCYAAFv84agw');
       });
     });
@@ -191,7 +211,7 @@ describe('API form submissions', function() {
   it('Use getSingle', function(done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) { done(err); return; }
-      Api.getSingle('single', {}, function (err, document) {
+      Api.getSingle('single', function (err, document) {
         if (err) { done(err); return; }
         assert.equal(document.id, 'V_OplCUAACQAE0lA');
         done();
@@ -202,7 +222,7 @@ describe('API form submissions', function() {
 
   it('Use getSingle with a Promise', function() {
     return Prismic.api(microRepository).then(function (Api) {
-      return Api.getSingle('single', {}).then(function (document) {
+      return Api.getSingle('single').then(function (document) {
         assert.equal(document.id, 'V_OplCUAACQAE0lA');
       });
     });
@@ -211,7 +231,7 @@ describe('API form submissions', function() {
   it('Use getByIDs', function(done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) { done(err); return; }
-      Api.getByIDs(['UrDejAEAAFwMyrW9', 'V2OokCUAAHSZcOUP'], {}, function (err, res) {
+      Api.getByIDs(['UrDejAEAAFwMyrW9', 'V2OokCUAAHSZcOUP'], function (err, res) {
         if (err) { done(err); return; }
         assert.equal(res.results.length, 2);
         done();
@@ -221,7 +241,7 @@ describe('API form submissions', function() {
 
   it('Use getByIDs with a Promise', function() {
     return Prismic.api(microRepository).then(function (Api) {
-      return Api.getByIDs(['UrDejAEAAFwMyrW9', 'V2OokCUAAHSZcOUP'], {}).then(function (res) {
+      return Api.getByIDs(['UrDejAEAAFwMyrW9', 'V2OokCUAAHSZcOUP']).then(function (res) {
         assert.equal(res.results.length, 2);
       });
     });
