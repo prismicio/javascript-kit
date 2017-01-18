@@ -253,7 +253,7 @@ ImageLink.prototype = {
    * @returns {string} - basic HTML code for the fragment
    */
   asHtml: function () {
-    return "&lt;a href=\"" + this.url() + "\">&lt;img src=\"" + this.url() + "\" alt=\"" + (this.alt || "") + "\">&lt;/a>";
+    return "&lt;a href=\"" + this.url() + "\">&lt;img src=\"" + this.url() + "\" alt=\"" + (this.alt || "") + " copyright=\"" + (this.copyright || "") + "\" \">&lt;/a>";
   },
   /**
    * Returns the URL of the link.
@@ -416,6 +416,44 @@ Num.prototype = {
       return null;
     } else {
       return this.value.toString();
+    }
+  }
+};
+
+/**
+ * Embodies a Range fragment
+ * @constructor
+ * @global
+ * @alias Fragments:Range
+ */
+function Range(data) {
+  /**
+   * @field
+   * @description the integer value of the fragment
+   */
+  this.value = data;
+}
+Range.prototype = {
+  /**
+   * Turns the fragment into a useable HTML version of it.
+   * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+   *
+   * @returns {string} - basic HTML code for the fragment
+   */
+  asHtml: function () {
+    return "&lt;span>" + this.value + "&lt;/span>";
+  },
+
+  /**
+   * Turns the fragment into a useable text version of it.
+   *
+   * @returns {string} - basic text version of the fragment
+   */
+  asText: function() {
+    if (this.value === null) {
+      return null;
+    } else {
+      return this.value;
     }
   }
 };
@@ -606,7 +644,7 @@ ImageEl.prototype = {
  * @global
  * @alias Fragments:ImageView
  */
-function ImageView(url, width, height, alt) {
+function ImageView(url, width, height, alt, copyright) {
   /**
    * @field
    * @description the URL of the ImageView (useable as it, in a &lt;img> tag in HTML, for instance)
@@ -627,6 +665,11 @@ function ImageView(url, width, height, alt) {
    * @description the alt text for the ImageView
    */
   this.alt = alt;
+  /**
+   * @field
+   * @description the copyright for the ImageView
+   */
+  this.copyright = copyright;
 }
 ImageView.prototype = {
   ratio: function () {
@@ -639,7 +682,7 @@ ImageView.prototype = {
    * @returns {string} - basic HTML code for the fragment
    */
   asHtml: function () {
-    return "&lt;img src=\"" + this.url + "\" width=\"" + this.width + "\" height=\"" + this.height + "\" alt=\"" + (this.alt || "") + "\">";
+    return '&lt;img src="' + this.url + '" width="' + this.width + '" height="' + this.height + '" alt="' + (this.alt || "") + '" copyright="' + (this.copyright || "") + '">';
   },
 
   /**
@@ -820,7 +863,8 @@ StructuredText.prototype = {
           block.url,
           block.dimensions.width,
           block.dimensions.height,
-          block.alt
+          block.alt,
+          block.copyright
         );
       }
     }
@@ -1162,6 +1206,7 @@ function initField(field) {
   var classForType = {
     "Color": Color,
     "Number": Num,
+    "Range": Range,
     "Date": DateFragment,
     "Timestamp": Timestamp,
     "Text": Text,
@@ -1189,7 +1234,8 @@ function initField(field) {
         img.url,
         img.dimensions.width,
         img.dimensions.height,
-        img.alt
+        img.alt,
+        img.copyright
       ),
       {}
     );
@@ -1199,7 +1245,8 @@ function initField(field) {
         img.url,
         img.dimensions.width,
         img.dimensions.height,
-        img.alt
+        img.alt,
+        img.copyright
       );
     }
     return output;
@@ -1267,7 +1314,7 @@ function serialize(element, content, htmlSerializer) {
 
   if (element.type == "image") {
     var label = element.label ? (" " + element.label) : "";
-    var imgTag = '&lt;img src="' + element.url + '" alt="' + (element.alt || "") + '">';
+    var imgTag = '&lt;img src="' + element.url + '" alt="' + (element.alt || "") + '" copyright="' + (element.copyright || "") + '">';
     return '&lt;p class="block-img' + label + '">' +
       (element.linkUrl ? ('&lt;a href="' + element.linkUrl + '">' + imgTag + '&lt;/a>') : imgTag) +
       '&lt;/p>';
@@ -1298,6 +1345,7 @@ module.exports = {
   ImageView: ImageView,
   Text: Text,
   Number: Num,
+  Range: Range,
   Date: DateFragment,
   Timestamp: Timestamp,
   Select: Select,
@@ -1326,13 +1374,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Range.html">Fragments:Range</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jan 13 2017 11:58:14 GMT+0900 (JST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jan 18 2017 17:50:58 GMT+0900 (JST)
 </footer>
 
 <script> prettyPrint(); </script>
