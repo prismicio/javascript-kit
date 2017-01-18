@@ -16,15 +16,12 @@ function getLinkResolver(ref) {
 
 describe('Document manipulation', function() {
 
-  it('Render a document to Html', function (done) {
-    Prismic.api(microRepository, function (err, Api) {
-      if (err) { done(err); return; }
-      Api.form('everything').ref(Api.master()).submit(function (err, documents) {
-        if (err) { done(err); return; }
+  it('Render a document to Html', function () {
+    return Prismic.api(microRepository).then(function (Api) {
+      return Api.form('everything').ref(Api.master()).submit().then(function (documents) {
         var first = documents.results[0];
-        assert.notEqual(null, first);
+        assert.isNotNull(first);
         first.asHtml(getLinkResolver());
-        done();
       });
     });
   });
