@@ -568,8 +568,8 @@ describe('Various fragment types', function() {
   it('ImageViews are well retrieved', function () {
     return Prismic.api(microRepository, previewToken).then(function (Api) {
       return Api.getByID('WHx-gSYAAMkyXYX_').then(function (doc) {
-        assert.equal(doc.getImageView('all.image', 'main').asHtml(), '<img src="https://prismic-io.s3.amazonaws.com/micro/e185bb021862c2c03a96bea92e170830908c39a3_thermometer.png" width="600" height="600" alt="">');
-        assert.equal(doc.getImageView('all.image', 'small').asHtml(), '<img src="https://prismic-io.s3.amazonaws.com/micro/5f4a19be1fd2edeaf7bc8123a3d67ee87a8446ef_thermometer.png" width="128" height="128" alt="">');
+        assert.equal(doc.getImageView('all.image', 'main').asHtml(), '<img src="https://prismic-io.s3.amazonaws.com/micro/e185bb021862c2c03a96bea92e170830908c39a3_thermometer.png" width="600" height="600" alt="" copyright="">');
+        assert.equal(doc.getImageView('all.image', 'small').asHtml(), '<img src="https://prismic-io.s3.amazonaws.com/micro/5f4a19be1fd2edeaf7bc8123a3d67ee87a8446ef_thermometer.png" width="128" height="128" alt="" copyright="">');
       });
     });
   });
@@ -727,7 +727,7 @@ describe('Various fragment types', function() {
     });
     var slices = doc.getSliceZone('article.blocks');
     assert.equal(slices.asText(getLinkResolver()), "c'est un bloc features\n\nC'est un bloc content\n");
-    assert.equal(slices.asHtml(getLinkResolver()), '<div data-slicetype="features" class="slice"><section data-field="illustration"><img src="https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg" width="4285" height="709" alt=""></section><section data-field="title"><span>c\'est un bloc features</span></section></div><div data-slicetype="text" class="slice"><p>C\'est un bloc content</p></div>');
+    assert.equal(slices.asHtml(getLinkResolver()), '<div data-slicetype="features" class="slice"><section data-field="illustration"><img src="https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg" width="4285" height="709" alt="" copyright=""></section><section data-field="title"><span>c\'est un bloc features</span></section></div><div data-slicetype="text" class="slice"><p>C\'est un bloc content</p></div>');
   });
 
 
