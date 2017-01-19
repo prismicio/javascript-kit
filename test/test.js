@@ -151,6 +151,14 @@ describe('API form submissions', function() {
     });
   });
 
+  it('Use query without q with a Promise', function() {
+    return Prismic.api(microRepository).then(function (Api) {
+      return Api.query().then(function (resp) {
+        assert.isAbove(resp.results_size, 1);
+      });
+    });
+  });
+
   it('Use queryFirst', function(done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) { done(err); return; }
