@@ -313,6 +313,51 @@ describe('API form submissions', function() {
     });
   });
 
+  it('Get next page by hand', function () {
+    return Prismic.api(microRepository).then(function (Api) {
+      return Api.query(undefined, {pageSize: 1}).then(function (page1) {
+        assert.isNotNull(page1.next_page);
+        return Api.request(page1.next_page).then(function (page2) {
+          assert.isNotNull(page2.previous_page);
+        });
+      });
+    });
+  });
+
+  it('Get next page with access token by hand', function () {
+    return Prismic.api(microRepository, accessToken).then(function (Api) {
+      return Api.query(undefined, {pageSize: 1, ref: Api.ref('myrelease')}).then(function (page1) {
+        assert.isNotNull(page1.next_page);
+        console.log('next_page: ', page1.next_page);
+        return Api.request(page1.next_page + '&access_token=' + accessToken).then(function (page2) {
+          assert.isNotNull(page2.previous_page);
+        });
+      });
+    });
+  });
+
+  it('Use getNextPage', function () {
+    return Prismic.api(microRepository).then(function (Api) {
+      return Api.query(undefined, {pageSize: 1}).then(function (page1) {
+        assert.isNotNull(page1.next_page);
+        return Api.getNextPage(page1.next_page).then(function (page2) {
+          assert.isNotNull(page2.previous_page);
+        });
+      });
+    });
+  });
+
+  it('Use getNextPage with access token', function () {
+    return Prismic.api(microRepository, accessToken).then(function (Api) {
+      return Api.query(undefined, {pageSize: 1, ref: Api.ref('myrelease')}).then(function (page1) {
+        assert.isNotNull(page1.next_page);
+        return Api.getNextPage(page1.next_page).then(function (page2) {
+          assert.isNotNull(page2.previous_page);
+        });
+      });
+    });
+  });
+
   it('Correctly handles the error if wrong submission', function (done) {
     Prismic.api(microRepository, function (err, Api) {
       if (err) { done(err); return; }
