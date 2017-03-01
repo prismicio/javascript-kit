@@ -290,6 +290,10 @@ Api.prototype = {
    * @param {function} callback(err, response)
    */
   query: function query(q, options, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = undefined;
+    }
     var opts = options || {};
     var form = this.form('everything');
     for (var key in opts) {
@@ -315,20 +319,38 @@ Api.prototype = {
   },
 
   /**
-   * Retrieve the document with the given id
-   * @param {string} id
-   * @param {object} additional parameters
-   * @param {function} callback(err, response)
+   * Retrieve the document returned by the given query
+   * @param {string|array|Predicate} the query
+   * @param {object} additional parameters. In NodeJS, pass the request as 'req'.
+   * @param {function} callback(err, doc)
    */
-  getByID: function getByID(id, options, callback) {
-    return this.query(Predicates.at('document.id', id), options, function (err, response) {
+  queryFirst: function queryFirst(q, options, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = undefined;
+    }
+    var opts = Object.assign({}, options || {}, {
+      page: 1,
+      pageSize: 1
+    });
+    return this.query(q, opts, function (err, response) {
       if (callback) {
-        var result = response.results.length > 0 ? response.results[0] : null;
+        var result = response && response.results && response.results[0];
         callback(err, result);
       }
     }).then(function (response) {
       return response && response.results && response.results[0];
     });
+  },
+
+  /**
+   * Retrieve the document with the given id
+   * @param {string} id
+   * @param {object} additional parameters
+   * @param {function} callback(err, doc)
+   */
+  getByID: function getByID(id, options, callback) {
+    return this.queryFirst(Predicates.at('document.id', id), options, callback);
   },
 
   /**
@@ -349,25 +371,7 @@ Api.prototype = {
    * @param {function} callback(err, response)
    */
   getByUID: function getByUID(type, uid, options, callback) {
-    if (typeof options === 'function') {
-      callback = options;
-      options = {};
-    }
-    var self = this;
-    return new Promise(function (resolve, reject) {
-      var cb = function cb(err, value, xhr) {
-        if (callback) callback(err, value, xhr);
-        if (err) {
-          reject(err);
-        } else {
-          resolve(value);
-        }
-      };
-      self.query(Predicates.at('my.' + type + '.uid', uid), options, function (err, response) {
-        var result = response && response.results && response.results.length > 0 ? response.results[0] : null;
-        cb(err, result);
-      });
-    });
+    return this.queryFirst(Predicates.at('my.' + type + '.uid', uid), options, callback);
   },
 
   /**
@@ -377,25 +381,7 @@ Api.prototype = {
    * @param {function} callback(err, response)
    */
   getSingle: function getSingle(type, options, callback) {
-    if (typeof options === 'function') {
-      callback = options;
-      options = {};
-    }
-    var self = this;
-    return new Promise(function (resolve, reject) {
-      var cb = function cb(err, value, xhr) {
-        if (callback) callback(err, value, xhr);
-        if (err) {
-          reject(err);
-        } else {
-          resolve(value);
-        }
-      };
-      self.query(Predicates.at('document.type', type), options, function (err, response) {
-        var result = response && response.results && response.results.length > 0 ? response.results[0] : null;
-        cb(err, result);
-      });
-    });
+    return this.queryFirst(Predicates.at('document.type', type), options, callback);
   },
 
   /**
@@ -1899,7 +1885,7 @@ ImageLink.prototype = {
    * @returns {string} - basic HTML code for the fragment
    */
   asHtml: function asHtml() {
-    return "<a href=\"" + this.url() + "\"><img src=\"" + this.url() + "\" alt=\"" + (this.alt || "") + "\"></a>";
+    return "<a href=\"" + this.url() + "\"><img src=\"" + this.url() + "\" alt=\"" + (this.alt || "") + " copyright=\"" + (this.copyright || "") + "\" \"></a>";
   },
   /**
    * Returns the URL of the link.
@@ -2062,6 +2048,44 @@ Num.prototype = {
       return null;
     } else {
       return this.value.toString();
+    }
+  }
+};
+
+/**
+ * Embodies a Range fragment
+ * @constructor
+ * @global
+ * @alias Fragments:Range
+ */
+function Range(data) {
+  /**
+   * @field
+   * @description the integer value of the fragment
+   */
+  this.value = data;
+}
+Range.prototype = {
+  /**
+   * Turns the fragment into a useable HTML version of it.
+   * If the native HTML code doesn't suit your design, this function is meant to be overriden.
+   *
+   * @returns {string} - basic HTML code for the fragment
+   */
+  asHtml: function asHtml() {
+    return "<span>" + this.value + "</span>";
+  },
+
+  /**
+   * Turns the fragment into a useable text version of it.
+   *
+   * @returns {string} - basic text version of the fragment
+   */
+  asText: function asText() {
+    if (this.value === null) {
+      return null;
+    } else {
+      return this.value;
     }
   }
 };
@@ -2250,7 +2274,7 @@ ImageEl.prototype = {
  * @global
  * @alias Fragments:ImageView
  */
-function ImageView(url, width, height, alt) {
+function ImageView(url, width, height, alt, copyright) {
   /**
    * @field
    * @description the URL of the ImageView (useable as it, in a <img> tag in HTML, for instance)
@@ -2271,6 +2295,11 @@ function ImageView(url, width, height, alt) {
    * @description the alt text for the ImageView
    */
   this.alt = alt;
+  /**
+   * @field
+   * @description the copyright for the ImageView
+   */
+  this.copyright = copyright;
 }
 ImageView.prototype = {
   ratio: function ratio() {
@@ -2283,7 +2312,7 @@ ImageView.prototype = {
    * @returns {string} - basic HTML code for the fragment
    */
   asHtml: function asHtml() {
-    return "<img src=\"" + this.url + "\" width=\"" + this.width + "\" height=\"" + this.height + "\" alt=\"" + (this.alt || "") + "\">";
+    return '<img src="' + this.url + '" width="' + this.width + '" height="' + this.height + '" alt="' + (this.alt || "") + '" copyright="' + (this.copyright || "") + '">';
   },
 
   /**
@@ -2453,7 +2482,7 @@ StructuredText.prototype = {
     for (var i = 0; i < this.blocks.length; i++) {
       var block = this.blocks[i];
       if (block.type == 'image') {
-        return new ImageView(block.url, block.dimensions.width, block.dimensions.height, block.alt);
+        return new ImageView(block.url, block.dimensions.width, block.dimensions.height, block.alt, block.copyright);
       }
     }
     return null;
@@ -2788,6 +2817,7 @@ function initField(field) {
   var classForType = {
     "Color": Color,
     "Number": Num,
+    "Range": Range,
     "Date": DateFragment,
     "Timestamp": Timestamp,
     "Text": Text,
@@ -2810,10 +2840,10 @@ function initField(field) {
 
   if (field.type === "Image") {
     var img = field.value.main;
-    var output = new ImageEl(new ImageView(img.url, img.dimensions.width, img.dimensions.height, img.alt), {});
+    var output = new ImageEl(new ImageView(img.url, img.dimensions.width, img.dimensions.height, img.alt, img.copyright), {});
     for (var name in field.value.views) {
       img = field.value.views[name];
-      output.views[name] = new ImageView(img.url, img.dimensions.width, img.dimensions.height, img.alt);
+      output.views[name] = new ImageView(img.url, img.dimensions.width, img.dimensions.height, img.alt, img.copyright);
     }
     return output;
   }
@@ -2878,7 +2908,7 @@ function serialize(element, content, htmlSerializer) {
 
   if (element.type == "image") {
     var label = element.label ? " " + element.label : "";
-    var imgTag = '<img src="' + element.url + '" alt="' + (element.alt || "") + '">';
+    var imgTag = '<img src="' + element.url + '" alt="' + (element.alt || "") + '" copyright="' + (element.copyright || "") + '">';
     return '<p class="block-img' + label + '">' + (element.linkUrl ? '<a href="' + element.linkUrl + '">' + imgTag + '</a>' : imgTag) + '</p>';
   }
 
@@ -2903,6 +2933,7 @@ module.exports = {
   ImageView: ImageView,
   Text: Text,
   Number: Num,
+  Range: Range,
   Date: DateFragment,
   Timestamp: Timestamp,
   Select: Select,
@@ -12166,7 +12197,7 @@ module.exports={
     "preuglify": "npm run build",
     "prepublish": "npm run uglify",
     "lint": "eslint lib",
-    "test": "istanbul cover _mocha test/",
+    "test": "istanbul cover _mocha -- -t 3000 test/",
     "posttest": "eslint lib",
     "predocs": "rimraf ./docs",
     "docs": "jsdoc lib/*.js README.md -d docs"

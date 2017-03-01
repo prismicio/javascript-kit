@@ -39,7 +39,7 @@
     "preuglify": "npm run build",
     "prepublish": "npm run uglify",
     "lint": "eslint lib",
-    "test": "istanbul cover _mocha test/",
+    "test": "istanbul cover _mocha -- -t 3000 test/",
     "posttest": "eslint lib",
     "predocs": "rimraf ./docs",
     "docs": "jsdoc lib/*.js README.md -d docs"
