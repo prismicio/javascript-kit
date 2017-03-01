@@ -46,7 +46,6 @@ describe('API retrieval and parsing', function(){
 
   it('Parsing stores types and tags', function(done) {
     Prismic.api(microRepository).then(function(Api) {
-      console.log('kiki')
       assert.equal(Object.keys(Api.data.types).length, 12);
       assert.equal(Api.data.tags.length, 1);
       done();
