@@ -46,7 +46,7 @@ describe('API retrieval and parsing', function(){
 
   it('Parsing stores types and tags', function(done) {
     Prismic.api(microRepository).then(function(Api) {
-      assert.equal(Object.keys(Api.data.types).length, 11);
+      assert.equal(Object.keys(Api.data.types).length, 12);
       assert.equal(Api.data.tags.length, 1);
       done();
     }, function(err) {
@@ -57,7 +57,7 @@ describe('API retrieval and parsing', function(){
   it('Retrieve the API with master+releases privilege', function(done) {
     Prismic.api(microRepository, function(err, Api) {
       if (err) throw err;
-      assert.equal(Api.data.refs.length, 3);
+      assert.equal(Api.data.refs.length, 4);
       done();
     }, previewToken);
   });
@@ -81,8 +81,8 @@ describe('API form submissions', function() {
         assert.equal(documents.prev_page, null);
         assert.equal(documents.results_per_page, 20);
         assert.equal(documents.results_size, 20);
-        assert.equal(documents.total_pages, 1);
-        assert.equal(documents.total_results_size, 20);
+        assert.equal(documents.total_pages, 2);
+        assert.equal(documents.total_results_size, 24);
         done();
       });
     });
@@ -209,7 +209,7 @@ describe('API form submissions', function() {
       Api.form('everything').ref(Api.master()).orderings('[my.product.price desc]').submit(function (err, documents) {
         if (err) { console.log(err); }
         assert.equal(documents.results.length, 20);
-        assert.equal(documents.results[0].id, 'V_OplCUAACQAE0lA');
+        assert.equal(documents.results[0].id, 'WHx-gSYAAMkyXYX_');
         done();
       });
     });
@@ -241,13 +241,13 @@ describe('API form submissions', function() {
       Api.form('everything').pageSize(10).ref(Api.master()).submit(function (err, documents) {
         if (err) throw err;
         assert.equal(documents.results.length, 10);
-        assert.equal(documents.next_page, "https://micro.prismic.io/api/documents/search?ref=V_OpmSUAACcAE0lS&page=2&pageSize=10");
+        assert.equal(documents.next_page, "https://micro.prismic.io/api/documents/search?ref=WH8MzyoAAGoSGJwT&page=2&pageSize=10");
         assert.equal(documents.page, 1);
         assert.equal(documents.prev_page, null);
         assert.equal(documents.results_per_page, 10);
         assert.equal(documents.results_size, 10);
-        assert.equal(documents.total_pages, 2);
-        assert.equal(documents.total_results_size, 20);
+        assert.equal(documents.total_pages, 3);
+        assert.equal(documents.total_results_size, 24);
         done();
       });
     });
@@ -262,13 +262,13 @@ describe('API form submissions', function() {
           return;
         }
         assert.equal(documents.results.length, 10);
-        assert.isNull(documents.next_page);
+        assert.equal(documents.next_page, "https://micro.prismic.io/api/documents/search?ref=WH8MzyoAAGoSGJwT&page=3&pageSize=10");
         assert.equal(documents.page, 2);
-        assert.equal(documents.prev_page, "https://micro.prismic.io/api/documents/search?ref=V_OpmSUAACcAE0lS&page=1&pageSize=10");
+        assert.equal(documents.prev_page, "https://micro.prismic.io/api/documents/search?ref=WH8MzyoAAGoSGJwT&page=1&pageSize=10");
         assert.equal(documents.results_per_page, 10);
         assert.equal(documents.results_size, 10);
-        assert.equal(documents.total_pages, 2);
-        assert.equal(documents.total_results_size, 20);
+        assert.equal(documents.total_pages, 3);
+        assert.equal(documents.total_results_size, 24);
         done();
       });
     });
@@ -278,7 +278,7 @@ describe('API form submissions', function() {
     Prismic.api(microRepository, function (err, Api) {
       if (err) throw err;
       Api.form('everything').ref(Api.master()).query("wrongpredicate").submit(function (err, _) {
-        assert.equal(err.message, "Unexpected status code [400] on URL https://micro.prismic.io/api/documents/search?page=1&pageSize=20&ref=V_OpmSUAACcAE0lS&q=wrongpredicate");
+        assert.equal(err.message, "Unexpected status code [400] on URL https://micro.prismic.io/api/documents/search?page=1&pageSize=20&ref=WH8MzyoAAGoSGJwT&q=wrongpredicate");
         done();
       });
     });
