@@ -344,10 +344,13 @@ Api.prototype = {
       }
       var cookies = Cookies.parse(cookieString);
       var previewRef = cookies[previewCookie];
-      var experimentRef = cookies[experimentCookie];
+      var experimentRef = this.experiments.refFromCookie(cookies[experimentCookie]);
       form = form.ref(previewRef || experimentRef || this.master());
     }
-    return form.query(q).submit(callback);
+    if (q) {
+      form.query(q);
+    }
+    return form.submit(callback);
   },
 
   /**
@@ -361,10 +364,12 @@ Api.prototype = {
       callback = options;
       options = undefined;
     }
-    var opts = Object.assign({}, options || {}, {
-      page: 1,
-      pageSize: 1
-    });
+    var opts = {};
+    for (var key in Object.keys(options || {})) {
+      opts[key] = options[key];
+    }
+    opts.page = 1;
+    opts.pageSize = 1;
     return this.query(q, opts, function(err, response) {
       if (callback) {
         var result = response &amp;&amp; response.results &amp;&amp; response.results[0];
@@ -497,26 +502,39 @@ Api.prototype = {
     var api = this;
     var cacheKey = url + (this.accessToken ? ('#' + this.accessToken) : '');
     var cache = this.apiCache;
-    cache.get(cacheKey, function (err, value) {
-      if (err || value) {
-        callback(err, api.response(value));
-        return;
-      }
-      api.requestHandler(url, function (err, documents, xhr, ttl) {
-        if (err) {
-          callback(err, null, xhr);
+    function run(cb) {
+      cache.get(cacheKey, function (err, value) {
+        if (err || value) {
+          cb(err, api.response(value));
           return;
         }
+        api.requestHandler(url, function (err, documents, xhr, ttl) {
+          if (err) {
+            cb(err, null, xhr);
+            return;
+          }
 
-        if (ttl) {
-          cache.set(cacheKey, documents, ttl, function (err) {
-            callback(err, api.response(documents));
-          });
-        } else {
-          callback(null, api.response(documents));
-        }
+          if (ttl) {
+            cache.set(cacheKey, documents, ttl, function (err) {
+              cb(err, api.response(documents));
+            });
+          } else {
+            cb(null, api.response(documents));
+          }
+        });
+      });
+    }
+    return new Promise(function(resolve, reject) {
+      run(function(err, value, xhr) {
+        if (callback) callback(err, value, xhr);
+        if (err) reject(err);
+        if (value) resolve(value);
       });
     });
+  },
+
+  getNextPage: function(nextPage, callback) {
+    return this.request(nextPage + (this.accessToken ? '&amp;access_token=' + this.accessToken : ''), callback);
   },
 
   /**
@@ -580,6 +598,7 @@ var parseDoc = function(json) {
     slugs,
     json.first_publication_date,
     json.last_publication_date,
+    json.i18n,
     fragments
   );
 };
@@ -706,6 +725,16 @@ SearchForm.prototype = {
   },
 
   /**
+   * Sets the language to query for this SearchForm. This is an optional method.
+   *
+   * @param {string} fields - The list of fields, array or comma separated string
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  language: function(fields) {
+    return this.set("lang", fields);
+  },
+
+  /**
    * Sets the page number to query for this SearchForm. This is an optional method.
    *
    * @param {number} p - The page number
@@ -761,13 +790,7 @@ SearchForm.prototype = {
       }
     }
 
-    return new Promise(function(resolve, reject) {
-      self.api.request(url, function(err, value, xhr) {
-        if (callback) callback(err, value, xhr);
-        if (err) reject(err);
-        if (value) resolve(value);
-      });
-    });
+    return self.api.request(url, callback);
   }
 };
 
@@ -887,13 +910,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Range.html">Fragments:Range</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jan 18 2017 17:50:58 GMT+0900 (JST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Mar 07 2017 17:34:10 GMT+0100 (CET)
 </footer>
 
 <script> prettyPrint(); </script>
