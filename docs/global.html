@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Global</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Global</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2></h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="data"><span class="type-signature"></span>data<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    The original JSON data from the API
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="documents.js.html">documents.js</a>, <a href="documents.js.html#line594">line 594</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="fragments"><span class="type-signature"></span>fragments<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Fragments, converted to business objects
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="documents.js.html">documents.js</a>, <a href="documents.js.html#line598">line 598</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="ApiCache"><span class="type-signature"></span>ApiCache<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Api cache
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="cache.js.html">cache.js</a>, <a href="cache.js.html#line9">line 9</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="insertSpans"><span class="type-signature"></span>insertSpans<span class="signature">(text, spans, linkResolver, htmlSerializer)</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Parses a block that has spans, and inserts the proper HTML code.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>text</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the original text of the block</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>spans</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the spans as returned by the API</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>linkResolver</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the function to build links that may be in the fragment (please read prismic.io's online documentation about this)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>htmlSerializer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">optional serializer</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="fragments.js.html">fragments.js</a>, <a href="fragments.js.html#line916">line 916</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - the HTML output
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="LRUCache"><span class="type-signature"></span>LRUCache<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    A doubly linked list-based Least Recently Used (LRU) cache. Will keep most
+recently used items while discarding least recently used items when its limit
+is reached.
+
+Licensed under MIT. Copyright (c) 2010 Rasmus Andersson <http://hunch.se/>
+See README.md for details.
+
+Illustration of the design:
+
+      entry             entry             entry             entry
+      ______            ______            ______            ______
+     | head |.newer => |      |.newer => |      |.newer => | tail |
+     |  A   |          |  B   |          |  C   |          |  D   |
+     |______| <= older.|______| <= older.|______| <= older.|______|
+
+ removed  <--  <--  <--  <--  <--  <--  <--  <--  <--  <--  <--  added
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="lru.js.html">lru.js</a>, <a href="lru.js.html#line20">line 20</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="parseDoc"><span class="type-signature"></span>parseDoc<span class="signature">()</span><span class="type-signature"> &rarr; {Document}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Parse json as a document
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="api.js.html">api.js</a>, <a href="api.js.html#line551">line 551</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Document</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Mar 09 2017 18:47:47 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

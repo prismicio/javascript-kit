@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: api.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: api.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+var Requests = require('./requests'),
+    Cookies = require('./cookies'),
+    documents = require('./documents'),
+    ApiCache = require('./cache'),
+    Predicates = require('./predicates'),
+    experiments = require('./experiments');
+
+var Experiments = experiments.Experiments,
+    Document = documents.Document;
+
+var experimentCookie = "io.prismic.experiment",
+    previewCookie = "io.prismic.preview";
+
+/**
+ * Initialisation of the API object.
+ * This is for internal use, from outside this kit, you should call Prismic.Api()
+ * @private
+ */
+function Api(url, options) {
+  var opts = options || {};
+  this.accessToken = opts.accessToken;
+  this.url = url + (this.accessToken ? (url.indexOf('?') > -1 ? '&amp;' : '?') + 'access_token=' + this.accessToken : '');
+  this.req = opts.req;
+  this.apiCache = opts.apiCache || globalCache();
+  this.requestHandler = opts.requestHandler || Requests.request;
+  this.apiCacheKey = this.url + (this.accessToken ? ('#' + this.accessToken) : '');
+  this.apiDataTTL = opts.apiDataTTL || 5;
+  return this;
+}
+
+Api.prototype = {
+
+  // Predicates
+  AT: "at",
+  ANY: "any",
+  SIMILAR: "similar",
+  FULLTEXT: "fulltext",
+  NUMBER: {
+    GT: "number.gt",
+    LT: "number.lt"
+  },
+  DATE: {
+    // Other date operators are available: see the documentation.
+    AFTER: "date.after",
+    BEFORE: "date.before",
+    BETWEEN: "date.between"
+  },
+
+  // Fragment: usable as the second element of a query array on most predicates (except SIMILAR).
+  // You can also use "my.*" for your custom fields.
+  DOCUMENT: {
+    ID: "document.id",
+    TYPE: "document.type",
+    TAGS: "document.tags"
+  },
+
+  data: null,
+
+  /**
+   * Fetches data used to construct the api client, from cache if it's
+   * present, otherwise from calling the prismic api endpoint (which is
+   * then cached).
+   *
+   * @param {function} callback - Callback to receive the data. Optional, you can use the promise result.
+   * @returns {Promise} Promise holding the data or error
+   */
+  get: function(callback) {
+    var self = this;
+    var cacheKey = this.apiCacheKey;
+
+    return new Promise(function (resolve, reject) {
+      var cb = function(err, value, xhr, ttl) {
+        if (callback) callback(err, value, xhr, ttl);
+        if (value) resolve(value);
+        if (err) reject(err);
+      };
+      self.apiCache.get(cacheKey, function (err, value) {
+        if (err || value) {
+          cb(err, value);
+          return;
+        }
+
+        self.requestHandler(self.url, function(err, data, xhr, ttl) {
+          if (err) {
+            cb(err, null, xhr, ttl);
+            return;
+          }
+
+          var parsed = self.parse(data);
+          ttl = ttl || self.apiDataTTL;
+
+          self.apiCache.set(cacheKey, parsed, ttl, function (err) {
+            cb(err, parsed, xhr, ttl);
+          });
+        });
+      });
+    });
+  },
+
+  /**
+   * Cleans api data from the cache and fetches an up to date copy.
+   *
+   * @param {function} callback - Optional callback function that is called after the data has been refreshed
+   * @returns {Promise}
+   */
+  refresh: function (callback) {
+    var self = this;
+    var cacheKey = this.apiCacheKey;
+
+    return new Promise(function(resolve, reject) {
+      var cb = function(err, value, xhr) {
+        if (callback) callback(err, value, xhr);
+        if (value) resolve(value);
+        if (err) reject(err);
+      };
+      self.apiCache.remove(cacheKey, function (err) {
+        if (err) { cb(err); return; }
+
+        self.get(function (err, data) {
+          if (err) { cb(err); return; }
+
+          self.data = data;
+          self.bookmarks = data.bookmarks;
+          self.experiments = new Experiments(data.experiments);
+
+          cb();
+        });
+      });
+    });
+  },
+
+  /**
+   * Parses and returns the /api document.
+   * This is for internal use, from outside this kit, you should call Prismic.Api()
+   *
+   * @param {string} data - The JSON document responded on the API's endpoint
+   * @returns {Api} - The Api object that can be manipulated
+   * @private
+   */
+  parse: function(data) {
+    var refs,
+        master,
+        forms = {},
+        form,
+        types,
+        tags,
+        f,
+        i;
+
+    // Parse the forms
+    for (i in data.forms) {
+      if (data.forms.hasOwnProperty(i)) {
+        f = data.forms[i];
+
+        if(this.accessToken) {
+          f.fields['access_token'] = {};
+          f.fields['access_token']['type'] = 'string';
+          f.fields['access_token']['default'] = this.accessToken;
+        }
+
+        form = new Form(
+          f.name,
+          f.fields,
+          f.form_method,
+          f.rel,
+          f.enctype,
+          f.action
+        );
+
+        forms[i] = form;
+      }
+    }
+
+    refs = data.refs.map(function (r) {
+      return new Ref(
+        r.ref,
+        r.label,
+        r.isMasterRef,
+        r.scheduledAt,
+        r.id
+      );
+    }) || [];
+
+    master = refs.filter(function (r) {
+      return r.isMaster === true;
+    });
+
+    types = data.types;
+
+    tags = data.tags;
+
+    if (master.length === 0) {
+      throw ("No master ref.");
+    }
+
+    return {
+      bookmarks: data.bookmarks || {},
+      refs: refs,
+      forms: forms,
+      master: master[0],
+      types: types,
+      tags: tags,
+      experiments: data.experiments,
+      oauthInitiate: data['oauth_initiate'],
+      oauthToken: data['oauth_token'],
+      quickRoutes: data.quickRoutes
+    };
+
+  },
+
+  /**
+   * @deprecated use form() now
+   * @param {string} formId - The id of a form, like "everything", or "products"
+   * @returns {SearchForm} - the SearchForm that can be used.
+   */
+  forms: function(formId) {
+    return this.form(formId);
+  },
+
+  /**
+   * Returns a useable form from its id, as described in the RESTful description of the API.
+   * For instance: api.form("everything") works on every repository (as "everything" exists by default)
+   * You can then chain the calls: api.form("everything").query('[[:d = at(document.id, "UkL0gMuvzYUANCpf")]]').ref(ref).submit()
+   *
+   * @param {string} formId - The id of a form, like "everything", or "products"
+   * @returns {SearchForm} - the SearchForm that can be used.
+   */
+  form: function(formId) {
+    var form = this.data.forms[formId];
+    if(form) {
+      return new SearchForm(this, form, {});
+    }
+    return null;
+  },
+
+  /**
+   * The ID of the master ref on this prismic.io API.
+   * Do not use like this: searchForm.ref(api.master()).
+   * Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+   *
+   * @returns {string}
+   */
+  master: function() {
+    return this.data.master.ref;
+  },
+
+  /**
+   * Returns the ref ID for a given ref's label.
+   * Do not use like this: searchForm.ref(api.ref("Future release label")).
+   * Instead, set your ref once in a variable, and call it when you need it; this will allow to change the ref you're viewing easily for your entire page.
+   *
+   * @param {string} label - the ref's label
+   * @returns {string}
+   */
+  ref: function(label) {
+    for(var i=0; i&lt;this.data.refs.length; i++) {
+      if(this.data.refs[i].label == label) {
+        return this.data.refs[i].ref;
+      }
+    }
+    return null;
+  },
+
+  /**
+   * The current experiment, or null
+   * @returns {Experiment}
+   */
+  currentExperiment: function() {
+    return this.experiments.current();
+  },
+
+  quickRoutesEnabled: function() {
+    return this.data.quickRoutes.enabled;
+  },
+
+  /**
+   * Retrieve quick routes definitions
+   */
+  quickRoutes: function(callback) {
+    var self = this;
+    return new Promise(function(resolve, reject) {
+      self.requestHandler(self.data.quickRoutes.url, function(err, data, xhr) {
+        if (callback) callback(err, data, xhr);
+        if (err) reject(err);
+        if (data) resolve(data);
+      });
+    });
+  },
+
+  /**
+   * Query the repository
+   * @param {string|array|Predicate} the query itself
+   * @param {object} additional parameters. In NodeJS, pass the request as 'req'.
+   * @param {function} callback(err, response)
+   */
+  query: function(q, options, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = undefined;
+    }
+    var opts = options || {};
+    var form = this.form('everything');
+    for (var key in opts) {
+      form = form.set(key, options[key]);
+    }
+    // Don't override the ref if the caller specified one in the options
+    if (!opts['ref']) {
+      // Look in cookies if we have a ref (preview or experiment)
+      var cookieString = '';
+      if (this.req) { // NodeJS
+        cookieString = this.req.headers["cookie"] || '';
+      } else if (typeof window !== 'undefined') { // Browser
+        cookieString = window.document.cookie || '';
+      }
+      var cookies = Cookies.parse(cookieString);
+      var previewRef = cookies[previewCookie];
+      var experimentRef = this.experiments.refFromCookie(cookies[experimentCookie]);
+      form = form.ref(previewRef || experimentRef || this.master());
+    }
+    if (q) {
+      form.query(q);
+    }
+    return form.submit(callback);
+  },
+
+  /**
+   * Retrieve the document returned by the given query
+   * @param {string|array|Predicate} the query
+   * @param {object} additional parameters. In NodeJS, pass the request as 'req'.
+   * @param {function} callback(err, doc)
+   */
+  queryFirst: function(q, options, callback) {
+    if (typeof options === 'function') {
+      callback = options;
+      options = undefined;
+    }
+    var opts = {};
+    for (var key in (options || {})) {
+      opts[key] = options[key];
+    }
+    opts.page = 1;
+    opts.pageSize = 1;
+    return this.query(q, opts, function(err, response) {
+      if (callback) {
+        var result = response &amp;&amp; response.results &amp;&amp; response.results[0];
+        callback(err, result);
+      }
+    }).then(function(response){
+      return response &amp;&amp; response.results &amp;&amp; response.results[0];
+    });
+  },
+
+  /**
+   * Retrieve the document with the given id
+   * @param {string} id
+   * @param {object} additional parameters
+   * @param {function} callback(err, doc)
+   */
+  getByID: function(id, options, callback) {
+    return this.queryFirst(Predicates.at('document.id', id), options, callback);
+  },
+
+  /**
+   * Retrieve multiple documents from an array of id
+   * @param {array} ids
+   * @param {object} additional parameters
+   * @param {function} callback(err, response)
+   */
+  getByIDs: function(ids, options, callback) {
+    return this.query(['in', 'document.id', ids], options, callback);
+  },
+
+  /**
+   * Retrieve the document with the given uid
+   * @param {string} type the custom type of the document
+   * @param {string} uid
+   * @param {object} additional parameters
+   * @param {function} callback(err, response)
+   */
+  getByUID: function(type, uid, options, callback) {
+    return this.queryFirst(Predicates.at('my.'+type+'.uid', uid), options, callback);
+  },
+
+  /**
+   * Retrieve the singleton document with the given type
+   * @param {string} type the custom type of the document
+   * @param {object} additional parameters
+   * @param {function} callback(err, response)
+   */
+  getSingle: function(type, options, callback) {
+    return this.queryFirst(Predicates.at('document.type', type), options, callback);
+  },
+
+  /**
+   * Retrieve the document with the given bookmark
+   * @param {string} bookmark name
+   * @param {object} additional parameters
+   * @param {function} callback(err, response)
+   * @returns {Promise}
+   */
+  getBookmark: function(bookmark, options, callback) {
+    return new Promise(function(resolve, reject) {
+      var id = this.bookmarks[bookmark];
+      if (id) {
+        resolve(id);
+      } else {
+        var err = new Error("Error retrieving bookmarked id");
+        if (callback) callback(err);
+        reject(err);
+      }
+    }).then(function(id) {
+      return this.getByID(id, options, callback);
+    });
+  },
+
+  /**
+   * Return the URL to display a given preview
+   * @param {string} token as received from Prismic server to identify the content to preview
+   * @param {function} linkResolver the link resolver to build URL for your site
+   * @param {string} defaultUrl the URL to default to return if the preview doesn't correspond to a document
+   *                (usually the home page of your site)
+   * @param {function} callback to get the resulting URL (optional, you can get it from the Promise result)
+   * @returns {Promise}
+   */
+  previewSession: function(token, linkResolver, defaultUrl, callback) {
+    var api = this;
+    return new Promise(function(resolve, reject) {
+      var cb = function(err, value, xhr) {
+        if (callback) callback(err, value, xhr);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(value);
+        }
+      };
+      api.requestHandler(token, function (err, result, xhr) {
+        if (err) {
+          cb(err, defaultUrl, xhr);
+          return;
+        }
+        try {
+          var mainDocumentId = result.mainDocument;
+          if (!mainDocumentId) {
+            cb(null, defaultUrl, xhr);
+          } else {
+            api.form("everything").query(Predicates.at("document.id", mainDocumentId)).ref(token).submit(function(err, response) {
+              if (err) {
+                cb(err);
+              }
+              try {
+                if (response.results.length === 0) {
+                  cb(null, defaultUrl, xhr);
+                } else {
+                  cb(null, linkResolver(response.results[0]), xhr);
+                }
+              } catch (e) {
+                cb(e);
+              }
+            });
+          }
+        } catch (e) {
+          cb(e, defaultUrl, xhr);
+        }
+      });
+    });
+  },
+
+  /**
+   * Fetch a URL corresponding to a query, and parse the response as a Response object
+   */
+  request: function(url, callback) {
+    var api = this;
+    var cacheKey = url + (this.accessToken ? ('#' + this.accessToken) : '');
+    var cache = this.apiCache;
+    function run(cb) {
+      cache.get(cacheKey, function (err, value) {
+        if (err || value) {
+          cb(err, api.response(value));
+          return;
+        }
+        api.requestHandler(url, function (err, documents, xhr, ttl) {
+          if (err) {
+            cb(err, null, xhr);
+            return;
+          }
+
+          if (ttl) {
+            cache.set(cacheKey, documents, ttl, function (err) {
+              cb(err, api.response(documents));
+            });
+          } else {
+            cb(null, api.response(documents));
+          }
+        });
+      });
+    }
+    return new Promise(function(resolve, reject) {
+      run(function(err, value, xhr) {
+        if (callback) callback(err, value, xhr);
+        if (err) reject(err);
+        if (value) resolve(value);
+      });
+    });
+  },
+
+  getNextPage: function(nextPage, callback) {
+    return this.request(nextPage + (this.accessToken ? '&amp;access_token=' + this.accessToken : ''), callback);
+  },
+
+  /**
+   * JSON documents to Response object
+   */
+  response: function(documents){
+    var results = documents.results.map(parseDoc);
+    return new Response(
+      documents.page,
+      documents.results_per_page,
+      documents.results_size,
+      documents.total_results_size,
+      documents.total_pages,
+      documents.next_page,
+      documents.prev_page,
+      results || []);
+  }
+
+};
+
+/**
+ * Embodies a submittable RESTful form as described on the API endpoint (as per RESTful standards)
+ * @constructor
+ * @private
+ */
+function Form(name, fields, form_method, rel, enctype, action) {
+  this.name = name;
+  this.fields = fields;
+  this.form_method = form_method;
+  this.rel = rel;
+  this.enctype = enctype;
+  this.action = action;
+}
+
+Form.prototype = {};
+
+/**
+ * Parse json as a document
+ *
+ * @returns {Document}
+ */
+var parseDoc = function(json) {
+  var fragments = {};
+  for(var field in json.data[json.type]) {
+    fragments[json.type + '.' + field] = json.data[json.type][field];
+  }
+
+  var slugs = [];
+  if (json.slugs !== undefined) {
+    for (var i = 0; i &lt; json.slugs.length; i++) {
+      slugs.push(decodeURIComponent(json.slugs[i]));
+    }
+  }
+
+  return new Document(
+    json.id,
+    json.uid || null,
+    json.type,
+    json.href,
+    json.tags,
+    slugs,
+    json.first_publication_date,
+    json.last_publication_date,
+    json.lang,
+    json.alternate_languages,
+    fragments
+  );
+};
+
+/**
+ * Embodies a SearchForm object. To create SearchForm objects that are allowed in the API, please use the API.form() method.
+ * @constructor
+ * @global
+ * @alias SearchForm
+ */
+function SearchForm(api, form, data) {
+  this.api = api;
+  this.form = form;
+  this.data = data || {};
+
+  for(var field in form.fields) {
+    if(form.fields[field]['default']) {
+      this.data[field] = [form.fields[field]['default']];
+    }
+  }
+}
+
+SearchForm.prototype = {
+
+  /**
+   * Set an API call parameter. This will only work if field is a valid field of the
+   * RESTful form in the first place (as described in the /api document); otherwise,
+   * an "Unknown field" error is thrown.
+   * Please prefer using dedicated methods like query(), orderings(), ...
+   *
+   * @param {string} field - The name of the field to set
+   * @param {string} value - The value that gets assigned
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  set: function(field, value) {
+    var fieldDesc = this.form.fields[field];
+    if(!fieldDesc) throw new Error("Unknown field " + field);
+    var values= this.data[field] || [];
+    if(value === '' || value === undefined) {
+      // we must compare value to null because we want to allow 0
+      value = null;
+    }
+    if(fieldDesc.multiple) {
+      if (value) values.push(value);
+    } else {
+      values = value &amp;&amp; [value];
+    }
+    this.data[field] = values;
+    return this;
+  },
+
+  /**
+   * Sets a ref to query on for this SearchForm. This is a mandatory
+   * method to call before calling submit(), and api.form('everything').submit()
+   * will not work.
+   *
+   * @param {Ref} ref - The Ref object defining the ref to query
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  ref: function(ref) {
+    return this.set("ref", ref);
+  },
+
+  /**
+   * Sets a predicate-based query for this SearchForm. This is where you
+   * paste what you compose in your prismic.io API browser.
+   *
+   * @example form.query(Prismic.Predicates.at("document.id", "foobar"))
+   * @param {string|...array} query - Either a query as a string, or as many predicates as you want. See Prismic.Predicates.
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  query: function(query) {
+    if (typeof query === 'string') {
+      return this.set("q", query);
+    } else {
+      var predicates;
+      if (query.constructor === Array &amp;&amp; query.length > 0 &amp;&amp; query[0].constructor === Array) {
+        predicates = query;
+      } else {
+        predicates = [].slice.apply(arguments); // Convert to a real JS array
+      }
+      var stringQueries = [];
+      predicates.forEach(function (predicate) {
+        stringQueries.push(Predicates.toQuery(predicate));
+      });
+      return this.query("[" + stringQueries.join("") + "]");
+    }
+  },
+
+  /**
+   * Sets a page size to query for this SearchForm. This is an optional method.
+   *
+   * @param {number} size - The page size
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  pageSize: function(size) {
+    return this.set("pageSize", size);
+  },
+
+  /**
+   * Restrict the results document to the specified fields
+   *
+   * @param {string|array} fields - The list of fields, array or comma separated string
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  fetch: function(fields) {
+    if (fields instanceof Array) {
+      fields = fields.join(",");
+    }
+    return this.set("fetch", fields);
+  },
+
+  /**
+   * Include the requested fields in the DocumentLink instances in the result
+   *
+   * @param {string|array} fields - The list of fields, array or comma separated string
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  fetchLinks: function(fields) {
+    if (fields instanceof Array) {
+      fields = fields.join(",");
+    }
+    return this.set("fetchLinks", fields);
+  },
+
+  /**
+   * Sets the language to query for this SearchForm. This is an optional method.
+   *
+   * @param {string} fields - The language code
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  lang: function(fields) {
+    return this.set("lang", fields);
+  },
+
+  /**
+   * Sets the page number to query for this SearchForm. This is an optional method.
+   *
+   * @param {number} p - The page number
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  page: function(p) {
+    return this.set("page", p);
+  },
+
+  /**
+   * Sets the orderings to query for this SearchForm. This is an optional method.
+   *
+   * @param {array} orderings - Array of string: list of fields, optionally followed by space and desc. Example: ['my.product.price desc', 'my.product.date']
+   * @returns {SearchForm} - The SearchForm itself
+   */
+  orderings: function(orderings) {
+    if (typeof orderings === 'string') {
+      // Backward compatibility
+      return this.set("orderings", orderings);
+    } else if (!orderings) {
+      // Noop
+      return this;
+    } else {
+      // Normal usage
+      return this.set("orderings", "[" + orderings.join(",") + "]");
+    }
+  },
+
+  /**
+   * Submits the query, and calls the callback function.
+   *
+   * @param {function} callback - Optional callback function that is called after the query was made,
+   * to which you may pass three parameters: a potential error (null if no problem),
+   * a Response object (containing all the pagination specifics + the array of Docs),
+   * and the XMLHttpRequest
+   */
+  submit: function(callback) {
+    var self = this;
+    var url = this.form.action;
+
+    if (this.data) {
+      var sep = (url.indexOf('?') > -1 ? '&amp;' : '?');
+      for(var key in this.data) {
+        if (this.data.hasOwnProperty(key)) {
+          var values = this.data[key];
+          if (values) {
+            for (var i = 0; i &lt; values.length; i++) {
+              url += sep + key + '=' + encodeURIComponent(values[i]);
+              sep = '&amp;';
+            }
+          }
+        }
+      }
+    }
+
+    return self.api.request(url, callback);
+  }
+};
+
+/**
+ * Embodies the response of a SearchForm query as returned by the API.
+ * It includes all the fields that are useful for pagination (page, total_pages, total_results_size, ...),
+ * as well as the field "results", which is an array of {@link Document} objects, the documents themselves.
+ *
+ * @constructor
+ * @global
+ */
+function Response(page, results_per_page, results_size, total_results_size, total_pages, next_page, prev_page, results) {
+  /**
+   * The current page
+   * @type {number}
+   */
+  this.page = page;
+  /**
+   * The number of results per page
+   * @type {number}
+   */
+  this.results_per_page = results_per_page;
+  /**
+   * The size of the current page
+   * @type {number}
+   */
+  this.results_size = results_size;
+  /**
+   * The total size of results across all pages
+   * @type {number}
+   */
+  this.total_results_size = total_results_size;
+  /**
+   * The total number of pages
+   * @type {number}
+   */
+  this.total_pages = total_pages;
+  /**
+   * The URL of the next page in the API
+   * @type {string}
+   */
+  this.next_page = next_page;
+  /**
+   * The URL of the previous page in the API
+   * @type {string}
+   */
+  this.prev_page = prev_page;
+  /**
+   * Array of {@link Document} for the current page
+   * @type {Array}
+   */
+  this.results = results;
+}
+
+/**
+ * Embodies a prismic.io ref (a past or future point in time you can query)
+ * @constructor
+ * @global
+ */
+function Ref(ref, label, isMaster, scheduledAt, id) {
+  /**
+   * @field
+   * @description the ID of the ref
+   */
+  this.ref = ref;
+  /**
+   * @field
+   * @description the label of the ref
+   */
+  this.label = label;
+  /**
+   * @field
+   * @description is true if the ref is the master ref
+   */
+  this.isMaster = isMaster;
+  /**
+   * @field
+   * @description the scheduled date of the ref
+   */
+  this.scheduledAt = scheduledAt;
+  /**
+   * @field
+   * @description the name of the ref
+   */
+  this.id = id;
+}
+Ref.prototype = {};
+function globalCache() {
+  var g;
+  if (typeof global == 'object') {
+    g = global; // NodeJS
+  } else {
+    g = window; // browser
+  }
+  if (!g.prismicCache) {
+    g.prismicCache = new ApiCache();
+  }
+  return g.prismicCache;
+}
+
+module.exports = {
+  experimentCookie: experimentCookie,
+  previewCookie: previewCookie,
+  Api: Api,
+  Form: Form,
+  SearchForm: SearchForm,
+  Ref: Ref,
+  parseDoc: parseDoc
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Mar 09 2017 18:47:47 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

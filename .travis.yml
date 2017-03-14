@@ -1,17 +1,21 @@
 language: node_js
 sudo: false
-
 node_js:
 - '0.12'
 - '4'
 - '5'
-
+- '6'
 deploy:
   provider: npm
-  email: eloisant@gmail.com
+  email: arnaud.lewis@gmail.com
   api_key:
-    secure: C3fXXtk20vLty7/0+ORC0HaKHRGNdSYy8eLt2UZkXKDiBsPBfMyO3MrNASJhWgpZcjNJJBgkWmgOU/g12VrEH6CJ8BicIkOVlhLERPfCc2OfTZGyzZCBx7p1/mu0/FJ0veP5VKYvOIDyJMkwypY0KEN4MJ3RJSfjbTfRsC02SEI=
+    secure: R9LtyIpgqJkeiTigLdWsqrbdE/+sxVnlKKhufeJZIRJyxrlJDVpQJkA/xzFpypqDGCL7ZjtWh8nwk0d8SiljLMAR3xe4E1PlXKcGNQ1eVlwom++Ar7W4uizoRTVVADinzv2koowzx/mlqfiyeu/wC/B0Gap7HhUazrn9r2ezeFk=
   on:
     tags: true
-    all_branches: true
+    branch: master
     repo: prismicio/javascript-kit
+after_script:
+- codeclimate < coverage/lcov.info
+addons:
+  code_climate:
+    repo_token: 25760a4ae3dea7404d3a3ef79951e0b6bf8808fcdb7f63bc1533610a9d8f936d

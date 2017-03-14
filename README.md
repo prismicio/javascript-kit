@@ -3,6 +3,7 @@
 [![npm version](https://badge.fury.io/js/prismic.io.svg)](http://badge.fury.io/js/prismic.io)
 [![Build Status](https://api.travis-ci.org/prismicio/javascript-kit.png)](https://travis-ci.org/prismicio/javascript-kit)
 [![Code Climate](https://codeclimate.com/github/prismicio/javascript-kit.png)](https://codeclimate.com/github/prismicio/javascript-kit)
+[![Test Coverage](https://codeclimate.com/github/prismicio/javascript-kit/badges/coverage.svg)](https://codeclimate.com/github/prismicio/javascript-kit/coverage)
 
 * The [source code](https://github.com/prismicio/javascript-kit) is on Github.
 * The [Changelog](https://github.com/prismicio/javascript-kit/releases) is on Github's releases tab.
@@ -18,7 +19,7 @@ npm install prismic.io --save
 #### CDN
 
 ```
-https://npmcdn.com/prismic.io@2.0.0/dist/prismic.io.min.js
+https://unpkg.com/prismic.io/dist/prismic.io.min.js
 ```
 
 (You may need to adapt the version number)
@@ -38,8 +39,7 @@ The kit is universal, it can be used:
 For new project, you can start from a sample project:
 
 * [Node.js project](https://github.com/prismicio/nodejs-sdk)
-* [Simple in-browser project](https://github.com/prismicio/javascript-jquery-starter)
-* [Static pages generation with baked.js](https://github.com/prismicio/baked.js)
+* [Node.js blog](https://github.com/prismicio/nodejs-blog)
 
 ### Usage
 
@@ -48,9 +48,10 @@ To fetch documents from your repository, you need to fetch the Api data first.
 ```javascript
 var Prismic = require('prismic.io');
 
-Prismic.api("http://lesbonneschoses.prismic.io/api", function(error, api) {
-  api.query("", function(error, response) { // An empty query will return all the documents
-    if (error) {
+Prismic.api("http://your_repository_name.prismic.io/api", function(error, api) {
+  var options = {}; // In Node.js, pass the request as 'req' to read the reference from the cookies
+  api.query("", options, function(err, response) { // An empty query will return all the documents
+    if (err) {
       console.log("Something went wrong: ", err);
     }
     console.log("Documents: ", response.documents);
