@@ -225,6 +225,36 @@ describe('Multiple fragment level global test', function() {
                   "spans":[]
                 }]
               }
+            }, {
+              "type": "Slice",
+              "slice_type": "ma-nouvelle-slice",
+              "slice_label": null,
+              "repeat": [
+                {
+                  "text": {
+                    "type": "StructuredText",
+                    "value": [
+                      {
+                        "type": "paragraph",
+                        "text": "some text",
+                        spans: []
+                      }
+                    ]
+                  }
+                }
+              ],
+              "non-repeat": {
+                "text": {
+                  "type": "StructuredText",
+                  "value": [
+                    {
+                      "type": "heading2",
+                      "text": "some other text",
+                      spans: []
+                    }
+                  ]
+                }
+              }
             }]
           }
         }
