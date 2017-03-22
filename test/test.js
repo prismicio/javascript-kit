@@ -83,8 +83,7 @@ describe('API form submissions', function() {
       Api.form('everything').query('[[:d = any(document.type, ["doc","docchapter"])]]').ref(Api.master()).submit(function (err, response) {
         if (err) { done(err); return; }
         var document = response.results[0];
-        assert.equal(document.linkedDocuments().length, 1);
-        assert.equal(document.linkedDocuments()[0].id, 'U0w8OwEAACoAQEvB');
+        assert.equal(document.linkedDocuments().length, 0);
         done();
       });
     });
@@ -96,7 +95,7 @@ describe('API form submissions', function() {
       api.getByUID('page', 'page-with-slices', function(err, document) {
         if (err) { done(err); return; }
         if (!document) chai.fail('Missing document page-with-slices');
-        assert.equal(document.linkedDocuments().length, 2);
+        assert.equal(document.linkedDocuments().length, 0);
         done();
       });
     });
@@ -111,8 +110,7 @@ describe('API form submissions', function() {
         .submit(function (err, response) {
           if (err) { done(err); return; }
           var document = response.results[0];
-          assert.equal(document.linkedDocuments().length, 1);
-          assert.equal(document.linkedDocuments()[0].id, 'U0w8OwEAACoAQEvB');
+          assert.equal(document.linkedDocuments().length, 0);
           done();
         });
     });

@@ -555,7 +555,7 @@ var parseDoc = function parseDoc(json) {
     }
   }
 
-  return new Document(json.id, json.uid || null, json.type, json.href, json.tags, slugs, json.first_publication_date, json.last_publication_date, json.lang, json.alternate_languages, fragments);
+  return new Document(json.id, json.uid || null, json.type, json.href, json.tags, slugs, json.first_publication_date, json.last_publication_date, json.lang, json.alternate_languages, fragments, json.data);
 };
 
 /**
@@ -1500,7 +1500,7 @@ WithFragments.prototype = {
  * @global
  * @alias Doc
  */
-function Document(id, uid, type, href, tags, slugs, firstPublicationDate, lastPublicationDate, lang, alternateLanguages, data) {
+function Document(id, uid, type, href, tags, slugs, firstPublicationDate, lastPublicationDate, lang, alternateLanguages, rawFragments, data) {
   /**
    * The ID of the document
    * @type {string}
@@ -1559,7 +1559,7 @@ function Document(id, uid, type, href, tags, slugs, firstPublicationDate, lastPu
   /**
    * Fragments, converted to business objects
    */
-  this.fragments = require('./fragments').parseFragments(data);
+  this.fragments = require('./fragments').parseFragments(rawFragments);
 }
 
 Document.prototype = Object.create(WithFragments.prototype);
@@ -12231,7 +12231,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "3.5.0",
+  "version": "3.5.2",
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
     "babelify": "^7.2.0",
