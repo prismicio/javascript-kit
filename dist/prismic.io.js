@@ -12231,7 +12231,7 @@ module.exports={
     "content",
     "api"
   ],
-  "version": "3.5.2",
+  "version": "3.5.3",
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
     "babelify": "^7.2.0",
