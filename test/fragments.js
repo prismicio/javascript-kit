@@ -294,6 +294,55 @@ describe('Multiple fragment level global test', function() {
       }
     });
 
+
+    var sliceWithSingleComposite = Prismic.parseDoc({
+      "id":"VQ_hV31Za5EAy02H",
+      "uid":null,
+      "type":"article",
+      "href":"http://toto.wroom.dev/api/documents/search?ref=VQ_uWX1Za0oCy46m&q=%5B%5B%3Ad+%3D+at%28document.id%2C+%22VQ_hV31Za5EAy02H%22%29+%5D%5D",
+      "tags":[],
+      "slugs":["une-activite"],
+      "linked_documents":[],
+      "data":{
+        "article":{
+          "blocks":{
+            "type":"SliceZone",
+            "value":[{
+              "type": "Slice",
+              "slice_type": "ma-nouvelle-slice",
+              "slice_label": null,
+              "repeat": [
+                {
+                  "text": {
+                    "type": "StructuredText",
+                    "value": [
+                      {
+                        "type": "paragraph",
+                        "text": "some text",
+                        spans: []
+                      }
+                    ]
+                  }
+                }
+              ],
+              "non-repeat": {
+                "text": {
+                  "type": "StructuredText",
+                  "value": [
+                    {
+                      "type": "heading2",
+                      "text": "some other text",
+                      spans: []
+                    }
+                  ]
+                }
+              }
+            }]
+          }
+        }
+      }
+    });
+
     // Testing get First title on doc level.
     assert.equal(doc.getFirstTitle().text, "As seen by fine pastry as a field");
 
@@ -303,6 +352,9 @@ describe('Multiple fragment level global test', function() {
 
     var slicesWithSingleElem = sliceSingleElem.getSliceZone('article.blocks');
     assert.equal(slicesWithSingleElem.getFirstTitle().text, "As seen by fine pastry as a field");
+
+    var compositeSlice = sliceWithSingleComposite.getSliceZone('article.blocks');
+    assert.equal(compositeSlice.getFirstTitle().text, "some other text");
     done();
   });
 
