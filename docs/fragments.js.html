@@ -1019,16 +1019,11 @@ function insertSpans(text, spans, linkResolver, htmlSerializer) {
 }
 
 /**
- * Embodies a Slice fragment
+ * Embodies a simple slice (fragment or group)
  * @constructor
  * @global
- * @alias Fragments:Slice
+ * @alias Fragments:SimpleSlice
  */
-function Slice(sliceType, label, value) {
-  if(value.type === 'Slice') return new CompositeSlice(sliceType, label, value);
-  else return new SimpleSlice(sliceType, label, value);
-}
-
 function SimpleSlice(sliceType, label, sliceValue) {
   this.sliceType = sliceType;
   this.label = label;
@@ -1091,6 +1086,12 @@ SimpleSlice.prototype = {
 
 };
 
+/**
+ * Embodies a composite slice with repeatable and non repeatable parts
+ * @constructor
+ * @global
+ * @alias Fragments:CompositeSlice
+ */
 function CompositeSlice(sliceType, label, sliceValue) {
   this.sliceType = sliceType;
   this.label = label;
@@ -1114,10 +1115,10 @@ CompositeSlice.prototype = {
     var classes = ['slice'];
     if (this.label) classes.push(this.label);
 
-    var nonRepeatHtml = "";
-    for (var field in this.nonRepeat) {
-      nonRepeatHtml += field.asHtml(linkResolver);
-    }
+    var self = this;
+    var nonRepeatHtml = Object.keys(this.nonRepeat).reduce(function(acc, key) {
+      return acc + self.nonRepeat[key].asHtml(linkResolver);
+    }, "");
 
     return '&lt;div data-slicetype="' + this.sliceType + '" class="' + classes.join(' ') + '">' +
       nonRepeatHtml +
@@ -1131,12 +1132,11 @@ CompositeSlice.prototype = {
    * @returns {string} - basic text version of the fragment
    */
   asText: function(linkResolver) {
-    var text = "";
-    for (var field in this.nonRepeat) {
-      text += field.asText(linkResolver);
-    }
-    text += this.repeat.asText(linkResolver);
-    return text;
+    var self = this;
+    var nonRepeatText = Object.keys(this.nonRepeat).reduce(function(acc, key) {
+      return acc + self.nonRepeat[key].asText(linkResolver);
+    }, "");
+    return nonRepeatText + '\n' + this.repeat.asText(linkResolver);
   },
 
   /**
@@ -1214,8 +1214,10 @@ function SliceZone(data) {
     var label = data[i]['slice_label'] || null;
     var value = data[i];
     if (sliceType &amp;&amp; value) {
-      if(value.type === 'Slice' &amp;&amp; !value.value) this.value.push(new CompositeSlice(sliceType, label, value));
-      else this.value.push(new SimpleSlice(sliceType, label, value.value));
+      if(value.repeat)
+        this.value.push(new CompositeSlice(sliceType, label, value));
+      else
+        this.value.push(new SimpleSlice(sliceType, label, value.value));
     }
   }
   this.slices = this.value;
@@ -1439,7 +1441,6 @@ module.exports = {
   Separator: Separator,
   Group: Group,
   GeoPoint: GeoPoint,
-  Slice: Slice,
   SliceZone: SliceZone,
   initField: initField,
   parseFragments: parseFragments,
@@ -1455,13 +1456,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_Slice.html">Fragments:Slice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Api.html">Api</a></li><li><a href="Doc.html">Doc</a></li><li><a href="Experiments.html">Experiments</a></li><li><a href="Fragments_Color.html">Fragments:Color</a></li><li><a href="Fragments_CompositeSlice.html">Fragments:CompositeSlice</a></li><li><a href="Fragments_Date.html">Fragments:Date</a></li><li><a href="Fragments_DocumentLink.html">Fragments:DocumentLink</a></li><li><a href="Fragments_Embed.html">Fragments:Embed</a></li><li><a href="Fragments_FileLink.html">Fragments:FileLink</a></li><li><a href="Fragments_GeoPoint.html">Fragments:GeoPoint</a></li><li><a href="Fragments_Group.html">Fragments:Group</a></li><li><a href="Fragments_ImageEl.html">Fragments:ImageEl</a></li><li><a href="Fragments_ImageLink.html">Fragments:ImageLink</a></li><li><a href="Fragments_ImageView.html">Fragments:ImageView</a></li><li><a href="Fragments_Num.html">Fragments:Num</a></li><li><a href="Fragments_Select.html">Fragments:Select</a></li><li><a href="Fragments_Separator.html">Fragments:Separator</a></li><li><a href="Fragments_SimpleSlice.html">Fragments:SimpleSlice</a></li><li><a href="Fragments_SliceZone.html">Fragments:SliceZone</a></li><li><a href="Fragments_StructuredText.html">Fragments:StructuredText</a></li><li><a href="Fragments_Text.html">Fragments:Text</a></li><li><a href="Fragments_Timestamp.html">Fragments:Timestamp</a></li><li><a href="Fragments_WebLink.html">Fragments:WebLink</a></li><li><a href="Ref.html">Ref</a></li><li><a href="Response.html">Response</a></li><li><a href="SearchForm.html">SearchForm</a></li><li><a href="WithFragments.html">WithFragments</a></li></ul><h3>Namespaces</h3><ul><li><a href="Predicates.html">Predicates</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ApiCache">ApiCache</a></li><li><a href="global.html#data">data</a></li><li><a href="global.html#fragments">fragments</a></li><li><a href="global.html#insertSpans">insertSpans</a></li><li><a href="global.html#LRUCache">LRUCache</a></li><li><a href="global.html#parseDoc">parseDoc</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Mar 22 2017 10:45:06 GMT+0100 (CET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Mar 30 2017 16:23:33 GMT+0200 (CEST)
 </footer>
 
 <script> prettyPrint(); </script>
