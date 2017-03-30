@@ -1,0 +1,7 @@
+{
+  "name": "prismic.io",
+  "version": "1.1.4",
+  "homepage": "https://github.com/prismicio/javascript-kit",
+  "description": "JavaScript development kit for prismic.io",
+  "main": "./dist/prismic.io.min.js"
+}
