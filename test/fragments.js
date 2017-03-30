@@ -799,14 +799,44 @@ describe('Various fragment types', function() {
                   "spans":[]
                 }]
               }
+            }, {
+              "type": "Slice",
+              "slice_type": "ma-nouvelle-slice",
+              "slice_label": null,
+              "repeat": [
+                {
+                  "text": {
+                    "type": "StructuredText",
+                    "value": [
+                      {
+                        "type": "paragraph",
+                        "text": "C'est du repeat",
+                        spans: []
+                      }
+                    ]
+                  }
+                }
+              ],
+              "non-repeat": {
+                "text": {
+                  "type": "StructuredText",
+                  "value": [
+                    {
+                      "type": "heading2",
+                      "text": "C'est du non repeat",
+                      spans: []
+                    }
+                  ]
+                }
+              }
             }]
           }
         }
       }
     });
     var slices = doc.getSliceZone('article.blocks');
-    assert.equal(slices.asText(getLinkResolver()), "c'est un bloc features\n\nC'est un bloc content\n");
-    assert.equal(slices.asHtml(getLinkResolver()), '<div data-slicetype="features" class="slice"><section data-field="illustration"><img src="https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg" width="4285" height="709" alt="" copyright=""></section><section data-field="title"><span>c\'est un bloc features</span></section></div><div data-slicetype="text" class="slice"><p>C\'est un bloc content</p></div>');
+    assert.equal(slices.asText(getLinkResolver()), "c'est un bloc features\n\nC'est un bloc content\nC\'est du non repeat\nC\'est du repeat\n\n");
+    assert.equal(slices.asHtml(getLinkResolver()), '<div data-slicetype="features" class="slice"><section data-field="illustration"><img src="https://wroomdev.s3.amazonaws.com/toto/db3775edb44f9818c54baa72bbfc8d3d6394b6ef_hsf_evilsquall.jpg" width="4285" height="709" alt="" copyright=""></section><section data-field="title"><span>c\'est un bloc features</span></section></div><div data-slicetype="text" class="slice"><p>C\'est un bloc content</p></div><div data-slicetype="ma-nouvelle-slice" class="slice"><h2>C\'est du non repeat</h2><section data-field="text"><p>C\'est du repeat</p></section></div>');
   });
 
 
