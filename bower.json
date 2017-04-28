@@ -1,0 +1,21 @@
+{
+  "name": "prismic.io",
+  "description": "JavaScript development kit for prismic.io",
+  "main": "lib/prismic.js",
+  "license": "Apache-2.0",
+  "keywords": [
+    "prismic",
+    "prismic.io",
+    "cms",
+    "content",
+    "api"
+  ],
+  "homepage": "https://github.com/prismicio/javascript-kit",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
