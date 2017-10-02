@@ -10,7 +10,7 @@
     "content",
     "api"
   ],
-  "version": "3.5.7",
+  "version": "3.6.0",
   "engines": {
     "node": ">=4.8.1",
     "npm": ">=2.15.11"
