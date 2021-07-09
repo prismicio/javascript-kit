@@ -218,7 +218,7 @@ describe('Multiple fragment level global test', function() {
                 "value":[{
                   type: "heading2",
                   text: "As seen by fine pastry as a field",
-                  spans: []
+                  "spans": []
                 }, {
                   "type":"paragraph",
                   "text":"C'est un bloc content",
@@ -237,7 +237,7 @@ describe('Multiple fragment level global test', function() {
                       {
                         "type": "paragraph",
                         "text": "some text",
-                        spans: []
+                        "spans": []
                       }
                     ]
                   }
@@ -250,7 +250,7 @@ describe('Multiple fragment level global test', function() {
                     {
                       "type": "heading2",
                       "text": "some other text",
-                      spans: []
+                      "spans": []
                     }
                   ]
                 }
@@ -281,7 +281,7 @@ describe('Multiple fragment level global test', function() {
                 "value":[{
                   type: "heading2",
                   text: "As seen by fine pastry as a field",
-                  spans: []
+                  "spans": []
                 }, {
                   "type":"paragraph",
                   "text":"C'est un bloc content",
@@ -319,7 +319,7 @@ describe('Multiple fragment level global test', function() {
                       {
                         "type": "paragraph",
                         "text": "some text",
-                        spans: []
+                        "spans": []
                       }
                     ]
                   }
@@ -332,7 +332,7 @@ describe('Multiple fragment level global test', function() {
                     {
                       "type": "heading2",
                       "text": "some other text",
-                      spans: []
+                      "spans": []
                     }
                   ]
                 }
@@ -404,7 +404,7 @@ describe('Multiple fragment level global test', function() {
                 "value":[{
                   type: "heading2",
                   text: "As seen by fine pastry as a field",
-                  spans: []
+                  "spans": []
                 }, {
                   "type":"paragraph",
                   "text":"C'est un bloc content",
@@ -437,7 +437,7 @@ describe('Multiple fragment level global test', function() {
                 "value":[{
                   type: "heading2",
                   text: "As seen by fine pastry as a field",
-                  spans: []
+                  "spans": []
                 }, {
                   "type":"paragraph",
                   "text":"C'est un bloc content",
@@ -811,7 +811,7 @@ describe('Various fragment types', function() {
                       {
                         "type": "paragraph",
                         "text": "C'est du repeat",
-                        spans: []
+                        "spans": []
                       }
                     ]
                   }
@@ -824,7 +824,7 @@ describe('Various fragment types', function() {
                     {
                       "type": "heading2",
                       "text": "C'est du non repeat",
-                      spans: []
+                      "spans": []
                     }
                   ]
                 }
